@@ -46,6 +46,42 @@ func _process(_delta):
 	if current_state == RaceState.RACING:
 		race_time = (Time.get_ticks_msec() / 1000.0) - start_time
 		time_updated.emit(race_time)
+	
+	_handle_global_input()
+
+func _handle_global_input():
+	if Input.is_key_pressed(KEY_T):
+		if not _key_states.get(KEY_T, false):
+			reset_race()
+		_key_states[KEY_T] = true
+	else:
+		_key_states[KEY_T] = false
+
+	if Input.is_key_pressed(KEY_1):
+		if not _key_states.get(KEY_1, false):
+			toggle_sfx()
+		_key_states[KEY_1] = true
+	else:
+		_key_states[KEY_1] = false
+
+	if Input.is_key_pressed(KEY_0):
+		if not _key_states.get(KEY_0, false):
+			_toggle_fullscreen()
+		_key_states[KEY_0] = true
+	else:
+		_key_states[KEY_0] = false
+
+	if Input.is_key_pressed(KEY_ESCAPE):
+		get_tree().quit()
+
+var _key_states = {}
+
+func _toggle_fullscreen():
+	var mode = DisplayServer.window_get_mode()
+	if mode == DisplayServer.WINDOW_MODE_FULLSCREEN or mode == DisplayServer.WINDOW_MODE_EXCLUSIVE_FULLSCREEN:
+		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED)
+	else:
+		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN)
 
 func format_time(time_seconds: float) -> String:
 	var minutes = int(time_seconds / 60)

@@ -26,22 +26,4 @@ func _on_state_changed(state):
 			timer_label.text = "00:00.000"
 
 func _process(_delta):
-	var gm = get_node_or_null("/root/GameManager")
-	if not gm: return
-	
-	# Handle raw keys for specific requirements
-	if Input.is_key_label_pressed(KEY_1) and _just_pressed_key(KEY_1):
-		gm.toggle_sfx()
-		
-	if Input.is_key_label_pressed(KEY_T) and _just_pressed_key(KEY_T):
-		gm.reset_race()
-
-	if Input.is_action_just_pressed("ui_cancel"):
-		get_tree().quit()
-
-var _key_states = {}
-func _just_pressed_key(key):
-	var cur = Input.is_key_label_pressed(key)
-	var prev = _key_states.get(key, false)
-	_key_states[key] = cur
-	return cur and not prev
+	pass

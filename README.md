@@ -72,4 +72,5 @@ A smooth follow camera that tracks the car's position and orientation, looking s
 - **Steer:** Left/Right / A/D
 - **Restart Race:** T
 - **Toggle SFX:** 1
+- **Toggle Fullscreen:** 0
 - **Quit Game:** Escape
