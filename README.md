@@ -9,17 +9,19 @@ The car is modeled as an open-seater racing vehicle (Formula style) using a cust
 - **Visuals:** Features a procedurally generated mesh (`assets/open_seater_mesh.tscn`) with a tapered nose, front and rear wings, and sidepods.
 - **Suspension & Downforce:** Four raycasts calculate spring and damping forces. A custom "Sticky Downforce" system applies 10,000 units of force towards the track surface **only when driving on Loop or Side Pipe segments**, allowing the car to complete vertical stunts without affecting natural physics on standard track pieces.
 - **Performance:** Tuned with a 1,500kg mass and 30,000 engine power. Top speed is approximately 360 KM/H (100 m/s).
-- **Engine & Steering:** Forces are applied locally to the RigidBody based on wheel orientation. Boosters apply a 40,000 unit forward impulse.
+- **Engine & Steering:** Forces are applied locally to the RigidBody based on wheel orientation. Boosters apply a 40,000 unit forward impulse. Steering is speed-sensitive, gradually reducing at higher speeds for better stability.
 - **Grip:** Lateral forces are applied to simulate tire friction and prevent excessive sliding.
-- **Air Control:** Torque is applied while in the air to allow players to adjust their pitch and yaw.
+- **Air Control:** Pitch control allows players to adjust their orientation while in the air.
 - **Out-of-Bounds:** Automatically resets the race if the car falls below Y = -20.
+- **Audio:** Procedural engine loops, skid noise, brake squeals, and collision thumps.
 
 ### 2. Race Management (`scripts/game_manager.gd`)
-A global singleton (Autoload) that handles the lifecycle of a race.
+A global singleton (Autoload) that handles the race lifecycle and track progression.
 - **States:** `PRE_START`, `RACING`, `FINISHED`.
 - **Timing:** Precision timer that starts at the start gate and stops at the finish gate.
-- **Best Time:** Persists the best time during the session.
-- **Formatting:** Utility for converting seconds into `MM:SS.mmm` format.
+- **Track Progression:** Automatically transitions to the next track in the list 2 seconds after crossing the finish line. Manual switching available via the '2' key.
+- **Best Time:** Tracks the personal best for the current session.
+- **Global Input:** Manages restart (T), SFX toggle (1), Next Track (2), Fullscreen (0), and Quit (Esc).
 
 ### 3. Track Generation Tool (`scripts/create_blocks.gd`)
 This script acts as a procedural generation utility for the track's modular pieces. 
@@ -37,45 +39,35 @@ Execute the following command from the project root:
 godot --headless -s scripts/create_blocks.gd
 ```
 
-- **Procedural Meshes:** Uses `SurfaceTool` to generate geometry for complex shapes like curves (`RoadCurveTight`, `RoadCurveWide`, `RoadCurveExtraWide`).
-- **Safety Walls:** Automatically generates 0.25m high side walls for all track segments to provide a low-profile guide while preventing the car from falling off.
-- **Automated Collision:** Automatically generates `TrimeshCollisionShape3D` for procedural meshes (including walls) and `BoxShape3D` for standard ones.
-- **Material & Shading:** Assigns materials with specific properties, such as emission for boosters and consistent road colors.
-- **Gate Generation:** Procedurally constructs the Start and Finish gate structures scaled to the road width.
-- **Global Offsets:** Ensures all blocks are correctly aligned on the Y-axis (0.5m offset) to maintain consistent physics interaction.
-
-### 4. Track Block System (`scripts/track_block.gd`)
-The modular pieces created by the generator are used to assemble levels.
+- **Procedural Meshes:** Uses `SurfaceTool` to generate geometry for curves, side pipes, and loops.
+- **Safety Walls:** Automatically generates 0.25m high side walls for standard track segments.
 - **Block Types:**
   - `START`: Triggers the race timer via `GameManager`.
   - `FINISH`: Stops the timer and records the score.
-  - `BOOSTER`: Applies a massive forward impulse to the car's RigidBody.
-  - `STRAIGHT`, `STRAIGHT_LONG`: Standard road pieces (8m wide, 4m and 16m lengths).
-  - `STRAIGHT_LONG_WO_WALLS`: 16m straight piece without any side walls, perfect for placing next to wall-ride sections.
-  - `RAMP`: Inclined road for jumps and elevation changes.
-  - `CURVE_TIGHT`, `CURVE_WIDE`, `CURVE_EXTRA_WIDE`: Curved segments with increasing radii and an 8m road width. All curves include 0.25m side walls with 0.1m thickness.
-  - `SIDE_PIPE`: an 8m long segment that transition from a flat road into a 90-degree cylindrical wall ride (6m radius). Features 32-step high-resolution geometry for smooth physics.
-  - `LOOP_360`, `LOOP_90`: Vertical looping segments with a 24m radius and 8m width. Omit side walls for high-speed stunts.
+  - `BOOSTER`: Applies a forward impulse.
+  - `STRAIGHT`, `STRAIGHT_LONG`, `STRAIGHT_LONG_WO_WALLS`: Various lengths and wall configurations.
+  - `RAMP`: Elevation changes.
+  - `CURVE_TIGHT`, `CURVE_WIDE`, `CURVE_EXTRA_WIDE`: Various radii.
+  - `SIDE_PIPE`: Transition from flat road to 90-degree wall ride.
+  - `LOOP_360`, `LOOP_90`: Vertical looping segments.
 
-### 5. Camera System (`scripts/follow_camera.gd`)
-A smooth follow camera that tracks the car's position and orientation.
-- **Easing:** Averaging data over a 2-frame buffer (`pos_history` and `basis_history`) to filter out sudden physics impulses.
-- **Smoothing:** Uses spherical linear interpolation (slerp) for the basis and looking 5m ahead of the car for high-speed stabilization.
+### 4. Camera System (`scripts/follow_camera.gd`)
+A smooth follow camera with 2-frame easing and high-speed stabilization to filter out physics jitter.
 
-### 6. HUD & UI (`scripts/hud.gd`)
-- **Timer:** Real-time display of the current race duration using the "Press Start 2P" font.
-- **Speedometer:** Displays the car's current speed in KM/H (converted from m/s). Top speed is estimated at 360 KM/H.
-- **Finish Screen:** Displays completion time and personal best with high-visibility styling.
-- **Controls:** Handles global inputs for SFX toggling, race restarts, and quitting.
+### 5. HUD & UI (`scripts/hud.gd`)
+- **Timer:** Displays race duration using "Press Start 2P" font.
+- **Speedometer:** Real-time speed in KM/H.
+- **Finish Screen:** Completion details and session personal best.
 
 ## Assets
-- `assets/fonts/PressStart2P-Regular.ttf`: Google Font used for the retro-styled HUD.
-- `assets/open_seater_mesh.tscn`: Procedural mesh for the player vehicle.
+- `assets/fonts/PressStart2P-Regular.ttf`: Retro-styled HUD font.
+- `assets/open_seater_mesh.tscn`: Procedural player vehicle mesh.
 
 ## Controls
 - **Accelerate/Brake:** Up/Down / W/S
 - **Steer:** Left/Right / A/D
 - **Restart Race:** T
+- **Next Track:** 2
 - **Toggle SFX:** 1
 - **Toggle Fullscreen:** 0
 - **Quit Game:** Escape

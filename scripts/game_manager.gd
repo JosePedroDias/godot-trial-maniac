@@ -8,22 +8,24 @@ var race_time = 0.0
 var best_time = 0.0
 var sfx_enabled = true
 
+var tracks = ["res://scenes/track1.tscn", "res://scenes/track2.tscn"]
+var current_track_index = 0
+
 signal state_changed(new_state)
 signal time_updated(new_time)
 signal speed_updated(new_speed)
 signal sfx_toggled(is_enabled)
 
-func toggle_sfx():
-	sfx_enabled = !sfx_enabled
-	sfx_toggled.emit(sfx_enabled)
-	return sfx_enabled
-
 func _ready():
-	# Race no longer starts automatically on ready
 	current_state = RaceState.PRE_START
+	# Sync index with current scene
+	if get_tree().current_scene:
+		var scene_path = get_tree().current_scene.scene_file_path
+		var idx = tracks.find(scene_path)
+		if idx != -1:
+			current_track_index = idx
 
 func start_race():
-	# Only start if we are not already racing
 	if current_state != RaceState.RACING:
 		current_state = RaceState.RACING
 		start_time = Time.get_ticks_msec() / 1000.0
@@ -36,12 +38,28 @@ func finish_race():
 		if best_time == 0.0 or race_time < best_time:
 			best_time = race_time
 		state_changed.emit(current_state)
+		
+		# Wait 2 seconds and go to next track
+		await get_tree().create_timer(2.0).timeout
+		if current_state == RaceState.FINISHED:
+			next_track()
+
+func next_track():
+	current_track_index = (current_track_index + 1) % tracks.size()
+	best_time = 0.0
+	current_state = RaceState.PRE_START
+	get_tree().change_scene_to_file(tracks[current_track_index])
 
 func reset_race():
 	current_state = RaceState.PRE_START
 	race_time = 0.0
 	state_changed.emit(current_state)
 	get_tree().reload_current_scene()
+
+func toggle_sfx():
+	sfx_enabled = !sfx_enabled
+	sfx_toggled.emit(sfx_enabled)
+	return sfx_enabled
 
 func _process(_delta):
 	if current_state == RaceState.RACING:
@@ -64,6 +82,13 @@ func _handle_global_input():
 		_key_states[KEY_1] = true
 	else:
 		_key_states[KEY_1] = false
+
+	if Input.is_key_pressed(KEY_2):
+		if not _key_states.get(KEY_2, false):
+			next_track()
+		_key_states[KEY_2] = true
+	else:
+		_key_states[KEY_2] = false
 
 	if Input.is_key_pressed(KEY_0):
 		if not _key_states.get(KEY_0, false):
