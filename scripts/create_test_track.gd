@@ -7,12 +7,13 @@ func _init():
 	var env = WorldEnvironment.new()
 	env.name = "WorldEnvironment"
 	var sky = Sky.new()
-	var sky_mat = PhysicalSkyMaterial.new()
+	var sky_mat = ProceduralSkyMaterial.new()
 	sky.sky_material = sky_mat
 	var env_res = Environment.new()
 	env_res.background_mode = Environment.BG_SKY
 	env_res.sky = sky
 	env_res.ambient_light_source = Environment.AMBIENT_SOURCE_SKY
+	env_res.tonemap_mode = Environment.TONE_MAPPER_ACES
 	env.environment = env_res
 	root.add_child(env)
 	env.owner = root
@@ -27,42 +28,50 @@ func _init():
 	var gridmap = GridMap.new()
 	gridmap.name = "TrackGridMap"
 	gridmap.mesh_library = load("res://assets/tracks/track_library.tres")
-	gridmap.cell_size = Vector3(2, 0.2, 2) # Adjusted height to match road block
+	gridmap.cell_size = Vector3(2, 2, 2)
 	root.add_child(gridmap)
 	gridmap.owner = root
 	
 	var straight_id = gridmap.mesh_library.find_item_by_name("RoadStraight")
+	var start_id = gridmap.mesh_library.find_item_by_name("RoadStart")
+	var finish_id = gridmap.mesh_library.find_item_by_name("RoadFinish")
 	
 	# Create a simple loop
-	for x in range(-10, 11):
-		gridmap.set_cell_item(Vector3i(x, 0, -10), straight_id)
-		gridmap.set_cell_item(Vector3i(x, 0, 10), straight_id)
-	for z in range(-10, 11):
-		gridmap.set_cell_item(Vector3i(-10, 0, z), straight_id)
-		gridmap.set_cell_item(Vector3i(10, 0, z), straight_id)
+	for x in range(-15, 16):
+		if x == 0:
+			gridmap.set_cell_item(Vector3i(x, 0, -15), start_id)
+		elif x == 5:
+			gridmap.set_cell_item(Vector3i(x, 0, -15), finish_id)
+		else:
+			gridmap.set_cell_item(Vector3i(x, 0, -15), straight_id)
+		gridmap.set_cell_item(Vector3i(x, 0, 15), straight_id)
+		
+	for z in range(-15, 16):
+		gridmap.set_cell_item(Vector3i(-15, 0, z), straight_id)
+		gridmap.set_cell_item(Vector3i(15, 0, z), straight_id)
 	
-	# Start Line
+	# Start Line Trigger
 	var start_scene = load("res://scenes/start_line.tscn")
-	var start = start_scene.instantiate()
-	start.position = Vector3(0, 0.5, -10)
-	start.is_start_line = true
-	root.add_child(start)
-	start.owner = root
+	var start_trigger = start_scene.instantiate()
+	start_trigger.position = Vector3(0, 0.5, -30)
+	start_trigger.is_start_line = true
+	root.add_child(start_trigger)
+	start_trigger.owner = root
 	
-	# Finish Line
+	# Finish Line Trigger
 	var finish_scene = load("res://scenes/finish_line.tscn")
-	var finish = finish_scene.instantiate()
-	finish.position = Vector3(4, 0.5, -10)
-	finish.is_start_line = false
-	root.add_child(finish)
-	finish.owner = root
+	var finish_trigger = finish_scene.instantiate()
+	finish_trigger.position = Vector3(10, 0.5, -30) # x=5 * cell_size=2
+	finish_trigger.is_start_line = false
+	root.add_child(finish_trigger)
+	finish_trigger.owner = root
 	
 	# Add the car
 	var car_scene = load("res://scenes/car.tscn")
 	var car = car_scene.instantiate()
 	car.name = "Car"
-	car.position = Vector3(-5, 1, -10)
-	car.rotation_degrees = Vector3(0, 90, 0) # Face towards +X
+	car.position = Vector3(-4, 1, -30) # A bit before the start line
+	car.rotation_degrees = Vector3(0, 90, 0)
 	root.add_child(car)
 	car.owner = root
 	
@@ -83,6 +92,6 @@ func _init():
 	var packed_scene = PackedScene.new()
 	packed_scene.pack(root)
 	ResourceSaver.save(packed_scene, "res://scenes/main.tscn")
-	print("Successfully created complete res://scenes/main.tscn")
+	print("Successfully updated res://scenes/main.tscn with gates")
 	
 	quit()

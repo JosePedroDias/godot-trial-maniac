@@ -1,9 +1,32 @@
-[gd_scene load_steps=4 format=3 uid="uid://bt7p6l8j1w2k8"]
+[gd_scene load_steps=10 format=3 uid="uid://bt7p6l8j1w2k8"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_road"]
+albedo_color = Color(0.2, 0.2, 0.2, 1)
 
 [sub_resource type="BoxMesh" id="BoxMesh_1"]
+material = SubResource("StandardMaterial3D_road")
 size = Vector3(2, 0.2, 2)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_1"]
+size = Vector3(2, 0.2, 2)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_start"]
+albedo_color = Color(0.1, 0.8, 0.1, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_gate_side"]
+size = Vector3(0.1, 1, 0.1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_gate_top"]
+size = Vector3(2, 0.1, 0.1)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_finish"]
+albedo_color = Color(0.8, 0.1, 0.1, 1)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ramp"]
+albedo_color = Color(0.3, 0.3, 0.3, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_ramp"]
+material = SubResource("StandardMaterial3D_ramp")
 size = Vector3(2, 0.2, 2)
 
 [node name="TrackLibrarySource" type="Node3D"]
@@ -16,9 +39,57 @@ mesh = SubResource("BoxMesh_1")
 [node name="CollisionShape3D" type="CollisionShape3D" parent="RoadStraight/StaticBody3D"]
 shape = SubResource("BoxShape3D_1")
 
-[node name="RoadRamp" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.965926, 0.258819, 0, -0.258819, 0.965926, 0, 0.25, 2.5)
+[node name="RoadStart" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 3)
 mesh = SubResource("BoxMesh_1")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="RoadStart"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="RoadStart/StaticBody3D"]
+shape = SubResource("BoxShape3D_1")
+
+[node name="GateLeft" type="MeshInstance3D" parent="RoadStart"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.95, 0.5, 0)
+mesh = SubResource("BoxMesh_gate_side")
+surface_material_override/0 = SubResource("StandardMaterial3D_start")
+
+[node name="GateRight" type="MeshInstance3D" parent="RoadStart"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.95, 0.5, 0)
+mesh = SubResource("BoxMesh_gate_side")
+surface_material_override/0 = SubResource("StandardMaterial3D_start")
+
+[node name="GateTop" type="MeshInstance3D" parent="RoadStart"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+mesh = SubResource("BoxMesh_gate_top")
+surface_material_override/0 = SubResource("StandardMaterial3D_start")
+
+[node name="RoadFinish" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 6)
+mesh = SubResource("BoxMesh_1")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="RoadFinish"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="RoadFinish/StaticBody3D"]
+shape = SubResource("BoxShape3D_1")
+
+[node name="GateLeft" type="MeshInstance3D" parent="RoadFinish"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.95, 0.5, 0)
+mesh = SubResource("BoxMesh_gate_side")
+surface_material_override/0 = SubResource("StandardMaterial3D_finish")
+
+[node name="GateRight" type="MeshInstance3D" parent="RoadFinish"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.95, 0.5, 0)
+mesh = SubResource("BoxMesh_gate_side")
+surface_material_override/0 = SubResource("StandardMaterial3D_finish")
+
+[node name="GateTop" type="MeshInstance3D" parent="RoadFinish"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+mesh = SubResource("BoxMesh_gate_top")
+surface_material_override/0 = SubResource("StandardMaterial3D_finish")
+
+[node name="RoadRamp" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.965926, 0.258819, 0, -0.258819, 0.965926, 0, 0.25, 9)
+mesh = SubResource("BoxMesh_ramp")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="RoadRamp"]
 

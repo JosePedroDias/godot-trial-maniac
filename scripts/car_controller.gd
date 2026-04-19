@@ -46,7 +46,7 @@ func _physics_process(delta):
 			var dist = (ray.global_position - hit_point).length()
 			
 			# 1. Suspension Force
-			var compression = suspension_rest_dist + wheel_radius - dist
+			var compression = (suspension_rest_dist + wheel_radius) - dist
 			if compression > 0:
 				var wheel_velocity = linear_velocity + angular_velocity.cross(ray.global_position - global_position)
 				var upward_vel = hit_normal.dot(wheel_velocity)
@@ -76,7 +76,8 @@ func _physics_process(delta):
 				
 				# Visual wheel update
 				wheel.global_position = hit_point + hit_normal * wheel_radius
-				wheel.global_basis = wheel_basis
+				# Align cylinder (Y-axis) with lateral axis (X-axis)
+				wheel.global_basis = wheel_basis.rotated(wheel_basis.z, PI/2.0)
 			else:
 				# Wheel in air
 				wheel.position.y = -suspension_rest_dist
@@ -87,9 +88,9 @@ func _physics_process(delta):
 	# Air control
 	if !is_any_wheel_touching():
 		var air_torque = Vector3.ZERO
-		air_torque.x = Input.get_axis("ui_up", "ui_down") * 100.0
-		air_torque.y = Input.get_axis("ui_left", "ui_right") * 100.0
-		apply_torque(global_basis * air_torque)
+		air_torque.x = Input.get_axis("ui_up", "ui_down") * 10.0
+		air_torque.y = Input.get_axis("ui_left", "ui_right") * 10.0
+		apply_torque(global_basis * air_torque * mass)
 
 func is_any_wheel_touching() -> bool:
 	for ray in raycasts:
