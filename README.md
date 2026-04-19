@@ -54,7 +54,7 @@ The modular pieces created by the generator are used to assemble levels.
   - `RAMP`: Inclined road for jumps and elevation changes.
   - `CURVE_TIGHT`, `CURVE_WIDE`, `CURVE_EXTRA_WIDE`: Curved segments with increasing radii and an 8m road width. All curves include 0.25m side walls with 0.1m thickness.
   - `SIDE_PIPE_LEFT`, `SIDE_PIPE_RIGHT`: 8m long segments that transition from a flat road into a 90-degree cylindrical wall ride (6m radius). These segments have a 0.1m radial thickness and a closed top rim for a solid, high-quality look. Standard safety walls are omitted to allow for seamless entry.
-  - `LOOP_360`, `LOOP_90`: Vertical looping segments with a 16m radius and 16m width. Omit side walls for high-speed stunts.
+  - `LOOP_360`, `LOOP_90`: Vertical looping segments with a 24m radius and 8m width. Omit side walls for high-speed stunts.
 
 ### 5. Camera System (`scripts/follow_camera.gd`)
 A smooth follow camera that tracks the car's position and orientation, looking slightly ahead of the vehicle to give the player a better view of the track.

@@ -370,11 +370,11 @@ func _init():
 	_save_block("RoadSidePipeLeft", 9, road_color, side_color, Vector3(ROAD_WIDTH, ROAD_THICKNESS, 8.0), null, Vector3.ZERO, pipe_l_mesh)
 
 	# Loops
-	var loop360_mesh = _create_loop_mesh(16.0, 360.0, 16.0, road_color)
-	_save_block("RoadLoop360", 12, road_color, side_color, Vector3(16.0, ROAD_THICKNESS, 16.0 * 2.0), null, Vector3.ZERO, loop360_mesh)
+	var loop360_mesh = _create_loop_mesh(24.0, 360.0, ROAD_WIDTH, road_color)
+	_save_block("RoadLoop360", 12, road_color, side_color, Vector3(ROAD_WIDTH, ROAD_THICKNESS, 24.0 * 2.0), null, Vector3.ZERO, loop360_mesh)
 	
-	var loop90_mesh = _create_loop_mesh(16.0, 90.0, 16.0, road_color)
-	_save_block("RoadLoop90", 13, road_color, side_color, Vector3(16.0, ROAD_THICKNESS, 16.0), null, Vector3.ZERO, loop90_mesh)
+	var loop90_mesh = _create_loop_mesh(24.0, 90.0, ROAD_WIDTH, road_color)
+	_save_block("RoadLoop90", 13, road_color, side_color, Vector3(ROAD_WIDTH, ROAD_THICKNESS, 24.0), null, Vector3.ZERO, loop90_mesh)
 
 	print("Successfully updated block scenes with loops")
 	call_deferred("quit")
