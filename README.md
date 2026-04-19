@@ -3,11 +3,11 @@
 A high-paced, Trackmania-inspired time trial racing game built with Godot 4 and Jolt Physics.
 
 ## Core Game Logic
+
 ### 1. Car Physics (`scripts/car_controller.gd`)
 The car is modeled as an open-seater racing vehicle (Formula style) using a custom Raycast-based suspension system.
 - **Visuals:** Features a procedurally generated mesh (`assets/open_seater_mesh.tscn`) with a tapered nose, front and rear wings, and sidepods for a high-performance aesthetic.
 - **Suspension:** Four raycasts calculate spring and damping forces. The car is tuned with a low `suspension_rest_dist` (0.3m) for better stability and to sit within the safety walls.
-...
 - **Engine & Steering:** Forces are applied locally to the RigidBody based on wheel orientation.
 - **Grip:** Lateral forces are applied to simulate tire friction and prevent excessive sliding.
 - **Air Control:** Torque is applied while in the air to allow players to adjust their pitch and yaw.
@@ -19,6 +19,7 @@ A global singleton (Autoload) that handles the lifecycle of a race.
 - **Timing:** Precision timer that starts at the start gate and stops at the finish gate.
 - **Best Time:** Persists the best time during the session.
 - **Formatting:** Utility for converting seconds into `MM:SS.mmm` format.
+
 ### 3. Track Generation Tool (`scripts/create_blocks.gd`)
 This script acts as a procedural generation utility for the track's modular pieces. 
 
@@ -35,12 +36,11 @@ Execute the following command from the project root:
 godot --headless -s scripts/create_blocks.gd
 ```
 
-- **Procedural Meshes:** Uses `SurfaceTool` to generate geometry for complex shapes like curves (`RoadCurveTight`, `RoadCurveWide`) with custom inner/outer radii.
-- **Safety Walls:** Automatically generates 0.5m high side walls for all track segments to prevent the car from falling off the track too easily.
-...
+- **Procedural Meshes:** Uses `SurfaceTool` to generate geometry for complex shapes like curves (`RoadCurveTight`, `RoadCurveWide`, `RoadCurveExtraWide`).
+- **Safety Walls:** Automatically generates 0.25m high side walls for all track segments to provide a low-profile guide while preventing the car from falling off.
 - **Automated Collision:** Automatically generates `TrimeshCollisionShape3D` for procedural meshes (including walls) and `BoxShape3D` for standard ones.
 - **Material & Shading:** Assigns materials with specific properties, such as emission for boosters and consistent road colors.
-- **Gate Generation:** Procedurally constructs the Start and Finish gate structures.
+- **Gate Generation:** Procedurally constructs the Start and Finish gate structures scaled to the road width.
 - **Global Offsets:** Ensures all blocks are correctly aligned on the Y-axis (0.5m offset) to maintain consistent physics interaction.
 
 ### 4. Track Block System (`scripts/track_block.gd`)
@@ -49,9 +49,9 @@ The modular pieces created by the generator are used to assemble levels.
   - `START`: Triggers the race timer via `GameManager`.
   - `FINISH`: Stops the timer and records the score.
   - `BOOSTER`: Applies a massive forward impulse to the car's RigidBody.
-  - `STRAIGHT`, `STRAIGHT_LONG`: Standard road pieces (2m and 8m lengths).
+  - `STRAIGHT`, `STRAIGHT_LONG`: Standard road pieces (8m wide, 4m and 16m lengths).
   - `RAMP`: Inclined road for jumps and elevation changes.
-  - `CURVE_TIGHT`, `CURVE_WIDE`, `CURVE_EXTRA_WIDE`: Curved segments with increasing radii (1m-5m, 5m-9m, 9m-13m). All curves include 0.5m side walls with proper thickness.
+  - `CURVE_TIGHT`, `CURVE_WIDE`, `CURVE_EXTRA_WIDE`: Curved segments with increasing radii and an 8m road width. All curves include 0.25m side walls with 0.1m thickness.
 
 ### 5. Camera System (`scripts/follow_camera.gd`)
 A smooth follow camera that tracks the car's position and orientation, looking slightly ahead of the vehicle to give the player a better view of the track.

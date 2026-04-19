@@ -76,11 +76,18 @@ func _physics_process(delta):
 				# 2. Driving
 				var wheel_basis = ray.global_basis
 				if i < 2:
-					wheel_basis = wheel_basis.rotated(global_basis.y, steering_input * deg_to_rad(steering_angle))
+					# Gradual speed-sensitive steering:
+					# Full steering at low speeds, gradually reducing to 15% at high speeds (100 m/s)
+					var speed = linear_velocity.length()
+					var steer_speed_factor = lerp(1.0, 0.15, clamp(speed / 100.0, 0.0, 1.0))
+					
+					var effective_steer = steering_input * deg_to_rad(steering_angle) * steer_speed_factor
+					wheel_basis = wheel_basis.rotated(global_basis.y, effective_steer)
 				
 				var forward_dir = wheel_basis.z
 				var right_dir = wheel_basis.x
 				
+				# Only apply engine forces if the wheel is touching the ground
 				if abs(engine_input) > 0.05:
 					var accel_force = forward_dir * engine_input * engine_power
 					apply_force(accel_force, ray.global_position - global_position)
@@ -102,8 +109,8 @@ func _physics_process(delta):
 
 	if !on_ground:
 		var air_torque = Vector3.ZERO
-		air_torque.x = Input.get_axis("ui_up", "ui_down") * 15.0
-		# Yaw torque (turning in air) removed as requested
+		# Air control now only handles pitch if the user wants separate keys
+		# For now, we remove the throttle-based pitch as it was confusing
 		apply_torque(global_basis * air_torque * mass)
 
 func _check_track_block(block):
