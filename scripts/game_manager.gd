@@ -11,12 +11,15 @@ signal state_changed(new_state)
 signal time_updated(new_time)
 
 func _ready():
-	start_race()
+	# Race no longer starts automatically on ready
+	current_state = RaceState.PRE_START
 
 func start_race():
-	current_state = RaceState.RACING
-	start_time = Time.get_ticks_msec() / 1000.0
-	state_changed.emit(current_state)
+	# Only start if we are not already racing
+	if current_state != RaceState.RACING:
+		current_state = RaceState.RACING
+		start_time = Time.get_ticks_msec() / 1000.0
+		state_changed.emit(current_state)
 
 func finish_race():
 	if current_state == RaceState.RACING:
