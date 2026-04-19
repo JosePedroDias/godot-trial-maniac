@@ -54,7 +54,7 @@ The modular pieces created by the generator are used to assemble levels.
   - `STRAIGHT_LONG_WO_WALLS`: 16m straight piece without any side walls, perfect for placing next to wall-ride sections.
   - `RAMP`: Inclined road for jumps and elevation changes.
   - `CURVE_TIGHT`, `CURVE_WIDE`, `CURVE_EXTRA_WIDE`: Curved segments with increasing radii and an 8m road width. All curves include 0.25m side walls with 0.1m thickness.
-  - `SIDE_PIPE_LEFT`, `SIDE_PIPE_RIGHT`: 8m long segments that transition from a flat road into a 90-degree cylindrical wall ride (6m radius). These segments have a 0.1m radial thickness and a closed top rim for a solid, high-quality look. Standard safety walls are omitted to allow for seamless entry.
+  - `SIDE_PIPE`: an 8m long segment that transition from a flat road into a 90-degree cylindrical wall ride (6m radius). Features 32-step high-resolution geometry for smooth physics.
   - `LOOP_360`, `LOOP_90`: Vertical looping segments with a 24m radius and 8m width. Omit side walls for high-speed stunts.
 
 ### 5. Camera System (`scripts/follow_camera.gd`)

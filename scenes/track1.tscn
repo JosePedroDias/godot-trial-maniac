@@ -11,7 +11,7 @@
 [ext_resource type="PackedScene" path="res://scenes/hud.tscn" id="9_fufvl"]
 [ext_resource type="PackedScene" path="res://scenes/blocks/RoadCurveWide.tscn" id="9_ryrif"]
 [ext_resource type="PackedScene" path="res://scenes/blocks/RoadStraightLong.tscn" id="11_vo5wb"]
-[ext_resource type="PackedScene" path="res://scenes/blocks/RoadSidePipeLeft.tscn" id="12_doyf6"]
+[ext_resource type="PackedScene" path="res://scenes/blocks/RoadSidePipe.tscn" id="12_doyf6"]
 [ext_resource type="PackedScene" path="res://scenes/blocks/RoadStraightLongNoWalls.tscn" id="14_cvqpw"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_kd68p"]

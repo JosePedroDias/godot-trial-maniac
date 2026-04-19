@@ -122,7 +122,7 @@ func _create_side_pipe_mesh(radius: float, angle_deg: float, length: float, is_r
 	mat.vertex_color_use_as_albedo = true
 	st.set_material(mat)
 	
-	var segments = 16
+	var segments = 32 # Doubled resolution
 	var angle_rad = deg_to_rad(angle_deg)
 	var flat_width = ROAD_WIDTH - radius
 	if flat_width < 0: flat_width = 2.0
@@ -207,7 +207,7 @@ func _create_loop_mesh(radius: float, angle_deg: float, road_width: float, color
 	st.set_material(mat)
 	
 	var segments = int(abs(angle_deg) / 90.0 * 32.0)
-	if segments < 16: segments = 16 # Minimum resolution
+	if segments < 16: segments = 16
 	var angle_rad = deg_to_rad(angle_deg)
 	var half_w = road_width / 2.0
 	
@@ -215,23 +215,17 @@ func _create_loop_mesh(radius: float, angle_deg: float, road_width: float, color
 		var a0 = (float(i) / segments) * angle_rad
 		var a1 = (float(i + 1) / segments) * angle_rad
 		
-		# In a loop, we are essentially building a cylinder surface
-		# We'll orient it so it's a vertical loop (around X axis)
-		# z = r * sin(a), y = r - r * cos(a)
-		
 		var s0 = sin(a0); var c0 = cos(a0)
 		var s1 = sin(a1); var c1 = cos(a1)
 		
 		var r_in = radius
 		var r_out = radius + ROAD_THICKNESS
 		
-		# Inner surface (where car drives)
 		var v0 = Vector3(-half_w, r_in - r_in * c0, r_in * s0)
 		var v1 = Vector3(half_w, r_in - r_in * c0, r_in * s0)
 		var v2 = Vector3(half_w, r_in - r_in * c1, r_in * s1)
 		var v3 = Vector3(-half_w, r_in - r_in * c1, r_in * s1)
 		
-		# Outer surface
 		var v0b = Vector3(-half_w, r_out - r_out * c0, r_out * s0)
 		var v1b = Vector3(half_w, r_out - r_out * c0, r_out * s0)
 		var v2b = Vector3(half_w, r_out - r_out * c1, r_out * s1)
@@ -239,12 +233,9 @@ func _create_loop_mesh(radius: float, angle_deg: float, road_width: float, color
 		
 		var n_avg = Vector3(0, -cos((a0+a1)/2.0), sin((a0+a1)/2.0)).normalized()
 		
-		# Drive surface (inward facing normal)
 		_add_quad(st, v0, v1, v2, v3, -n_avg)
-		# Back surface (outward facing normal)
 		_add_quad(st, v3b, v2b, v1b, v0b, n_avg)
 		
-		# Sides
 		var n_side_l = Vector3.LEFT
 		var n_side_r = Vector3.RIGHT
 		_add_quad(st, v0b, v0, v3, v3b, n_side_l)
@@ -347,7 +338,7 @@ func _init():
 	
 	_save_block("RoadStraight", 0, road_color, side_color)
 	_save_block("RoadStraightLong", 7, road_color, side_color, Vector3(ROAD_WIDTH, ROAD_THICKNESS, ROAD_LENGTH * 4.0))
-	_save_block("RoadStraightLongNoWalls", 11, road_color, side_color, Vector3(ROAD_WIDTH, ROAD_THICKNESS, ROAD_LENGTH * 4.0), null, Vector3.ZERO, null, false)
+	_save_block("RoadStraightLongNoWalls", 10, road_color, side_color, Vector3(ROAD_WIDTH, ROAD_THICKNESS, ROAD_LENGTH * 4.0), null, Vector3.ZERO, null, false)
 	_save_block("RoadStart", 1, road_color, side_color, Vector3(ROAD_WIDTH, ROAD_THICKNESS, ROAD_LENGTH), _create_gate(start_color))
 	_save_block("RoadFinish", 2, road_color, side_color, Vector3(ROAD_WIDTH, ROAD_THICKNESS, ROAD_LENGTH), _create_gate(finish_color))
 	_save_block("RoadBooster", 3, booster_color, side_color)
@@ -364,18 +355,15 @@ func _init():
 	_save_block("RoadCurveExtraWide", 8, road_color, side_color, Vector3(ROAD_WIDTH * 3.0 + 2.0, ROAD_THICKNESS, ROAD_WIDTH * 3.0 + 2.0), null, Vector3.ZERO, extra_wide_mesh)
 	
 	# Side Pipes
-	var pipe_r_mesh = _create_side_pipe_mesh(6.0, 90.0, 8.0, true, road_color, side_color)
-	_save_block("RoadSidePipeRight", 10, road_color, side_color, Vector3(ROAD_WIDTH, ROAD_THICKNESS, 8.0), null, Vector3.ZERO, pipe_r_mesh)
-	
-	var pipe_l_mesh = _create_side_pipe_mesh(6.0, 90.0, 8.0, false, road_color, side_color)
-	_save_block("RoadSidePipeLeft", 9, road_color, side_color, Vector3(ROAD_WIDTH, ROAD_THICKNESS, 8.0), null, Vector3.ZERO, pipe_l_mesh)
+	var pipe_mesh = _create_side_pipe_mesh(6.0, 90.0, 8.0, false, road_color, side_color)
+	_save_block("RoadSidePipe", 9, road_color, side_color, Vector3(ROAD_WIDTH, ROAD_THICKNESS, 8.0), null, Vector3.ZERO, pipe_mesh)
 
 	# Loops
 	var loop360_mesh = _create_loop_mesh(24.0, 360.0, ROAD_WIDTH, road_color)
-	_save_block("RoadLoop360", 12, road_color, side_color, Vector3(ROAD_WIDTH, ROAD_THICKNESS, 24.0 * 2.0), null, Vector3.ZERO, loop360_mesh)
+	_save_block("RoadLoop360", 11, road_color, side_color, Vector3(ROAD_WIDTH, ROAD_THICKNESS, 24.0 * 2.0), null, Vector3.ZERO, loop360_mesh)
 	
 	var loop90_mesh = _create_loop_mesh(24.0, 90.0, ROAD_WIDTH, road_color)
-	_save_block("RoadLoop90", 13, road_color, side_color, Vector3(ROAD_WIDTH, ROAD_THICKNESS, 24.0), null, Vector3.ZERO, loop90_mesh)
+	_save_block("RoadLoop90", 12, road_color, side_color, Vector3(ROAD_WIDTH, ROAD_THICKNESS, 24.0), null, Vector3.ZERO, loop90_mesh)
 
-	print("Successfully updated block scenes with loops")
+	print("Successfully updated block scenes with optimized pipes and resolution")
 	call_deferred("quit")
