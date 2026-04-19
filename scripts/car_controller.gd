@@ -2,19 +2,18 @@ extends RigidBody3D
 
 @export_group("Suspension")
 @export var suspension_rest_dist: float = 0.5
-@export var spring_strength: float = 300.0
-@export var spring_damping: float = 15.0
+@export var spring_strength: float = 50000.0 # Much higher for heavy mass
+@export var spring_damping: float = 2000.0
 @export var wheel_radius: float = 0.3
 
 @export_group("Engine")
-@export var engine_power: float = 2000.0
-@export var braking_power: float = 1000.0
+@export var engine_power: float = 20000.0
 @export var max_speed: float = 100.0
 
 @export_group("Steering")
 @export var steering_angle: float = 30.0
 @export var steering_speed: float = 5.0
-@export var grip: float = 5.0
+@export var grip: float = 20.0
 
 @onready var raycasts = [
 	$RayCastFL, $RayCastFR, $RayCastRL, $RayCastRR
@@ -40,7 +39,7 @@ func _physics_process(delta):
 		var ray = raycasts[i]
 		var wheel = wheels[i]
 		
-		# Always keep wheel at its raycast's X/Z position
+		# Local positioning for visual wheel
 		wheel.position.x = ray.position.x
 		wheel.position.z = ray.position.z
 		
@@ -53,6 +52,8 @@ func _physics_process(delta):
 			var compression = (suspension_rest_dist + wheel_radius) - dist
 			if compression > 0:
 				var wheel_velocity = linear_velocity + angular_velocity.cross(ray.global_position - global_position)
+				
+				# Normal Force (Suspension)
 				var upward_vel = hit_normal.dot(wheel_velocity)
 				var spring_force = compression * spring_strength
 				var damping_force = upward_vel * spring_damping
@@ -60,16 +61,16 @@ func _physics_process(delta):
 				
 				apply_force(total_force, ray.global_position - global_position)
 				
-				# 2. Steering & Grip
+				# 2. Driving & Grip
 				var wheel_basis = ray.global_basis
 				if i < 2: # Front wheels
-					wheel_basis = wheel_basis.rotated(Vector3.UP, steering_input * deg_to_rad(steering_angle))
+					wheel_basis = wheel_basis.rotated(global_basis.y, steering_input * deg_to_rad(steering_angle))
 				
-				var forward_dir = wheel_basis.z
+				var forward_dir = -wheel_basis.z # Car +Z is back
 				var right_dir = wheel_basis.x
 				
 				# Acceleration
-				if engine_input != 0:
+				if abs(engine_input) > 0.05:
 					var accel_force = forward_dir * engine_input * engine_power
 					apply_force(accel_force, ray.global_position - global_position)
 				
@@ -85,17 +86,16 @@ func _physics_process(delta):
 				wheel.position.y = -suspension_rest_dist
 		else:
 			wheel.position.y = -suspension_rest_dist
-			# Keep rotation consistent even in air
 			var wheel_basis = ray.global_basis
 			if i < 2:
-				wheel_basis = wheel_basis.rotated(Vector3.UP, steering_input * deg_to_rad(steering_angle))
+				wheel_basis = wheel_basis.rotated(global_basis.y, steering_input * deg_to_rad(steering_angle))
 			wheel.global_basis = wheel_basis.rotated(wheel_basis.z, PI/2.0)
 
 	# Air control
 	if !is_any_wheel_touching():
 		var air_torque = Vector3.ZERO
-		air_torque.x = Input.get_axis("ui_up", "ui_down") * 10.0
-		air_torque.y = Input.get_axis("ui_left", "ui_right") * 10.0
+		air_torque.x = Input.get_axis("ui_up", "ui_down") * 15.0
+		air_torque.y = Input.get_axis("ui_left", "ui_right") * 15.0
 		apply_torque(global_basis * air_torque * mass)
 
 func is_any_wheel_touching() -> bool:
