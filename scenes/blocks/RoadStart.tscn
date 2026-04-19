@@ -1,0 +1,58 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/track_block.gd" id="1_jtr2t"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ij7u6"]
+albedo_color = Color(0.2, 0.2, 0.2, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_dhrhf"]
+material = SubResource("StandardMaterial3D_ij7u6")
+size = Vector3(2, 0.2, 2)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_q06no"]
+size = Vector3(2, 0.2, 2)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_megug"]
+albedo_color = Color(0.1, 0.8, 0.1, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_ekaa0"]
+material = SubResource("StandardMaterial3D_megug")
+size = Vector3(0.1, 2, 0.1)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_gk5iy"]
+albedo_color = Color(0.1, 0.8, 0.1, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_afs7a"]
+material = SubResource("StandardMaterial3D_gk5iy")
+size = Vector3(0.1, 2, 0.1)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_j4rq6"]
+albedo_color = Color(0.1, 0.8, 0.1, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_3htkd"]
+material = SubResource("StandardMaterial3D_j4rq6")
+size = Vector3(2, 0.1, 0.1)
+
+[node name="RoadStart" type="StaticBody3D" unique_id=753637610]
+script = ExtResource("1_jtr2t")
+type = 1
+
+[node name="@MeshInstance3D@7" type="MeshInstance3D" parent="." unique_id=44791049]
+mesh = SubResource("BoxMesh_dhrhf")
+
+[node name="@CollisionShape3D@8" type="CollisionShape3D" parent="." unique_id=1835353979]
+shape = SubResource("BoxShape3D_q06no")
+
+[node name="Gate" type="Node3D" parent="." unique_id=1702891535]
+
+[node name="@MeshInstance3D@4" type="MeshInstance3D" parent="Gate" unique_id=1317283478]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.95, 1, 0)
+mesh = SubResource("BoxMesh_ekaa0")
+
+[node name="@MeshInstance3D@5" type="MeshInstance3D" parent="Gate" unique_id=1029997360]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.95, 1, 0)
+mesh = SubResource("BoxMesh_afs7a")
+
+[node name="@MeshInstance3D@6" type="MeshInstance3D" parent="Gate" unique_id=1302267980]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0)
+mesh = SubResource("BoxMesh_3htkd")

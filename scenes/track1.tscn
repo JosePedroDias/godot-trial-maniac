@@ -1,0 +1,78 @@
+[gd_scene format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/blocks/RoadStraight.tscn" id="1_ryrif"]
+[ext_resource type="Script" path="res://scripts/track_block.gd" id="2_vo5wb"]
+[ext_resource type="PackedScene" path="res://scenes/blocks/RoadStart.tscn" id="3_t3b6u"]
+[ext_resource type="PackedScene" path="res://scenes/blocks/RoadBooster.tscn" id="4_doyf6"]
+[ext_resource type="PackedScene" path="res://scenes/blocks/RoadFinish.tscn" id="5_cvqpw"]
+[ext_resource type="PackedScene" path="res://scenes/car.tscn" id="6_ssd5m"]
+[ext_resource type="Script" path="res://scripts/car_controller.gd" id="7_hfke8"]
+[ext_resource type="Script" path="res://scripts/follow_camera.gd" id="8_pwued"]
+[ext_resource type="PackedScene" path="res://scenes/hud.tscn" id="9_fufvl"]
+[ext_resource type="Script" path="res://scripts/hud.gd" id="10_0wewv"]
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_kd68p"]
+
+[sub_resource type="Sky" id="Sky_tgmmc"]
+sky_material = SubResource("ProceduralSkyMaterial_kd68p")
+
+[sub_resource type="Environment" id="Environment_d3voq"]
+background_mode = 2
+sky = SubResource("Sky_tgmmc")
+ambient_light_source = 3
+tonemap_mode = 3
+
+[node name="Track1" type="Node3D" unique_id=1120652294]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=1967726148]
+environment = SubResource("Environment_d3voq")
+
+[node name="Sun" type="DirectionalLight3D" parent="." unique_id=1685412878]
+transform = Transform3D(0.70710677, -0.49999997, 0.49999997, 0, 0.70710677, 0.70710677, -0.70710677, -0.49999997, 0.49999997, 0, 0, 0)
+shadow_enabled = true
+
+[node name="Track" type="Node3D" parent="." unique_id=1364897095]
+
+[node name="RoadStraight" type="StaticBody3D" parent="Track" unique_id=961651425 instance=ExtResource("1_ryrif")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 0, 0)
+script = ExtResource("2_vo5wb")
+
+[node name="RoadStart" type="StaticBody3D" parent="Track" unique_id=753637610 instance=ExtResource("3_t3b6u")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 0, 0)
+script = ExtResource("2_vo5wb")
+type = 1
+
+[node name="@StaticBody3D@2" type="StaticBody3D" parent="Track" unique_id=242979922 instance=ExtResource("1_ryrif")]
+script = ExtResource("2_vo5wb")
+
+[node name="RoadBooster" type="StaticBody3D" parent="Track" unique_id=758539836 instance=ExtResource("4_doyf6")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 0, 0)
+script = ExtResource("2_vo5wb")
+type = 3
+
+[node name="@StaticBody3D@3" type="StaticBody3D" parent="Track" unique_id=1791462273 instance=ExtResource("1_ryrif")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 0, 0)
+script = ExtResource("2_vo5wb")
+
+[node name="RoadFinish" type="StaticBody3D" parent="Track" unique_id=168827358 instance=ExtResource("5_cvqpw")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 0, 0)
+script = ExtResource("2_vo5wb")
+type = 2
+
+[node name="Car" type="RigidBody3D" parent="." unique_id=1749673328 instance=ExtResource("6_ssd5m")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -4, 1, 0)
+mass = 1500.0
+center_of_mass_mode = 1
+center_of_mass = Vector3(0, -0.2, 0)
+script = ExtResource("7_hfke8")
+
+[node name="FollowCamera" type="Camera3D" parent="." unique_id=828931360]
+script = ExtResource("8_pwued")
+target_path = NodePath("../Car")
+
+[node name="HUD" type="Control" parent="." unique_id=998022422 instance=ExtResource("9_fufvl")]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource("10_0wewv")

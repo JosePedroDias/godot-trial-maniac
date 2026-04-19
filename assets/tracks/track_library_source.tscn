@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3 uid="uid://bt7p6l8j1w2k8"]
+[gd_scene load_steps=14 format=3 uid="uid://bt7p6l8j1w2k8"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_road"]
 albedo_color = Color(0.2, 0.2, 0.2, 1)
@@ -27,6 +27,20 @@ albedo_color = Color(0.3, 0.3, 0.3, 1)
 
 [sub_resource type="BoxMesh" id="BoxMesh_ramp"]
 material = SubResource("StandardMaterial3D_ramp")
+size = Vector3(2, 0.2, 2)
+
+[sub_resource type="BoxMesh" id="BoxMesh_curve"]
+material = SubResource("StandardMaterial3D_road")
+size = Vector3(2, 0.2, 2)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_booster"]
+albedo_color = Color(1, 0.8, 0.1, 1)
+emission_enabled = true
+emission = Color(1, 0.8, 0.1, 1)
+emission_energy_multiplier = 2.0
+
+[sub_resource type="BoxMesh" id="BoxMesh_booster"]
+material = SubResource("StandardMaterial3D_booster")
 size = Vector3(2, 0.2, 2)
 
 [node name="TrackLibrarySource" type="Node3D"]
@@ -94,4 +108,22 @@ mesh = SubResource("BoxMesh_ramp")
 [node name="StaticBody3D" type="StaticBody3D" parent="RoadRamp"]
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="RoadRamp/StaticBody3D"]
+shape = SubResource("BoxShape3D_1")
+
+[node name="RoadCurve" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 0, 0)
+mesh = SubResource("BoxMesh_curve")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="RoadCurve"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="RoadCurve/StaticBody3D"]
+shape = SubResource("BoxShape3D_1")
+
+[node name="RoadBooster" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 0, 0)
+mesh = SubResource("BoxMesh_booster")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="RoadBooster"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="RoadBooster/StaticBody3D"]
 shape = SubResource("BoxShape3D_1")
