@@ -10,6 +10,7 @@
 [ext_resource type="Script" uid="uid://d3t3fpwfrfixw" path="res://scripts/follow_camera.gd" id="8_pwued"]
 [ext_resource type="PackedScene" path="res://scenes/hud.tscn" id="9_fufvl"]
 [ext_resource type="PackedScene" path="res://scenes/blocks/RoadCurveWide.tscn" id="9_ryrif"]
+[ext_resource type="PackedScene" path="res://scenes/blocks/RoadStraightLong.tscn" id="11_vo5wb"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_kd68p"]
 
@@ -36,9 +37,6 @@ shadow_enabled = true
 [node name="RoadStraight2" parent="Track" unique_id=660797023 instance=ExtResource("1_ryrif")]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -6, 0, 0)
 
-[node name="RoadStraight4" parent="Track" unique_id=1553797861 instance=ExtResource("1_ryrif")]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 27, 0, -16)
-
 [node name="RoadStraight3" parent="Track" unique_id=1790726755 instance=ExtResource("1_ryrif")]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -8, 0, 0)
 
@@ -48,23 +46,17 @@ transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -4, 
 [node name="RoadStraight" parent="Track" unique_id=1076793304 instance=ExtResource("1_ryrif")]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -2, 0, 0)
 
-[node name="RoadStraight7" parent="Track" unique_id=1755071148 instance=ExtResource("1_ryrif")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, 0, -7)
-
-[node name="RoadStraight8" parent="Track" unique_id=402096086 instance=ExtResource("1_ryrif")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, 0, -9)
-
 [node name="RoadStraight5" parent="Track" unique_id=1411489036 instance=ExtResource("1_ryrif")]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 0, 0, 0)
 
 [node name="RoadBooster" parent="Track" unique_id=9800978 instance=ExtResource("4_doyf6")]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 11, 0, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 31, 0, -18)
 
 [node name="RoadStraight6" parent="Track" unique_id=1499642161 instance=ExtResource("1_ryrif")]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 13, 0, 0)
 
 [node name="RoadFinish" parent="Track" unique_id=1424810287 instance=ExtResource("5_cvqpw")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 30, 0, -13)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 31, 0, -8)
 
 [node name="RoadRamp" parent="Track" unique_id=679231525 instance=ExtResource("5_ryrif")]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 2.950967, 0.087836504, 0)
@@ -82,10 +74,16 @@ grow_horizontal = 2
 grow_vertical = 2
 
 [node name="RoadCurveTight" parent="." unique_id=1577248770 instance=ExtResource("8_levyu")]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 28, 0.1, -14)
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 28, 0.1, -19.030983)
 
 [node name="RoadCurveWide" parent="." unique_id=1653715944 instance=ExtResource("9_ryrif")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14, 0.1, -6)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14, 0.1, -7)
 
 [node name="RoadCurveWide2" parent="." unique_id=1521853554 instance=ExtResource("9_ryrif")]
-transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 26, 0.1, -10.049)
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 28, 0.1, -15)
+
+[node name="RoadStraightLong" parent="." unique_id=211024955 instance=ExtResource("11_vo5wb")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 21, 0, -11)
+
+[node name="RoadStraightLong2" parent="." unique_id=348612342 instance=ExtResource("11_vo5wb")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 31, 0, -13)

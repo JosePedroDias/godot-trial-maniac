@@ -48,7 +48,9 @@ The modular pieces created by the generator are used to assemble levels.
   - `START`: Triggers the race timer via `GameManager`.
   - `FINISH`: Stops the timer and records the score.
   - `BOOSTER`: Applies a massive forward impulse to the car's RigidBody.
-  - `STRAIGHT`, `RAMP`, `CURVE`: Structural road pieces with integrated 0.5m side walls for safety and collision.
+  - `STRAIGHT`, `STRAIGHT_LONG`: Standard road pieces (2m and 8m lengths).
+  - `RAMP`: Inclined road for jumps and elevation changes.
+  - `CURVE_TIGHT`, `CURVE_WIDE`, `CURVE_EXTRA_WIDE`: Curved segments with increasing radii (1m-5m, 5m-9m, 9m-13m). All curves include 0.5m side walls with proper thickness.
 
 ### 5. Camera System (`scripts/follow_camera.gd`)
 A smooth follow camera that tracks the car's position and orientation, looking slightly ahead of the vehicle to give the player a better view of the track.

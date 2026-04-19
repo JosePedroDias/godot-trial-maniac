@@ -211,16 +211,23 @@ func _init():
 	var booster_color = Color(1, 0.8, 0.1)
 	
 	_save_block("RoadStraight", 0, road_color, side_color)
-	_save_block("RoadStart", 1, road_color, side_color, Vector3(4, 0, 2), _create_gate(start_color))
-	_save_block("RoadFinish", 2, road_color, side_color, Vector3(4, 0, 2), _create_gate(finish_color))
+	_save_block("RoadStraightLong", 7, road_color, side_color, Vector3(4, 0.2, 8))
+	_save_block("RoadStart", 1, road_color, side_color, Vector3(4, 0.2, 2), _create_gate(start_color))
+	_save_block("RoadFinish", 2, road_color, side_color, Vector3(4, 0.2, 2), _create_gate(finish_color))
 	_save_block("RoadBooster", 3, booster_color, side_color)
-	_save_block("RoadRamp", 4, road_color, side_color, Vector3(4, 0, 4), null, Vector3(-15, 0, 0))
+	_save_block("RoadRamp", 4, road_color, side_color, Vector3(4, 0.2, 4), null, Vector3(-15, 0, 0))
 	
-	var tight_mesh = _create_curved_road_mesh(0.0, 4.0, road_color, side_color)
-	_save_block("RoadCurveTight", 5, road_color, side_color, Vector3(4, 0, 4), null, Vector3.ZERO, tight_mesh)
+	# Tight Curve: 1.0m to 5.0m (Width 4)
+	var tight_mesh = _create_curved_road_mesh(1.0, 5.0, road_color, side_color)
+	_save_block("RoadCurveTight", 5, road_color, side_color, Vector3(5, 0.2, 5), null, Vector3.ZERO, tight_mesh)
 	
-	var wide_mesh = _create_curved_road_mesh(4.0, 8.0, road_color, side_color)
-	_save_block("RoadCurveWide", 6, road_color, side_color, Vector3(8, 0, 8), null, Vector3.ZERO, wide_mesh)
+	# Wide Curve: 5.0m to 9.0m (Width 4)
+	var wide_mesh = _create_curved_road_mesh(5.0, 9.0, road_color, side_color)
+	_save_block("RoadCurveWide", 6, road_color, side_color, Vector3(9, 0.2, 9), null, Vector3.ZERO, wide_mesh)
+	
+	# Extra Wide: 9.0m to 13.0m (Width 4)
+	var extra_wide_mesh = _create_curved_road_mesh(9.0, 13.0, road_color, side_color)
+	_save_block("RoadCurveExtraWide", 8, road_color, side_color, Vector3(13, 0.2, 13), null, Vector3.ZERO, extra_wide_mesh)
 	
 	print("Successfully updated block scenes with thickness and fixed shading")
 	quit()
