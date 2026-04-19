@@ -10,13 +10,17 @@ var sfx_enabled = true
 
 var tracks = ["res://scenes/track1.tscn", "res://scenes/track2.tscn"]
 var current_track_index = 0
+var highscores = {} # track_path: best_time
+const SAVE_PATH = "user://highscores.json"
 
 signal state_changed(new_state)
 signal time_updated(new_time)
 signal speed_updated(new_speed)
+signal record_updated(record_time)
 signal sfx_toggled(is_enabled)
 
 func _ready():
+	_load_highscores()
 	current_state = RaceState.PRE_START
 	# Sync index with current scene
 	if get_tree().current_scene:
@@ -24,19 +28,56 @@ func _ready():
 		var idx = tracks.find(scene_path)
 		if idx != -1:
 			current_track_index = idx
+			best_time = float(highscores.get(scene_path, 600.0))
+			# Delay slightly to ensure HUD is fully ready and connected
+			get_tree().create_timer(0.1).timeout.connect(_emit_initial_record)
+
+func _emit_initial_record():
+	record_updated.emit(best_time)
 
 func start_race():
+	# Refresh best_time just in case
+	var scene_path = get_tree().current_scene.scene_file_path
+	best_time = float(highscores.get(scene_path, 600.0))
+	record_updated.emit(best_time)
+
 	if current_state != RaceState.RACING:
 		current_state = RaceState.RACING
 		start_time = Time.get_ticks_msec() / 1000.0
 		state_changed.emit(current_state)
 
+func _load_highscores():
+	if FileAccess.file_exists(SAVE_PATH):
+		var file = FileAccess.open(SAVE_PATH, FileAccess.READ)
+		var json_string = file.get_as_text()
+		var json = JSON.new()
+		var error = json.parse(json_string)
+		if error == OK:
+			var data = json.data
+			if data is Dictionary:
+				for k in data:
+					highscores[k] = float(data[k])
+	
+	# Ensure defaults
+	for track in tracks:
+		if not highscores.has(track):
+			highscores[track] = 600.0
+
+func _save_highscores():
+	var file = FileAccess.open(SAVE_PATH, FileAccess.WRITE)
+	var json_string = JSON.stringify(highscores)
+	file.store_string(json_string)
+
 func finish_race():
 	if current_state == RaceState.RACING:
 		current_state = RaceState.FINISHED
 		race_time = (Time.get_ticks_msec() / 1000.0) - start_time
-		if best_time == 0.0 or race_time < best_time:
+		if race_time < best_time:
 			best_time = race_time
+			highscores[tracks[current_track_index]] = best_time
+			_save_highscores()
+			record_updated.emit(best_time)
+		
 		state_changed.emit(current_state)
 		
 		# Wait 2 seconds and go to next track
@@ -46,9 +87,10 @@ func finish_race():
 
 func next_track():
 	current_track_index = (current_track_index + 1) % tracks.size()
-	best_time = 0.0
+	var next_path = tracks[current_track_index]
+	best_time = highscores.get(next_path, 600.0)
 	current_state = RaceState.PRE_START
-	get_tree().change_scene_to_file(tracks[current_track_index])
+	get_tree().change_scene_to_file(next_path)
 
 func reset_race():
 	current_state = RaceState.PRE_START

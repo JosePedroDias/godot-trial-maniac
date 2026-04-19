@@ -1,4 +1,4 @@
-[gd_scene load_steps=6 format=3]
+[gd_scene load_steps=7 format=3]
 
 [ext_resource type="Script" path="res://scripts/hud.gd" id="1_ahhtf"]
 [ext_resource type="FontFile" path="res://assets/fonts/PressStart2P-Regular.ttf" id="2_font"]
@@ -22,6 +22,13 @@ shadow_color = Color(0, 0, 0, 0.5)
 font = ExtResource("2_font")
 font_size = 24
 outline_size = 4
+outline_color = Color(0, 0, 0, 1)
+
+[sub_resource type="LabelSettings" id="LabelSettings_record"]
+font = ExtResource("2_font")
+font_size = 12
+font_color = Color(0.7, 0.7, 1, 1)
+outline_size = 2
 outline_color = Color(0, 0, 0, 1)
 
 [node name="HUD" type="CanvasLayer"]
@@ -61,6 +68,21 @@ grow_vertical = 0
 text = "0 KM/H"
 label_settings = SubResource("LabelSettings_speed")
 horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="RecordLabel" type="Label" parent="Control"]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -300.0
+offset_top = 20.0
+offset_right = -20.0
+offset_bottom = 43.0
+grow_horizontal = 0
+text = "RECORD: 10:00.000"
+label_settings = SubResource("LabelSettings_record")
+horizontal_alignment = 2
 vertical_alignment = 1
 
 [node name="FinishLabel" type="Label" parent="Control"]

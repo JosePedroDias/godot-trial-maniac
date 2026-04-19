@@ -16,22 +16,18 @@ The car is modeled as an open-seater racing vehicle (Formula style) using a cust
 - **Audio:** Procedural engine loops, skid noise, brake squeals, and collision thumps.
 
 ### 2. Race Management (`scripts/game_manager.gd`)
-A global singleton (Autoload) that handles the race lifecycle and track progression.
+A global singleton (Autoload) that handles the race lifecycle, track progression, and persistence.
 - **States:** `PRE_START`, `RACING`, `FINISHED`.
 - **Timing:** Precision timer that starts at the start gate and stops at the finish gate.
 - **Track Progression:** Automatically transitions to the next track in the list 2 seconds after crossing the finish line. Manual switching available via the '2' key.
-- **Best Time:** Tracks the personal best for the current session.
+- **Persistence:** Highscores are saved to `user://highscores.json`. If no record exists, it defaults to 10:00.000.
+- **Best Time:** Tracks and displays the personal best for the current session and track.
 - **Global Input:** Manages restart (T), SFX toggle (1), Next Track (2), Fullscreen (0), and Quit (Esc).
 
 ### 3. Track Generation Tool (`scripts/create_blocks.gd`)
 This script acts as a procedural generation utility for the track's modular pieces. 
 
 **Note: This tool does NOT run automatically at game start.** It is a build-time utility used to update the `.tscn` files in `res://scenes/blocks/`.
-
-#### When to run the tool:
-- You modify road dimensions, colors, or wall heights in the script.
-- You change the procedural mesh generation logic.
-- You add new block types to the library.
 
 #### How to run the tool:
 Execute the following command from the project root:
@@ -40,16 +36,11 @@ godot --headless -s scripts/create_blocks.gd
 ```
 
 - **Procedural Meshes:** Uses `SurfaceTool` to generate geometry for curves, side pipes, and loops.
-- **Safety Walls:** Automatically generates 0.25m high side walls for standard track segments.
 - **Block Types:**
-  - `START`: Triggers the race timer via `GameManager`.
-  - `FINISH`: Stops the timer and records the score.
-  - `BOOSTER`: Applies a forward impulse.
-  - `STRAIGHT`, `STRAIGHT_LONG`, `STRAIGHT_LONG_WO_WALLS`: Various lengths and wall configurations.
-  - `RAMP`: Elevation changes.
-  - `CURVE_TIGHT`, `CURVE_WIDE`, `CURVE_EXTRA_WIDE`: Various radii.
-  - `SIDE_PIPE`: Transition from flat road to 90-degree wall ride.
-  - `LOOP_360`, `LOOP_90`: Vertical looping segments.
+  - `START`, `FINISH`, `BOOSTER`
+  - `STRAIGHT`, `STRAIGHT_LONG`, `STRAIGHT_LONG_WO_WALLS`
+  - `RAMP`, `CURVE_TIGHT`, `CURVE_WIDE`, `CURVE_EXTRA_WIDE`
+  - `SIDE_PIPE`, `LOOP_360`, `LOOP_90`
 
 ### 4. Camera System (`scripts/follow_camera.gd`)
 A smooth follow camera with 2-frame easing and high-speed stabilization to filter out physics jitter.
@@ -57,6 +48,7 @@ A smooth follow camera with 2-frame easing and high-speed stabilization to filte
 ### 5. HUD & UI (`scripts/hud.gd`)
 - **Timer:** Displays race duration using "Press Start 2P" font.
 - **Speedometer:** Real-time speed in KM/H.
+- **Record:** Displays the all-time best for the current track in the top-right corner.
 - **Finish Screen:** Completion details and session personal best.
 
 ## Assets
