@@ -52,6 +52,7 @@ The modular pieces created by the generator are used to assemble levels.
   - `STRAIGHT`, `STRAIGHT_LONG`: Standard road pieces (8m wide, 4m and 16m lengths).
   - `RAMP`: Inclined road for jumps and elevation changes.
   - `CURVE_TIGHT`, `CURVE_WIDE`, `CURVE_EXTRA_WIDE`: Curved segments with increasing radii and an 8m road width. All curves include 0.25m side walls with 0.1m thickness.
+  - `SIDE_PIPE_LEFT`, `SIDE_PIPE_RIGHT`: 8m long segments that transition from a flat road into a 90-degree cylindrical wall ride (6m radius). Useful for high-speed lateral maneuvers.
 
 ### 5. Camera System (`scripts/follow_camera.gd`)
 A smooth follow camera that tracks the car's position and orientation, looking slightly ahead of the vehicle to give the player a better view of the track.
