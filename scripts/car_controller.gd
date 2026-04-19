@@ -40,6 +40,10 @@ func _physics_process(delta):
 		var ray = raycasts[i]
 		var wheel = wheels[i]
 		
+		# Always keep wheel at its raycast's X/Z position
+		wheel.position.x = ray.position.x
+		wheel.position.z = ray.position.z
+		
 		if ray.is_colliding():
 			var hit_point = ray.get_collision_point()
 			var hit_normal = ray.get_collision_normal()
@@ -76,14 +80,16 @@ func _physics_process(delta):
 				
 				# Visual wheel update
 				wheel.global_position = hit_point + hit_normal * wheel_radius
-				# Align cylinder (Y-axis) with lateral axis (X-axis)
 				wheel.global_basis = wheel_basis.rotated(wheel_basis.z, PI/2.0)
 			else:
-				# Wheel in air
 				wheel.position.y = -suspension_rest_dist
 		else:
-			# Wheel in air
 			wheel.position.y = -suspension_rest_dist
+			# Keep rotation consistent even in air
+			var wheel_basis = ray.global_basis
+			if i < 2:
+				wheel_basis = wheel_basis.rotated(Vector3.UP, steering_input * deg_to_rad(steering_angle))
+			wheel.global_basis = wheel_basis.rotated(wheel_basis.z, PI/2.0)
 
 	# Air control
 	if !is_any_wheel_touching():

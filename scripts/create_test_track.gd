@@ -29,6 +29,7 @@ func _init():
 	gridmap.name = "TrackGridMap"
 	gridmap.mesh_library = load("res://assets/tracks/track_library.tres")
 	gridmap.cell_size = Vector3(2, 2, 2)
+	gridmap.cell_center_y = false # Ensure road is on cell floor
 	root.add_child(gridmap)
 	gridmap.owner = root
 	
@@ -36,7 +37,10 @@ func _init():
 	var start_id = gridmap.mesh_library.find_item_by_name("RoadStart")
 	var finish_id = gridmap.mesh_library.find_item_by_name("RoadFinish")
 	
-	# Create a simple loop
+	# World positions calculation: world = (grid + 0.5) * cell_size
+	# For cell_size=2: world = grid * 2 + 1
+	
+	# Simple Loop
 	for x in range(-15, 16):
 		if x == 0:
 			gridmap.set_cell_item(Vector3i(x, 0, -15), start_id)
@@ -50,18 +54,22 @@ func _init():
 		gridmap.set_cell_item(Vector3i(-15, 0, z), straight_id)
 		gridmap.set_cell_item(Vector3i(15, 0, z), straight_id)
 	
-	# Start Line Trigger
+	# Correct world positions based on center_x/z being true by default
+	# Grid X=0 -> World X=1.0
+	# Grid Z=-15 -> World Z=-15*2 + 1 = -29.0
+	
+	# Start Line Trigger (at x=0, z=-15)
 	var start_scene = load("res://scenes/start_line.tscn")
 	var start_trigger = start_scene.instantiate()
-	start_trigger.position = Vector3(0, 0.5, -30)
+	start_trigger.position = Vector3(1.0, 0.5, -29.0)
 	start_trigger.is_start_line = true
 	root.add_child(start_trigger)
 	start_trigger.owner = root
 	
-	# Finish Line Trigger
+	# Finish Line Trigger (at x=5, z=-15)
 	var finish_scene = load("res://scenes/finish_line.tscn")
 	var finish_trigger = finish_scene.instantiate()
-	finish_trigger.position = Vector3(10, 0.5, -30) # x=5 * cell_size=2
+	finish_trigger.position = Vector3(5 * 2 + 1, 0.5, -29.0) # World X=11.0
 	finish_trigger.is_start_line = false
 	root.add_child(finish_trigger)
 	finish_trigger.owner = root
@@ -70,12 +78,13 @@ func _init():
 	var car_scene = load("res://scenes/car.tscn")
 	var car = car_scene.instantiate()
 	car.name = "Car"
-	car.position = Vector3(-4, 1, -30) # A bit before the start line
+	# Position car at grid X=-2, Z=-15 -> World X=-2*2 + 1 = -3.0
+	car.position = Vector3(-3.0, 2.0, -29.0)
 	car.rotation_degrees = Vector3(0, 90, 0)
 	root.add_child(car)
 	car.owner = root
 	
-	# Add the camera
+	# Camera setup
 	var camera = Camera3D.new()
 	camera.name = "FollowCamera"
 	camera.set_script(load("res://scripts/follow_camera.gd"))
@@ -83,7 +92,7 @@ func _init():
 	root.add_child(camera)
 	camera.owner = root
 	
-	# Add HUD
+	# HUD setup
 	var hud_scene = load("res://scenes/hud.tscn")
 	var hud = hud_scene.instantiate()
 	root.add_child(hud)
@@ -92,6 +101,6 @@ func _init():
 	var packed_scene = PackedScene.new()
 	packed_scene.pack(root)
 	ResourceSaver.save(packed_scene, "res://scenes/main.tscn")
-	print("Successfully updated res://scenes/main.tscn with gates")
+	print("Successfully updated res://scenes/main.tscn with corrected positions")
 	
 	quit()
