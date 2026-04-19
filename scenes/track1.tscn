@@ -69,9 +69,6 @@ script = ExtResource("8_pwued")
 target_path = NodePath("../Car")
 
 [node name="HUD" parent="." unique_id=998022422 instance=ExtResource("9_fufvl")]
-anchors_preset = 15
-grow_horizontal = 2
-grow_vertical = 2
 
 [node name="RoadCurveTight" parent="." unique_id=1577248770 instance=ExtResource("8_levyu")]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 79, 0.1, -22)

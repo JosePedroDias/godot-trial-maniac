@@ -57,15 +57,13 @@ The modular pieces created by the generator are used to assemble levels.
 A smooth follow camera that tracks the car's position and orientation, looking slightly ahead of the vehicle to give the player a better view of the track.
 
 ### 6. HUD & UI (`scripts/hud.gd`)
-- **Timer:** Real-time display of the current race duration.
-- **Finish Screen:** Displays completion time and personal best.
-- **Controls:** `ui_cancel` (Esc) triggers an immediate race reset.
+- **Timer:** Real-time display of the current race duration using the "Press Start 2P" retro font.
+- **Finish Screen:** Displays completion time and personal best with high-visibility styling.
+- **Controls:** Handles global inputs for SFX toggling, race restarts, and quitting.
 
-## Project Structure
-- `assets/`: 3D models and textures.
-- `scenes/`: Main game levels and the UI.
-- `scenes/blocks/`: Individual modular track pieces.
-- `scripts/`: All GDScript logic.
+## Assets
+- `assets/fonts/PressStart2P-Regular.ttf`: Google Font used for the retro-styled HUD.
+- `assets/open_seater_mesh.tscn`: Procedural mesh for the player vehicle.
 
 ## Controls
 - **Accelerate/Brake:** Up/Down / W/S

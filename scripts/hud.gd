@@ -1,7 +1,7 @@
-extends Control
+extends CanvasLayer
 
-@onready var timer_label = $TimerLabel
-@onready var finish_label = $FinishLabel
+@onready var timer_label = $Control/TimerLabel
+@onready var finish_label = $Control/FinishLabel
 
 func _ready():
 	var gm = get_node_or_null("/root/GameManager")
@@ -28,9 +28,6 @@ func _on_state_changed(state):
 func _process(_delta):
 	var gm = get_node_or_null("/root/GameManager")
 	if not gm: return
-	
-	if Input.is_key_pressed(KEY_1) and Input.is_action_just_pressed("ui_accept"): # Simplified check or just use raw input
-		pass # We'll use a better approach below
 	
 	# Handle raw keys for specific requirements
 	if Input.is_key_label_pressed(KEY_1) and _just_pressed_key(KEY_1):
