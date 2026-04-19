@@ -13,6 +13,7 @@
 [ext_resource type="PackedScene" path="res://scenes/blocks/RoadStraightLong.tscn" id="11_vo5wb"]
 [ext_resource type="PackedScene" path="res://scenes/blocks/RoadSidePipeLeft.tscn" id="12_doyf6"]
 [ext_resource type="PackedScene" path="res://scenes/blocks/RoadSidePipeRight.tscn" id="13_cvqpw"]
+[ext_resource type="PackedScene" path="res://scenes/blocks/RoadStraightLongNoWalls.tscn" id="14_cvqpw"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_kd68p"]
 
@@ -87,11 +88,11 @@ transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 71, 
 [node name="RoadStraightLong2" parent="." unique_id=348612342 instance=ExtResource("11_vo5wb")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 85, 0, -14)
 
-[node name="RoadStraightLong3" parent="." unique_id=1047263078 instance=ExtResource("11_vo5wb")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 85, 0, 6)
-
 [node name="RoadSidePipeLeft" parent="." unique_id=1646642891 instance=ExtResource("12_doyf6")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 77, 0, 12)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 77, 0, 7)
 
 [node name="RoadSidePipeRight" parent="." unique_id=1959205017 instance=ExtResource("13_cvqpw")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 93, 0, 12)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 93, 0, 7)
+
+[node name="RoadStraightLongNoWalls" parent="." unique_id=528220966 instance=ExtResource("14_cvqpw")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 85, 0, 6)

@@ -53,45 +53,45 @@ albedo_color = Color(0.8, 0.1, 0.1, 1)
 material = SubResource("StandardMaterial3D_0uano")
 size = Vector3(8, 0.1, 0.1)
 
-[node name="RoadFinish" type="StaticBody3D" unique_id=1162157851]
+[node name="RoadFinish" type="StaticBody3D" unique_id=1399306491]
 script = ExtResource("1_ch3mv")
 type = 2
 
-[node name="@MeshInstance3D@26" type="MeshInstance3D" parent="." unique_id=1564677503]
+[node name="@MeshInstance3D@28" type="MeshInstance3D" parent="." unique_id=704688606]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
 mesh = SubResource("BoxMesh_1jv2j")
 
-[node name="@MeshInstance3D@27" type="MeshInstance3D" parent="." unique_id=844903477]
+[node name="@MeshInstance3D@29" type="MeshInstance3D" parent="." unique_id=1170808365]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.05, 0.725, 0)
 mesh = SubResource("BoxMesh_2s25p")
 
-[node name="@CollisionShape3D@28" type="CollisionShape3D" parent="." unique_id=348784122]
+[node name="@CollisionShape3D@30" type="CollisionShape3D" parent="." unique_id=835364059]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.05, 0.725, 0)
 shape = SubResource("BoxShape3D_lcwd8")
 
-[node name="@MeshInstance3D@29" type="MeshInstance3D" parent="." unique_id=234830786]
+[node name="@MeshInstance3D@31" type="MeshInstance3D" parent="." unique_id=1895227504]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.05, 0.725, 0)
 mesh = SubResource("BoxMesh_o1lx7")
 
-[node name="@CollisionShape3D@30" type="CollisionShape3D" parent="." unique_id=1205971470]
+[node name="@CollisionShape3D@32" type="CollisionShape3D" parent="." unique_id=1895624462]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.05, 0.725, 0)
 shape = SubResource("BoxShape3D_y65is")
 
-[node name="@CollisionShape3D@31" type="CollisionShape3D" parent="." unique_id=1606012373]
+[node name="@CollisionShape3D@33" type="CollisionShape3D" parent="." unique_id=2093871615]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
 shape = SubResource("BoxShape3D_6o2ed")
 
-[node name="Gate" type="Node3D" parent="." unique_id=2035126880]
+[node name="Gate" type="Node3D" parent="." unique_id=1889815044]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
 
-[node name="@MeshInstance3D@23" type="MeshInstance3D" parent="Gate" unique_id=912220540]
+[node name="@MeshInstance3D@25" type="MeshInstance3D" parent="Gate" unique_id=1725410795]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.95, 1, 0)
 mesh = SubResource("BoxMesh_7pau6")
 
-[node name="@MeshInstance3D@24" type="MeshInstance3D" parent="Gate" unique_id=1611347996]
+[node name="@MeshInstance3D@26" type="MeshInstance3D" parent="Gate" unique_id=2100086638]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.95, 1, 0)
 mesh = SubResource("BoxMesh_xy7yw")
 
-[node name="@MeshInstance3D@25" type="MeshInstance3D" parent="Gate" unique_id=1822636673]
+[node name="@MeshInstance3D@27" type="MeshInstance3D" parent="Gate" unique_id=1669774182]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0)
 mesh = SubResource("BoxMesh_f0t84")

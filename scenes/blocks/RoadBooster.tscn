@@ -35,30 +35,30 @@ size = Vector3(0.1, 0.25, 4)
 [sub_resource type="BoxShape3D" id="BoxShape3D_hcvk4"]
 size = Vector3(8, 0.2, 4)
 
-[node name="RoadBooster" type="StaticBody3D" unique_id=2087527150]
+[node name="RoadBooster" type="StaticBody3D" unique_id=355123377]
 script = ExtResource("1_gw3qg")
 type = 3
 
-[node name="@MeshInstance3D@32" type="MeshInstance3D" parent="." unique_id=627737407]
+[node name="@MeshInstance3D@34" type="MeshInstance3D" parent="." unique_id=283009727]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
 mesh = SubResource("BoxMesh_qnhqd")
 
-[node name="@MeshInstance3D@33" type="MeshInstance3D" parent="." unique_id=1923900667]
+[node name="@MeshInstance3D@35" type="MeshInstance3D" parent="." unique_id=1447669344]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.05, 0.725, 0)
 mesh = SubResource("BoxMesh_s30gm")
 
-[node name="@CollisionShape3D@34" type="CollisionShape3D" parent="." unique_id=337750274]
+[node name="@CollisionShape3D@36" type="CollisionShape3D" parent="." unique_id=1635077458]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.05, 0.725, 0)
 shape = SubResource("BoxShape3D_8ocd0")
 
-[node name="@MeshInstance3D@35" type="MeshInstance3D" parent="." unique_id=341543870]
+[node name="@MeshInstance3D@37" type="MeshInstance3D" parent="." unique_id=959670885]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.05, 0.725, 0)
 mesh = SubResource("BoxMesh_47fbm")
 
-[node name="@CollisionShape3D@36" type="CollisionShape3D" parent="." unique_id=1587940168]
+[node name="@CollisionShape3D@38" type="CollisionShape3D" parent="." unique_id=52582498]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.05, 0.725, 0)
 shape = SubResource("BoxShape3D_varwf")
 
-[node name="@CollisionShape3D@37" type="CollisionShape3D" parent="." unique_id=603222258]
+[node name="@CollisionShape3D@39" type="CollisionShape3D" parent="." unique_id=419355340]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
 shape = SubResource("BoxShape3D_hcvk4")

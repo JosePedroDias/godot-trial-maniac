@@ -124,10 +124,11 @@ func _create_side_pipe_mesh(radius: float, angle_deg: float, length: float, is_r
 	
 	var segments = 16
 	var angle_rad = deg_to_rad(angle_deg)
-	var flat_width = ROAD_WIDTH - radius # Width of the flat part
-	if flat_width < 0: flat_width = 2.0 # Fallback
+	var flat_width = ROAD_WIDTH - radius
+	if flat_width < 0: flat_width = 2.0
 	
 	var half_len = length / 2.0
+	var side_sign = 1.0 if is_right else -1.0
 	
 	# 1. Flat Road Part
 	st.set_color(color)
@@ -139,26 +140,11 @@ func _create_side_pipe_mesh(radius: float, angle_deg: float, length: float, is_r
 	var v_f2 = Vector3(f_x_end, 0, half_len)
 	var v_f3 = Vector3(f_x_start, 0, half_len)
 	_add_quad(st, v_f0, v_f1, v_f2, v_f3, Vector3.UP)
-	
-	# 1b. Flat Underneath
 	_add_quad(st, v_f3 - Vector3(0, ROAD_THICKNESS, 0), v_f2 - Vector3(0, ROAD_THICKNESS, 0), v_f1 - Vector3(0, ROAD_THICKNESS, 0), v_f0 - Vector3(0, ROAD_THICKNESS, 0), Vector3.DOWN)
 	
-	# 1c. Left/Right outer wall for the flat part
-	var flat_wall_x = f_x_start if is_right else f_x_end
-	var n_wall = Vector3.LEFT if is_right else Vector3.RIGHT
-	var v_w0 = Vector3(flat_wall_x, 0, -half_len)
-	var v_w1 = Vector3(flat_wall_x, 0, half_len)
-	var v_w0_w = v_w0 + Vector3(0, WALL_HEIGHT, 0)
-	var v_w1_w = v_w1 + Vector3(0, WALL_HEIGHT, 0)
-	var v_we0 = v_w0 + n_wall * WALL_THICKNESS
-	var v_we1 = v_w1 + n_wall * WALL_THICKNESS
-	var v_we0_w = v_we0 + Vector3(0, WALL_HEIGHT, 0)
-	var v_we1_w = v_we1 + Vector3(0, WALL_HEIGHT, 0)
-	
-	st.set_color(wall_color)
-	_add_quad(st, v_w1, v_w0, v_w0_w, v_w1_w, -n_wall)
-	_add_quad(st, v_we0, v_we1, v_we1_w, v_we0_w, n_wall)
-	_add_quad(st, v_w0_w, v_we0_w, v_we1_w, v_w1_w, Vector3.UP)
+	var flat_outer_x = f_x_start if is_right else f_x_end
+	var n_flat_outer = Vector3.LEFT if is_right else Vector3.RIGHT
+	_add_quad(st, Vector3(flat_outer_x, 0, half_len), Vector3(flat_outer_x, 0, -half_len), Vector3(flat_outer_x, -ROAD_THICKNESS, -half_len), Vector3(flat_outer_x, -ROAD_THICKNESS, half_len), n_flat_outer)
 
 	# 2. Pipe Arc Part
 	var arc_x_center = f_x_end if is_right else f_x_start
@@ -168,30 +154,25 @@ func _create_side_pipe_mesh(radius: float, angle_deg: float, length: float, is_r
 		var a0 = (float(i) / segments) * angle_rad
 		var a1 = (float(i + 1) / segments) * angle_rad
 		
-		# For right: arc goes from alpha=0 (bottom) to alpha=90 (right)
-		# x = center + radius * sin(alpha), y = center - radius * cos(alpha)
-		# For left: arc goes from alpha=0 (bottom) to alpha=90 (left)
-		# x = center - radius * sin(alpha), y = center - radius * cos(alpha)
-		
 		var s0 = sin(a0); var c0 = cos(a0)
 		var s1 = sin(a1); var c1 = cos(a1)
 		
-		var side_sign = 1.0 if is_right else -1.0
+		var x0_i = arc_x_center + side_sign * radius * s0
+		var y0_i = arc_y_center - radius * c0
+		var x1_i = arc_x_center + side_sign * radius * s1
+		var y1_i = arc_y_center - radius * c1
 		
-		var x0 = arc_x_center + side_sign * radius * s0
-		var y0 = arc_y_center - radius * c0
-		var x1 = arc_x_center + side_sign * radius * s1
-		var y1 = arc_y_center - radius * c1
+		var r_out = radius + WALL_THICKNESS
+		var x0_o = arc_x_center + side_sign * r_out * s0
+		var y0_o = arc_y_center - r_out * c0
+		var x1_o = arc_x_center + side_sign * r_out * s1
+		var y1_o = arc_y_center - r_out * c1
 		
-		var v_a0 = Vector3(x0, y0, -half_len)
-		var v_a1 = Vector3(x1, y1, -half_len)
-		var v_a2 = Vector3(x1, y1, half_len)
-		var v_a3 = Vector3(x0, y0, half_len)
+		var v0_i = Vector3(x0_i, y0_i, -half_len); var v1_i = Vector3(x1_i, y1_i, -half_len)
+		var v2_i = Vector3(x1_i, y1_i, half_len); var v3_i = Vector3(x0_i, y0_i, half_len)
 		
-		var v_a0_b = v_a0 - Vector3(0, ROAD_THICKNESS, 0)
-		var v_a1_b = v_a1 - Vector3(0, ROAD_THICKNESS, 0)
-		var v_a2_b = v_a2 - Vector3(0, ROAD_THICKNESS, 0)
-		var v_a3_b = v_a3 - Vector3(0, ROAD_THICKNESS, 0)
+		var v0_o = Vector3(x0_o, y0_o, -half_len); var v1_o = Vector3(x1_o, y1_o, -half_len)
+		var v2_o = Vector3(x1_o, y1_o, half_len); var v3_o = Vector3(x0_o, y0_o, half_len)
 		
 		var n0 = Vector3(side_sign * s0, -c0, 0).normalized()
 		var n1 = Vector3(side_sign * s1, -c1, 0).normalized()
@@ -199,29 +180,19 @@ func _create_side_pipe_mesh(radius: float, angle_deg: float, length: float, is_r
 		
 		st.set_color(color)
 		if is_right:
-			_add_quad(st, v_a0, v_a1, v_a2, v_a3, -n_avg)
-			_add_quad(st, v_a3_b, v_a2_b, v_a1_b, v_a0_b, n_avg)
+			_add_quad(st, v0_i, v1_i, v2_i, v3_i, -n_avg)
+			_add_quad(st, v3_o, v2_o, v1_o, v0_o, n_avg)
 		else:
-			_add_quad(st, v_a1, v_a0, v_a3, v_a2, -n_avg)
-			_add_quad(st, v_a0_b, v_a1_b, v_a2_b, v_a3_b, n_avg)
+			_add_quad(st, v1_i, v0_i, v3_i, v2_i, -n_avg)
+			_add_quad(st, v0_o, v1_o, v2_o, v3_o, n_avg)
 			
-		# Add end wall at the top of the arc
 		if i == segments - 1:
-			var n_end = Vector3(side_sign * sin(angle_rad), -cos(angle_rad), 0).normalized()
-			var v_top0 = v_a1
-			var v_top1 = v_a2
-			var v_top0_w = v_top0 - n_end * WALL_HEIGHT
-			var v_top1_w = v_top1 - n_end * WALL_HEIGHT
-			var v_tope0 = v_top0 + Vector3(side_sign * WALL_THICKNESS, 0, 0)
-			var v_tope1 = v_top1 + Vector3(side_sign * WALL_THICKNESS, 0, 0)
-			var v_tope0_w = v_tope0 - n_end * WALL_HEIGHT
-			var v_tope1_w = v_tope1 - n_end * WALL_HEIGHT
-			
 			st.set_color(wall_color)
+			var n_rim = Vector3(side_sign * sin(angle_rad), -cos(angle_rad), 0).normalized()
 			if is_right:
-				_add_quad(st, v_top0, v_top1, v_top1_w, v_top0_w, Vector3(-sin(angle_rad), cos(angle_rad), 0))
+				_add_quad(st, v1_i, v1_o, v2_o, v2_i, -n_rim)
 			else:
-				_add_quad(st, v_top1, v_top0, v_top0_w, v_top1_w, Vector3(sin(angle_rad), cos(angle_rad), 0))
+				_add_quad(st, v1_o, v1_i, v2_i, v2_o, -n_rim)
 
 	var mesh_node = MeshInstance3D.new()
 	mesh_node.mesh = st.commit()
@@ -241,7 +212,7 @@ func _create_gate(color: Color) -> Node3D:
 	gate.add_child(top)
 	return gate
 
-func _save_block(name: String, type_idx: int, color: Color, color2: Color, size: Vector3 = Vector3(ROAD_WIDTH, ROAD_THICKNESS, ROAD_LENGTH), extra_node: Node = null, rotation: Vector3 = Vector3.ZERO, custom_mesh: MeshInstance3D = null):
+func _save_block(name: String, type_idx: int, color: Color, color2: Color, size: Vector3 = Vector3(ROAD_WIDTH, ROAD_THICKNESS, ROAD_LENGTH), extra_node: Node = null, rotation: Vector3 = Vector3.ZERO, custom_mesh: MeshInstance3D = null, has_walls: bool = true):
 	var root = StaticBody3D.new()
 	root.name = name
 	root.set_script(load("res://scripts/track_block.gd"))
@@ -262,7 +233,7 @@ func _save_block(name: String, type_idx: int, color: Color, color2: Color, size:
 	else:
 		mesh.position.y = 0.5
 		
-	if !custom_mesh:
+	if !custom_mesh and has_walls:
 		var wall_h = WALL_HEIGHT
 		var wall_t = WALL_THICKNESS
 		var wall_color = color2
@@ -320,6 +291,7 @@ func _init():
 	
 	_save_block("RoadStraight", 0, road_color, side_color)
 	_save_block("RoadStraightLong", 7, road_color, side_color, Vector3(ROAD_WIDTH, ROAD_THICKNESS, ROAD_LENGTH * 4.0))
+	_save_block("RoadStraightLongNoWalls", 11, road_color, side_color, Vector3(ROAD_WIDTH, ROAD_THICKNESS, ROAD_LENGTH * 4.0), null, Vector3.ZERO, null, false)
 	_save_block("RoadStart", 1, road_color, side_color, Vector3(ROAD_WIDTH, ROAD_THICKNESS, ROAD_LENGTH), _create_gate(start_color))
 	_save_block("RoadFinish", 2, road_color, side_color, Vector3(ROAD_WIDTH, ROAD_THICKNESS, ROAD_LENGTH), _create_gate(finish_color))
 	_save_block("RoadBooster", 3, booster_color, side_color)
@@ -342,5 +314,5 @@ func _init():
 	var pipe_l_mesh = _create_side_pipe_mesh(6.0, 90.0, 8.0, false, road_color, side_color)
 	_save_block("RoadSidePipeLeft", 9, road_color, side_color, Vector3(ROAD_WIDTH, ROAD_THICKNESS, 8.0), null, Vector3.ZERO, pipe_l_mesh)
 
-	print("Successfully updated block scenes with side pipes")
+	print("Successfully updated block scenes with wall-less straight")
 	call_deferred("quit")
