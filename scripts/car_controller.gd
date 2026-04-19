@@ -150,6 +150,9 @@ func _physics_process(delta):
 
 	# Update Audio
 	var speed = linear_velocity.length()
+	if gm:
+		gm.speed_updated.emit(speed * 3.6) # Convert m/s to km/h
+	
 	if engine_player and sfx_enabled:
 		engine_player.pitch_scale = 0.5 + (speed / 50.0)
 		engine_player.volume_db = -10 + clamp(speed / 10.0, 0, 10)

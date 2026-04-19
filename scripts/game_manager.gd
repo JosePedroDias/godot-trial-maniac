@@ -10,6 +10,7 @@ var sfx_enabled = true
 
 signal state_changed(new_state)
 signal time_updated(new_time)
+signal speed_updated(new_speed)
 signal sfx_toggled(is_enabled)
 
 func toggle_sfx():

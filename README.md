@@ -61,6 +61,7 @@ A smooth follow camera that tracks the car's position and orientation, looking s
 
 ### 6. HUD & UI (`scripts/hud.gd`)
 - **Timer:** Real-time display of the current race duration using the "Press Start 2P" retro font.
+- **Speedometer:** Displays the car's current speed in KM/H (converted from m/s). Top speed is estimated at 360 KM/H.
 - **Finish Screen:** Displays completion time and personal best with high-visibility styling.
 - **Controls:** Handles global inputs for SFX toggling, race restarts, and quitting.
 
