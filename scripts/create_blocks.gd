@@ -198,6 +198,61 @@ func _create_side_pipe_mesh(radius: float, angle_deg: float, length: float, is_r
 	mesh_node.mesh = st.commit()
 	return mesh_node
 
+func _create_loop_mesh(radius: float, angle_deg: float, road_width: float, color: Color) -> MeshInstance3D:
+	var st = SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	
+	var mat = StandardMaterial3D.new()
+	mat.albedo_color = color
+	st.set_material(mat)
+	
+	var segments = 64
+	var angle_rad = deg_to_rad(angle_deg)
+	var half_w = road_width / 2.0
+	
+	for i in range(segments):
+		var a0 = (float(i) / segments) * angle_rad
+		var a1 = (float(i + 1) / segments) * angle_rad
+		
+		# In a loop, we are essentially building a cylinder surface
+		# We'll orient it so it's a vertical loop (around X axis)
+		# z = r * sin(a), y = r - r * cos(a)
+		
+		var s0 = sin(a0); var c0 = cos(a0)
+		var s1 = sin(a1); var c1 = cos(a1)
+		
+		var r_in = radius
+		var r_out = radius + ROAD_THICKNESS
+		
+		# Inner surface (where car drives)
+		var v0 = Vector3(-half_w, r_in - r_in * c0, r_in * s0)
+		var v1 = Vector3(half_w, r_in - r_in * c0, r_in * s0)
+		var v2 = Vector3(half_w, r_in - r_in * c1, r_in * s1)
+		var v3 = Vector3(-half_w, r_in - r_in * c1, r_in * s1)
+		
+		# Outer surface
+		var v0b = Vector3(-half_w, r_out - r_out * c0, r_out * s0)
+		var v1b = Vector3(half_w, r_out - r_out * c0, r_out * s0)
+		var v2b = Vector3(half_w, r_out - r_out * c1, r_out * s1)
+		var v3b = Vector3(-half_w, r_out - r_out * c1, r_out * s1)
+		
+		var n_avg = Vector3(0, -cos((a0+a1)/2.0), sin((a0+a1)/2.0)).normalized()
+		
+		# Drive surface (inward facing normal)
+		_add_quad(st, v0, v1, v2, v3, -n_avg)
+		# Back surface (outward facing normal)
+		_add_quad(st, v3b, v2b, v1b, v0b, n_avg)
+		
+		# Sides
+		var n_side_l = Vector3.LEFT
+		var n_side_r = Vector3.RIGHT
+		_add_quad(st, v0b, v0, v3, v3b, n_side_l)
+		_add_quad(st, v1, v1b, v2b, v2, n_side_r)
+
+	var mesh_node = MeshInstance3D.new()
+	mesh_node.mesh = st.commit()
+	return mesh_node
+
 func _create_gate(color: Color) -> Node3D:
 	var gate = Node3D.new()
 	gate.name = "Gate"
@@ -314,5 +369,12 @@ func _init():
 	var pipe_l_mesh = _create_side_pipe_mesh(6.0, 90.0, 8.0, false, road_color, side_color)
 	_save_block("RoadSidePipeLeft", 9, road_color, side_color, Vector3(ROAD_WIDTH, ROAD_THICKNESS, 8.0), null, Vector3.ZERO, pipe_l_mesh)
 
-	print("Successfully updated block scenes with wall-less straight")
+	# Loops
+	var loop360_mesh = _create_loop_mesh(16.0, 360.0, 16.0, road_color)
+	_save_block("RoadLoop360", 12, road_color, side_color, Vector3(16.0, ROAD_THICKNESS, 16.0 * 2.0), null, Vector3.ZERO, loop360_mesh)
+	
+	var loop90_mesh = _create_loop_mesh(16.0, 90.0, 16.0, road_color)
+	_save_block("RoadLoop90", 13, road_color, side_color, Vector3(16.0, ROAD_THICKNESS, 16.0), null, Vector3.ZERO, loop90_mesh)
+
+	print("Successfully updated block scenes with loops")
 	call_deferred("quit")
