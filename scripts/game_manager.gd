@@ -111,12 +111,8 @@ func _process(_delta):
 	_handle_global_input()
 
 func _handle_global_input():
-	if Input.is_key_pressed(KEY_T):
-		if not _key_states.get(KEY_T, false):
-			reset_race()
-		_key_states[KEY_T] = true
-	else:
-		_key_states[KEY_T] = false
+	if Input.is_action_just_pressed("restart"):
+		reset_race()
 
 	if Input.is_key_pressed(KEY_1):
 		if not _key_states.get(KEY_1, false):
@@ -125,12 +121,8 @@ func _handle_global_input():
 	else:
 		_key_states[KEY_1] = false
 
-	if Input.is_key_pressed(KEY_2):
-		if not _key_states.get(KEY_2, false):
-			next_track()
-		_key_states[KEY_2] = true
-	else:
-		_key_states[KEY_2] = false
+	if Input.is_action_just_pressed("next_track"):
+		next_track()
 
 	if Input.is_key_pressed(KEY_0):
 		if not _key_states.get(KEY_0, false):
@@ -139,7 +131,7 @@ func _handle_global_input():
 	else:
 		_key_states[KEY_0] = false
 
-	if Input.is_key_pressed(KEY_ESCAPE):
+	if Input.is_action_just_pressed("ui_cancel"):
 		get_tree().quit()
 
 var _key_states = {}

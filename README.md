@@ -56,10 +56,10 @@ A smooth follow camera with 2-frame easing and high-speed stabilization to filte
 - `assets/open_seater_mesh.tscn`: Procedural player vehicle mesh.
 
 ## Controls
-- **Accelerate/Brake:** Up/Down / W/S
-- **Steer:** Left/Right / A/D
-- **Restart Race:** T
-- **Next Track:** 2
+- **Accelerate/Brake:** Up/Down / W/S / Joypad R2/L2 or Axis
+- **Steer:** Left/Right / A/D / Joypad Left Stick
+- **Restart Race:** T / Joypad Button 3 (Y/Triangle)
+- **Next Track:** 2 / Joypad Button 9 (Select/Share)
 - **Toggle SFX:** 1
 - **Toggle Fullscreen:** 0
-- **Quit Game:** Escape
+- **Quit Game:** Escape / Joypad Start/Options (via ui_cancel)
