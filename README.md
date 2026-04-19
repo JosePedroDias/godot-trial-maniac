@@ -3,10 +3,11 @@
 A high-paced, Trackmania-inspired time trial racing game built with Godot 4 and Jolt Physics.
 
 ## Core Game Logic
-
 ### 1. Car Physics (`scripts/car_controller.gd`)
-The car uses a custom Raycast-based suspension system rather than the built-in VehicleBody3D for more arcade-like control.
+The car is modeled as an open-seater racing vehicle (Formula style) using a custom Raycast-based suspension system.
+- **Visuals:** Features a procedurally generated mesh (`assets/open_seater_mesh.tscn`) with a tapered nose, front and rear wings, and sidepods for a high-performance aesthetic.
 - **Suspension:** Four raycasts calculate spring and damping forces. The car is tuned with a low `suspension_rest_dist` (0.3m) for better stability and to sit within the safety walls.
+...
 - **Engine & Steering:** Forces are applied locally to the RigidBody based on wheel orientation.
 - **Grip:** Lateral forces are applied to simulate tire friction and prevent excessive sliding.
 - **Air Control:** Torque is applied while in the air to allow players to adjust their pitch and yaw.

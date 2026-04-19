@@ -1,13 +1,7 @@
-[gd_scene format=3]
+[gd_scene load_steps=6 format=3]
 
 [ext_resource type="Script" path="res://scripts/car_controller.gd" id="1_c35m8"]
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_qt2eu"]
-albedo_color = Color(0.8, 0.1, 0.1, 1)
-
-[sub_resource type="BoxMesh" id="BoxMesh_50v30"]
-material = SubResource("StandardMaterial3D_qt2eu")
-size = Vector3(1.2, 0.4, 2.5)
+[ext_resource type="PackedScene" path="res://assets/open_seater_mesh.tscn" id="2_newbody"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_jtldb"]
 size = Vector3(1.2, 0.4, 2.5)
@@ -21,38 +15,37 @@ top_radius = 0.3
 bottom_radius = 0.3
 height = 0.2
 
-[node name="Car" type="RigidBody3D" unique_id=1749673328]
+[node name="Car" type="RigidBody3D"]
 mass = 1500.0
 center_of_mass_mode = 1
 center_of_mass = Vector3(0, -0.2, 0)
 script = ExtResource("1_c35m8")
 
-[node name="BodyMesh" type="MeshInstance3D" parent="." unique_id=1452267235]
-mesh = SubResource("BoxMesh_50v30")
+[node name="OpenSeaterMesh" parent="." instance=ExtResource("2_newbody")]
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=1912928514]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 shape = SubResource("BoxShape3D_jtldb")
 
-[node name="RayCastFL" type="RayCast3D" parent="." unique_id=1900206084]
+[node name="RayCastFL" type="RayCast3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.7, 0, 1)
 
-[node name="WheelFL" type="MeshInstance3D" parent="." unique_id=1729361090]
+[node name="WheelFL" type="MeshInstance3D" parent="."]
 mesh = SubResource("CylinderMesh_cp117")
 
-[node name="RayCastFR" type="RayCast3D" parent="." unique_id=1620259222]
+[node name="RayCastFR" type="RayCast3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.7, 0, 1)
 
-[node name="WheelFR" type="MeshInstance3D" parent="." unique_id=638210747]
+[node name="WheelFR" type="MeshInstance3D" parent="."]
 mesh = SubResource("CylinderMesh_cp117")
 
-[node name="RayCastRL" type="RayCast3D" parent="." unique_id=1435745871]
+[node name="RayCastRL" type="RayCast3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.7, 0, -1)
 
-[node name="WheelRL" type="MeshInstance3D" parent="." unique_id=1967292063]
+[node name="WheelRL" type="MeshInstance3D" parent="."]
 mesh = SubResource("CylinderMesh_cp117")
 
-[node name="RayCastRR" type="RayCast3D" parent="." unique_id=1540119799]
+[node name="RayCastRR" type="RayCast3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.7, 0, -1)
 
-[node name="WheelRR" type="MeshInstance3D" parent="." unique_id=1741819341]
+[node name="WheelRR" type="MeshInstance3D" parent="."]
 mesh = SubResource("CylinderMesh_cp117")
