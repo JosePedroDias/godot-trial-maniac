@@ -1,0 +1,54 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/car_controller.gd" id="1_c35m8"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_qt2eu"]
+size = Vector3(1.2, 0.4, 2.5)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_50v30"]
+size = Vector3(1.2, 0.4, 2.5)
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_jtldb"]
+top_radius = 0.3
+bottom_radius = 0.3
+height = 0.2
+
+[node name="Car" type="RigidBody3D" unique_id=1225598131]
+mass = 1500.0
+center_of_mass_mode = 1
+center_of_mass = Vector3(0, -0.2, 0)
+script = ExtResource("1_c35m8")
+
+[node name="BodyMesh" type="MeshInstance3D" parent="." unique_id=368280486]
+mesh = SubResource("BoxMesh_qt2eu")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=660841527]
+shape = SubResource("BoxShape3D_50v30")
+
+[node name="RayCastFL" type="RayCast3D" parent="." unique_id=1669875647]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.7, 0, 1)
+
+[node name="WheelFL" type="MeshInstance3D" parent="." unique_id=1542745825]
+transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, 0, 0, 0)
+mesh = SubResource("CylinderMesh_jtldb")
+
+[node name="RayCastFR" type="RayCast3D" parent="." unique_id=580193953]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.7, 0, 1)
+
+[node name="WheelFR" type="MeshInstance3D" parent="." unique_id=1058675704]
+transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, 0, 0, 0)
+mesh = SubResource("CylinderMesh_jtldb")
+
+[node name="RayCastRL" type="RayCast3D" parent="." unique_id=538932516]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.7, 0, -1)
+
+[node name="WheelRL" type="MeshInstance3D" parent="." unique_id=1974328300]
+transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, 0, 0, 0)
+mesh = SubResource("CylinderMesh_jtldb")
+
+[node name="RayCastRR" type="RayCast3D" parent="." unique_id=1480443470]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.7, 0, -1)
+
+[node name="WheelRR" type="MeshInstance3D" parent="." unique_id=185591223]
+transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, 0, 0, 0)
+mesh = SubResource("CylinderMesh_jtldb")

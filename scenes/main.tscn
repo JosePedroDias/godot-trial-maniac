@@ -1,0 +1,64 @@
+[gd_scene format=3]
+
+[ext_resource type="MeshLibrary" path="res://assets/tracks/track_library.tres" id="1_85g3d"]
+[ext_resource type="PackedScene" path="res://scenes/start_line.tscn" id="2_choun"]
+[ext_resource type="Script" path="res://scripts/race_trigger.gd" id="3_ya4ey"]
+[ext_resource type="PackedScene" path="res://scenes/finish_line.tscn" id="4_eb6dy"]
+[ext_resource type="PackedScene" path="res://scenes/car.tscn" id="5_trceg"]
+[ext_resource type="Script" path="res://scripts/car_controller.gd" id="6_a8y0u"]
+[ext_resource type="Script" path="res://scripts/follow_camera.gd" id="7_jkv2x"]
+[ext_resource type="PackedScene" path="res://scenes/hud.tscn" id="8_jbj1t"]
+[ext_resource type="Script" path="res://scripts/hud.gd" id="9_muem4"]
+
+[sub_resource type="PhysicalSkyMaterial" id="PhysicalSkyMaterial_dp3eg"]
+
+[sub_resource type="Sky" id="Sky_0ld40"]
+sky_material = SubResource("PhysicalSkyMaterial_dp3eg")
+
+[sub_resource type="Environment" id="Environment_gqmmt"]
+background_mode = 2
+sky = SubResource("Sky_0ld40")
+ambient_light_source = 3
+
+[node name="Main" type="Node3D" unique_id=313754609]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=1671118517]
+environment = SubResource("Environment_gqmmt")
+
+[node name="Sun" type="DirectionalLight3D" parent="." unique_id=1386195891]
+transform = Transform3D(0.70710677, -0.49999997, 0.49999997, 0, 0.70710677, 0.70710677, -0.70710677, -0.49999997, 0.49999997, 0, 0, 0)
+shadow_enabled = true
+
+[node name="TrackGridMap" type="GridMap" parent="." unique_id=1604139511]
+mesh_library = ExtResource("1_85g3d")
+cell_size = Vector3(2, 0.2, 2)
+data = {
+"cells": PackedInt32Array(65526, 65526, 0, 65526, 10, 0, 65527, 65526, 0, 65527, 10, 0, 65528, 65526, 0, 65528, 10, 0, 65529, 65526, 0, 65529, 10, 0, 65530, 65526, 0, 65530, 10, 0, 65531, 65526, 0, 65531, 10, 0, 65532, 65526, 0, 65532, 10, 0, 65533, 65526, 0, 65533, 10, 0, 65534, 65526, 0, 65534, 10, 0, 65535, 65526, 0, 65535, 10, 0, 0, 65526, 0, 0, 10, 0, 1, 65526, 0, 1, 10, 0, 2, 65526, 0, 2, 10, 0, 3, 65526, 0, 3, 10, 0, 4, 65526, 0, 4, 10, 0, 5, 65526, 0, 5, 10, 0, 6, 65526, 0, 6, 10, 0, 7, 65526, 0, 7, 10, 0, 8, 65526, 0, 8, 10, 0, 9, 65526, 0, 9, 10, 0, 10, 65526, 0, 10, 10, 0, 65526, 65527, 0, 10, 65527, 0, 65526, 65528, 0, 10, 65528, 0, 65526, 65529, 0, 10, 65529, 0, 65526, 65530, 0, 10, 65530, 0, 65526, 65531, 0, 10, 65531, 0, 65526, 65532, 0, 10, 65532, 0, 65526, 65533, 0, 10, 65533, 0, 65526, 65534, 0, 10, 65534, 0, 65526, 65535, 0, 10, 65535, 0, 65526, 0, 0, 10, 0, 0, 65526, 1, 0, 10, 1, 0, 65526, 2, 0, 10, 2, 0, 65526, 3, 0, 10, 3, 0, 65526, 4, 0, 10, 4, 0, 65526, 5, 0, 10, 5, 0, 65526, 6, 0, 10, 6, 0, 65526, 7, 0, 10, 7, 0, 65526, 8, 0, 10, 8, 0, 65526, 9, 0, 10, 9, 0)
+}
+
+[node name="StartLine" type="Area3D" parent="." unique_id=1161240606 instance=ExtResource("2_choun")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, -10)
+script = ExtResource("3_ya4ey")
+
+[node name="FinishLine" type="Area3D" parent="." unique_id=745257213 instance=ExtResource("4_eb6dy")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 0.5, -10)
+script = ExtResource("3_ya4ey")
+is_start_line = false
+
+[node name="Car" type="RigidBody3D" parent="." unique_id=1225598131 instance=ExtResource("5_trceg")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -5, 1, -10)
+mass = 1500.0
+center_of_mass_mode = 1
+center_of_mass = Vector3(0, -0.2, 0)
+script = ExtResource("6_a8y0u")
+
+[node name="FollowCamera" type="Camera3D" parent="." unique_id=635709322]
+script = ExtResource("7_jkv2x")
+target_path = NodePath("../Car")
+
+[node name="HUD" type="Control" parent="." unique_id=998022422 instance=ExtResource("8_jbj1t")]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource("9_muem4")
