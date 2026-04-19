@@ -10,6 +10,9 @@ var best_time = 0.0
 signal state_changed(new_state)
 signal time_updated(new_time)
 
+func _ready():
+	start_race()
+
 func start_race():
 	current_state = RaceState.RACING
 	start_time = Time.get_ticks_msec() / 1000.0

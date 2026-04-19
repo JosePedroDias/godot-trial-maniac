@@ -10,17 +10,17 @@ emission_energy_multiplier = 2.0
 
 [sub_resource type="BoxMesh" id="BoxMesh_qnhqd"]
 material = SubResource("StandardMaterial3D_7x5nt")
-size = Vector3(2, 0.2, 2)
+size = Vector3(4, 0.2, 2)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_nsptm"]
-size = Vector3(2, 0.2, 2)
+size = Vector3(4, 0.2, 2)
 
-[node name="RoadBooster" type="StaticBody3D" unique_id=758539836]
+[node name="RoadBooster" type="StaticBody3D" unique_id=9800978]
 script = ExtResource("1_gw3qg")
 type = 3
 
-[node name="@MeshInstance3D@14" type="MeshInstance3D" parent="." unique_id=851759037]
+[node name="@MeshInstance3D@14" type="MeshInstance3D" parent="." unique_id=1850610836]
 mesh = SubResource("BoxMesh_qnhqd")
 
-[node name="@CollisionShape3D@15" type="CollisionShape3D" parent="." unique_id=775011609]
+[node name="@CollisionShape3D@15" type="CollisionShape3D" parent="." unique_id=501104675]
 shape = SubResource("BoxShape3D_nsptm")

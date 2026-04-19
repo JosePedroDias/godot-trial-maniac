@@ -17,18 +17,17 @@ func _create_mesh(size: Vector3, color: Color, emission: float = 0.0) -> MeshIns
 func _create_gate(color: Color) -> Node3D:
 	var gate = Node3D.new()
 	gate.name = "Gate"
-	var mat = StandardMaterial3D.new()
-	mat.albedo_color = color
 	
+	# New width is 4.0. Side pillars at edges.
 	var left = _create_mesh(Vector3(0.1, 2, 0.1), color)
-	left.position = Vector3(-0.95, 1, 0)
+	left.position = Vector3(-1.95, 1, 0) # Half width - 0.05
 	gate.add_child(left)
 	
 	var right = _create_mesh(Vector3(0.1, 2, 0.1), color)
-	right.position = Vector3(0.95, 1, 0)
+	right.position = Vector3(1.95, 1, 0)
 	gate.add_child(right)
 	
-	var top = _create_mesh(Vector3(2, 0.1, 0.1), color)
+	var top = _create_mesh(Vector3(4, 0.1, 0.1), color)
 	top.position = Vector3(0, 2, 0)
 	gate.add_child(top)
 	
@@ -40,13 +39,14 @@ func _save_block(name: String, type_idx: int, color: Color, extra_node: Node = n
 	root.set_script(load("res://scripts/track_block.gd"))
 	root.type = type_idx
 	
-	var mesh = _create_mesh(Vector3(2, 0.2, 2), color, (2.0 if type_idx == 3 else 0.0))
+	# Width is now 4.0, Length is 2.0
+	var mesh = _create_mesh(Vector3(4, 0.2, 2), color, (2.0 if type_idx == 3 else 0.0))
 	root.add_child(mesh)
 	mesh.owner = root
 	
 	var col = CollisionShape3D.new()
 	var shape = BoxShape3D.new()
-	shape.size = Vector3(2, 0.2, 2)
+	shape.size = Vector3(4, 0.2, 2)
 	col.shape = shape
 	root.add_child(col)
 	col.owner = root
@@ -54,7 +54,6 @@ func _save_block(name: String, type_idx: int, color: Color, extra_node: Node = n
 	if extra_node:
 		root.add_child(extra_node)
 		extra_node.owner = root
-		# Ensure children of extra_node are also owned for packing
 		for child in extra_node.get_children():
 			child.owner = root
 	
@@ -70,10 +69,8 @@ func _init():
 	_save_block("RoadStart", 1, Color(0.2, 0.2, 0.2), _create_gate(Color(0.1, 0.8, 0.1)))
 	_save_block("RoadFinish", 2, Color(0.2, 0.2, 0.2), _create_gate(Color(0.8, 0.1, 0.1)))
 	_save_block("RoadBooster", 3, Color(1, 0.8, 0.1))
-	
-	# Ramp and Curve need special transforms or meshes, but for the palette let's keep them simple
 	_save_block("RoadRamp", 4, Color(0.3, 0.3, 0.3))
 	_save_block("RoadCurve", 5, Color(0.2, 0.2, 0.2))
 	
-	print("Successfully created block scenes in res://scenes/blocks/")
+	print("Successfully updated block scenes to 4.0 width")
 	quit()
