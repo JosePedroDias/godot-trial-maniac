@@ -103,7 +103,7 @@ func _physics_process(delta):
 	if !on_ground:
 		var air_torque = Vector3.ZERO
 		air_torque.x = Input.get_axis("ui_up", "ui_down") * 15.0
-		air_torque.y = Input.get_axis("ui_left", "ui_right") * 15.0
+		# Yaw torque (turning in air) removed as requested
 		apply_torque(global_basis * air_torque * mass)
 
 func _check_track_block(block):
