@@ -222,4 +222,4 @@ func _init():
 	_save_block("RoadCurveExtraWide", 8, road_color, side_color, Vector3(ROAD_WIDTH * 3.0 + 2.0, ROAD_THICKNESS, ROAD_WIDTH * 3.0 + 2.0), null, Vector3.ZERO, extra_wide_mesh)
 	
 	print("Successfully updated block scenes with tweaked constants")
-	quit()
+	call_deferred("quit")

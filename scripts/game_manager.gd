@@ -6,9 +6,16 @@ var current_state = RaceState.PRE_START
 var start_time = 0.0
 var race_time = 0.0
 var best_time = 0.0
+var sfx_enabled = true
 
 signal state_changed(new_state)
 signal time_updated(new_time)
+signal sfx_toggled(is_enabled)
+
+func toggle_sfx():
+	sfx_enabled = !sfx_enabled
+	sfx_toggled.emit(sfx_enabled)
+	return sfx_enabled
 
 func _ready():
 	# Race no longer starts automatically on ready

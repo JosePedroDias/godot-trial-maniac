@@ -70,5 +70,6 @@ A smooth follow camera that tracks the car's position and orientation, looking s
 ## Controls
 - **Accelerate/Brake:** Up/Down / W/S
 - **Steer:** Left/Right / A/D
-- **Pitch/Yaw (Air):** Arrow Keys / WASD
-- **Reset:** Escape
+- **Restart Race:** T
+- **Toggle SFX:** 1
+- **Quit Game:** Escape

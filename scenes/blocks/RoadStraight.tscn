@@ -32,29 +32,29 @@ size = Vector3(0.1, 0.25, 4)
 [sub_resource type="BoxShape3D" id="BoxShape3D_djyc3"]
 size = Vector3(8, 0.2, 4)
 
-[node name="RoadStraight" type="StaticBody3D" unique_id=277663907]
+[node name="RoadStraight" type="StaticBody3D" unique_id=1821891669]
 script = ExtResource("1_f8f86")
 
-[node name="@MeshInstance3D@2" type="MeshInstance3D" parent="." unique_id=2137176479]
+[node name="@MeshInstance3D@2" type="MeshInstance3D" parent="." unique_id=1613964877]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
 mesh = SubResource("BoxMesh_3pn70")
 
-[node name="@MeshInstance3D@3" type="MeshInstance3D" parent="." unique_id=884888509]
+[node name="@MeshInstance3D@3" type="MeshInstance3D" parent="." unique_id=870736528]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.05, 0.725, 0)
 mesh = SubResource("BoxMesh_d2ndy")
 
-[node name="@CollisionShape3D@4" type="CollisionShape3D" parent="." unique_id=1576056493]
+[node name="@CollisionShape3D@4" type="CollisionShape3D" parent="." unique_id=1118044315]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.05, 0.725, 0)
 shape = SubResource("BoxShape3D_ihvk3")
 
-[node name="@MeshInstance3D@5" type="MeshInstance3D" parent="." unique_id=245340873]
+[node name="@MeshInstance3D@5" type="MeshInstance3D" parent="." unique_id=1038425563]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.05, 0.725, 0)
 mesh = SubResource("BoxMesh_oto2m")
 
-[node name="@CollisionShape3D@6" type="CollisionShape3D" parent="." unique_id=746370666]
+[node name="@CollisionShape3D@6" type="CollisionShape3D" parent="." unique_id=1023593654]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.05, 0.725, 0)
 shape = SubResource("BoxShape3D_fu1db")
 
-[node name="@CollisionShape3D@7" type="CollisionShape3D" parent="." unique_id=1548452910]
+[node name="@CollisionShape3D@7" type="CollisionShape3D" parent="." unique_id=927443570]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
 shape = SubResource("BoxShape3D_djyc3")

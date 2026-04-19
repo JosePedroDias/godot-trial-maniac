@@ -68,4 +68,4 @@ func _init():
 	print("Created open seater mesh at res://assets/open_seater_mesh.tscn")
 	
 	car_node.free()
-	quit()
+	call_deferred("quit")
