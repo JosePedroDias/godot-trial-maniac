@@ -32,6 +32,13 @@ func _ready():
 		ray.add_exception(self)
 
 func _physics_process(delta):
+	# Out of bounds check
+	if global_position.y < -20.0:
+		var gm = get_node_or_null("/root/GameManager")
+		if gm:
+			gm.reset_race()
+		return
+
 	engine_input = Input.get_axis("ui_down", "ui_up")
 	steering_input = lerp(steering_input, Input.get_axis("ui_right", "ui_left"), steering_speed * delta)
 	
@@ -66,7 +73,7 @@ func _physics_process(delta):
 				if i < 2: # Front wheels
 					wheel_basis = wheel_basis.rotated(global_basis.y, steering_input * deg_to_rad(steering_angle))
 				
-				var forward_dir = -wheel_basis.z # Car +Z is back
+				var forward_dir = wheel_basis.z # FL/FR were placed at +Z, so +Z is forward
 				var right_dir = wheel_basis.x
 				
 				# Acceleration
