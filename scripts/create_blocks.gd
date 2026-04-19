@@ -14,6 +14,17 @@ func _create_mesh(size: Vector3, color: Color, emission: float = 0.0) -> MeshIns
 	mesh_node.mesh = box
 	return mesh_node
 
+func _add_quad(st: SurfaceTool, v0: Vector3, v1: Vector3, v2: Vector3, v3: Vector3, normal: Vector3):
+	st.set_normal(normal)
+	st.add_vertex(v0)
+	st.add_vertex(v1)
+	st.add_vertex(v2)
+	
+	st.set_normal(normal)
+	st.add_vertex(v0)
+	st.add_vertex(v2)
+	st.add_vertex(v3)
+
 func _create_curved_road_mesh(inner_radius: float, outer_radius: float, color: Color) -> MeshInstance3D:
 	var st = SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
@@ -23,74 +34,41 @@ func _create_curved_road_mesh(inner_radius: float, outer_radius: float, color: C
 	st.set_material(mat)
 	
 	var segments = 16
-	var height = 0.2
+	var h = 0.1 # Half height
 	
-	for i in range(segments + 1):
-		var angle = (float(i) / segments) * (PI / 2.0)
-		var c = cos(angle)
-		var s = sin(angle)
-		
-		var v_inner = Vector3(c * inner_radius, 0, s * inner_radius)
-		var v_outer = Vector3(c * outer_radius, 0, s * outer_radius)
-		
-		# UVs
-		var u = float(i) / segments
-		
-		st.set_uv(Vector2(u, 0))
-		st.add_vertex(v_inner)
-		st.set_uv(Vector2(u, 1))
-		st.add_vertex(v_outer)
-		
-		# Bottom face
-		st.set_uv(Vector2(u, 0))
-		st.add_vertex(v_inner - Vector3(0, height, 0))
-		st.set_uv(Vector2(u, 1))
-		st.add_vertex(v_outer - Vector3(0, height, 0))
-
-	# Indices for Top face
 	for i in range(segments):
-		var i0 = i * 4
-		var i1 = i0 + 1
-		var i2 = (i + 1) * 4
-		var i3 = i2 + 1
+		var a0 = (float(i) / segments) * (PI / 2.0)
+		var a1 = (float(i + 1) / segments) * (PI / 2.0)
 		
-		# Top
-		st.add_index(i0)
-		st.add_index(i2)
-		st.add_index(i1)
+		var c0 = cos(a0); var s0 = sin(a0)
+		var c1 = cos(a1); var s1 = sin(a1)
 		
-		st.add_index(i1)
-		st.add_index(i2)
-		st.add_index(i3)
+		# Top verts
+		var v_in0 = Vector3(c0 * inner_radius, 0, s0 * inner_radius)
+		var v_out0 = Vector3(c0 * outer_radius, 0, s0 * outer_radius)
+		var v_in1 = Vector3(c1 * inner_radius, 0, s1 * inner_radius)
+		var v_out1 = Vector3(c1 * outer_radius, 0, s1 * outer_radius)
 		
-		# Bottom
-		st.add_index(i0 + 2)
-		st.add_index(i1 + 2)
-		st.add_index(i2 + 2)
-		
-		st.add_index(i1 + 2)
-		st.add_index(i3 + 2)
-		st.add_index(i2 + 2)
-		
-		# Inner side
-		st.add_index(i0)
-		st.add_index(i0 + 2)
-		st.add_index(i2)
-		
-		st.add_index(i2)
-		st.add_index(i0 + 2)
-		st.add_index(i2 + 2)
-		
-		# Outer side
-		st.add_index(i1)
-		st.add_index(i3)
-		st.add_index(i1 + 2)
-		
-		st.add_index(i3)
-		st.add_index(i3 + 2)
-		st.add_index(i1 + 2)
+		# Bottom verts
+		var v_in0_b = v_in0 - Vector3(0, 2*h, 0)
+		var v_out0_b = v_out0 - Vector3(0, 2*h, 0)
+		var v_in1_b = v_in1 - Vector3(0, 2*h, 0)
+		var v_out1_b = v_out1 - Vector3(0, 2*h, 0)
 
-	st.generate_normals()
+		# Top: CCW from +Y
+		_add_quad(st, v_in0, v_out0, v_out1, v_in1, Vector3.UP)
+		
+		# Bottom: CCW from -Y
+		_add_quad(st, v_out0_b, v_out1_b, v_in1_b, v_in0_b, Vector3.DOWN)
+		
+		# Inner Side: Facing towards origin
+		var n_in = -Vector3(cos((a0+a1)/2.0), 0, sin((a0+a1)/2.0))
+		_add_quad(st, v_in0, v_in1, v_in1_b, v_in0_b, n_in)
+		
+		# Outer Side: Facing away from origin
+		var n_out = -n_in
+		_add_quad(st, v_out0, v_out0_b, v_out1_b, v_out1, n_out)
+
 	var mesh_node = MeshInstance3D.new()
 	mesh_node.mesh = st.commit()
 	return mesh_node
@@ -123,8 +101,13 @@ func _save_block(name: String, type_idx: int, color: Color, size: Vector3 = Vect
 	mesh.owner = root
 	mesh.rotation_degrees = rotation
 	
-	if rotation.x != 0:
-		mesh.position.y = size.z * sin(deg_to_rad(abs(rotation.x))) / 2.0
+	# Global Y offset as requested
+	if custom_mesh:
+		mesh.position.y = 0.5
+	elif rotation.x != 0:
+		mesh.position.y = 0.5 + (size.z * sin(deg_to_rad(abs(rotation.x))) / 2.0)
+	else:
+		mesh.position.y = 0.5
 	
 	var col = CollisionShape3D.new()
 	if custom_mesh:
@@ -137,12 +120,13 @@ func _save_block(name: String, type_idx: int, color: Color, size: Vector3 = Vect
 	root.add_child(col)
 	col.owner = root
 	col.rotation_degrees = rotation
-	if rotation.x != 0:
-		col.position.y = mesh.position.y
+	col.position = mesh.position
 	
 	if extra_node:
 		root.add_child(extra_node)
 		extra_node.owner = root
+		# Adjust gate height to match road
+		extra_node.position.y = mesh.position.y
 		for child in extra_node.get_children():
 			child.owner = root
 	
@@ -162,12 +146,11 @@ func _init():
 	_save_block("RoadBooster", 3, Color(1, 0.8, 0.1))
 	_save_block("RoadRamp", 4, Color(0.3, 0.3, 0.3), Vector3(4, 0.2, 4), null, Vector3(-15, 0, 0))
 	
-	# Proper Curved Blocks
 	var tight_mesh = _create_curved_road_mesh(0.0, 4.0, road_color)
 	_save_block("RoadCurveTight", 5, road_color, Vector3(4, 0.2, 4), null, Vector3.ZERO, tight_mesh)
 	
 	var wide_mesh = _create_curved_road_mesh(4.0, 8.0, road_color)
 	_save_block("RoadCurveWide", 6, road_color, Vector3(8, 0.2, 8), null, Vector3.ZERO, wide_mesh)
 	
-	print("Successfully updated and created proper curved block scenes")
+	print("Successfully updated block scenes with 0.5Y offset and fixed shading")
 	quit()
