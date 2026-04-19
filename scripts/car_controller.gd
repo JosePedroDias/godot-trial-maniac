@@ -190,6 +190,7 @@ func _physics_process(delta):
 	steering_input = lerp(steering_input, Input.get_axis("ui_right", "ui_left"), steering_speed * delta)
 	
 	var on_ground = false
+	var is_on_sticky = false
 	
 	for i in range(raycasts.size()):
 		var ray = raycasts[i]
@@ -201,13 +202,16 @@ func _physics_process(delta):
 		if ray.is_colliding():
 			on_ground = true
 			var collider = ray.get_collider()
-			var hit_point = ray.get_collision_point()
-			var hit_normal = ray.get_collision_normal()
-			var dist = (ray.global_position - hit_point).length()
 			
 			# Block Detection
 			if collider.has_method("get_script") and collider.get_script() and collider.get_script().get_path() == "res://scripts/track_block.gd":
 				_check_track_block(collider)
+				if collider.is_sticky():
+					is_on_sticky = true
+			
+			var hit_point = ray.get_collision_point()
+			var hit_normal = ray.get_collision_normal()
+			var dist = (ray.global_position - hit_point).length()
 			
 			# 1. Suspension
 			var compression = (suspension_rest_dist + wheel_radius) - dist
@@ -221,9 +225,10 @@ func _physics_process(delta):
 				# 1.1 Apply Suspension Force
 				apply_force(total_force, ray.global_position - global_position)
 				
-				# 1.2 Apply Downforce (Sticky logic for loops)
-				var downforce_dir = -hit_normal
-				apply_force(downforce_dir * downforce / raycasts.size(), ray.global_position - global_position)
+				# 1.2 Apply Downforce (Sticky logic for loops/pipes)
+				if is_on_sticky:
+					var downforce_dir = -hit_normal
+					apply_force(downforce_dir * downforce / raycasts.size(), ray.global_position - global_position)
 				
 				# 2. Driving
 				var wheel_basis = ray.global_basis
