@@ -15,12 +15,12 @@ size = Vector3(4, 0.2, 2)
 [sub_resource type="BoxShape3D" id="BoxShape3D_nsptm"]
 size = Vector3(4, 0.2, 2)
 
-[node name="RoadBooster" type="StaticBody3D" unique_id=9800978]
+[node name="RoadBooster" type="StaticBody3D" unique_id=2112592116]
 script = ExtResource("1_gw3qg")
 type = 3
 
-[node name="@MeshInstance3D@14" type="MeshInstance3D" parent="." unique_id=1850610836]
+[node name="@MeshInstance3D@14" type="MeshInstance3D" parent="." unique_id=129560157]
 mesh = SubResource("BoxMesh_qnhqd")
 
-[node name="@CollisionShape3D@15" type="CollisionShape3D" parent="." unique_id=501104675]
+[node name="@CollisionShape3D@15" type="CollisionShape3D" parent="." unique_id=177633976]
 shape = SubResource("BoxShape3D_nsptm")

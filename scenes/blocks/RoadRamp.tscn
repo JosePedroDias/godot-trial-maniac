@@ -7,17 +7,19 @@ albedo_color = Color(0.3, 0.3, 0.3, 1)
 
 [sub_resource type="BoxMesh" id="BoxMesh_wnt7r"]
 material = SubResource("StandardMaterial3D_gquh6")
-size = Vector3(4, 0.2, 2)
+size = Vector3(4, 0.2, 4)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_b7ju5"]
-size = Vector3(4, 0.2, 2)
+size = Vector3(4, 0.2, 4)
 
-[node name="RoadRamp" type="StaticBody3D" unique_id=1741517584]
+[node name="RoadRamp" type="StaticBody3D" unique_id=299416360]
 script = ExtResource("1_di856")
 type = 4
 
-[node name="@MeshInstance3D@16" type="MeshInstance3D" parent="." unique_id=1514307]
+[node name="@MeshInstance3D@16" type="MeshInstance3D" parent="." unique_id=275433283]
+transform = Transform3D(1, 0, 0, 0, 0.9659258, 0.25881904, 0, -0.25881904, 0.9659258, 0, 0.5176381, 0)
 mesh = SubResource("BoxMesh_wnt7r")
 
-[node name="@CollisionShape3D@17" type="CollisionShape3D" parent="." unique_id=934858420]
+[node name="@CollisionShape3D@17" type="CollisionShape3D" parent="." unique_id=1768433585]
+transform = Transform3D(1, 0, 0, 0, 0.9659258, 0.25881904, 0, -0.25881904, 0.9659258, 0, 0.5176381, 0)
 shape = SubResource("BoxShape3D_b7ju5")
