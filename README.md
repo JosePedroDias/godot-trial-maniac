@@ -6,9 +6,10 @@ A high-paced, Trackmania-inspired time trial racing game built with Godot 4 and 
 
 ### 1. Car Physics (`scripts/car_controller.gd`)
 The car is modeled as an open-seater racing vehicle (Formula style) using a custom Raycast-based suspension system.
-- **Visuals:** Features a procedurally generated mesh (`assets/open_seater_mesh.tscn`) with a tapered nose, front and rear wings, and sidepods for a high-performance aesthetic.
-- **Suspension:** Four raycasts calculate spring and damping forces. The car is tuned with a low `suspension_rest_dist` (0.3m) for better stability and to sit within the safety walls.
-- **Engine & Steering:** Forces are applied locally to the RigidBody based on wheel orientation.
+- **Visuals:** Features a procedurally generated mesh (`assets/open_seater_mesh.tscn`) with a tapered nose, front and rear wings, and sidepods.
+- **Suspension & Downforce:** Four raycasts calculate spring and damping forces. A custom "Sticky Downforce" system applies 10,000 units of force towards the track surface, providing enough traction for loops and wall rides while maintaining agility.
+- **Performance:** Tuned with a 1,000kg mass and 30,000 engine power. Top speed is approximately 360 KM/H (100 m/s).
+- **Engine & Steering:** Forces are applied locally to the RigidBody based on wheel orientation. Boosters apply a 40,000 unit forward impulse.
 - **Grip:** Lateral forces are applied to simulate tire friction and prevent excessive sliding.
 - **Air Control:** Torque is applied while in the air to allow players to adjust their pitch and yaw.
 - **Out-of-Bounds:** Automatically resets the race if the car falls below Y = -20.
@@ -57,10 +58,12 @@ The modular pieces created by the generator are used to assemble levels.
   - `LOOP_360`, `LOOP_90`: Vertical looping segments with a 24m radius and 8m width. Omit side walls for high-speed stunts.
 
 ### 5. Camera System (`scripts/follow_camera.gd`)
-A smooth follow camera that tracks the car's position and orientation, looking slightly ahead of the vehicle to give the player a better view of the track.
+A smooth follow camera that tracks the car's position and orientation.
+- **Easing:** Averaging data over a 2-frame buffer (`pos_history` and `basis_history`) to filter out sudden physics impulses.
+- **Smoothing:** Uses spherical linear interpolation (slerp) for the basis and looking 5m ahead of the car for high-speed stabilization.
 
 ### 6. HUD & UI (`scripts/hud.gd`)
-- **Timer:** Real-time display of the current race duration using the "Press Start 2P" retro font.
+- **Timer:** Real-time display of the current race duration using the "Press Start 2P" font.
 - **Speedometer:** Displays the car's current speed in KM/H (converted from m/s). Top speed is estimated at 360 KM/H.
 - **Finish Screen:** Displays completion time and personal best with high-visibility styling.
 - **Controls:** Handles global inputs for SFX toggling, race restarts, and quitting.

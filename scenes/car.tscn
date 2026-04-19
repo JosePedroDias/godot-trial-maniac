@@ -16,7 +16,7 @@ bottom_radius = 0.3
 height = 0.2
 
 [node name="Car" type="RigidBody3D"]
-mass = 1500.0
+mass = 1000.0
 center_of_mass_mode = 1
 center_of_mass = Vector3(0, -0.2, 0)
 script = ExtResource("1_c35m8")

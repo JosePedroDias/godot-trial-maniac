@@ -7,9 +7,10 @@ extends RigidBody3D
 @export var wheel_radius: float = 0.3
 
 @export_group("Engine")
-@export var engine_power: float = 20000.0
-@export var max_speed: float = 100.0
-@export var booster_force: float = 50000.0
+@export var engine_power: float = 30000.0
+@export var max_speed: float = 120.0
+@export var booster_force: float = 40000.0
+@export var downforce: float = 10000.0
 
 @export_group("Steering")
 @export var steering_angle: float = 30.0
@@ -216,7 +217,13 @@ func _physics_process(delta):
 				var spring_force = compression * spring_strength
 				var damping_force = upward_vel * spring_damping
 				var total_force = (spring_force - damping_force) * hit_normal
+				
+				# 1.1 Apply Suspension Force
 				apply_force(total_force, ray.global_position - global_position)
+				
+				# 1.2 Apply Downforce (Sticky logic for loops)
+				var downforce_dir = -hit_normal
+				apply_force(downforce_dir * downforce / raycasts.size(), ray.global_position - global_position)
 				
 				# 2. Driving
 				var wheel_basis = ray.global_basis

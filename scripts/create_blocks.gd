@@ -206,7 +206,8 @@ func _create_loop_mesh(radius: float, angle_deg: float, road_width: float, color
 	mat.albedo_color = color
 	st.set_material(mat)
 	
-	var segments = 64
+	var segments = int(abs(angle_deg) / 90.0 * 32.0)
+	if segments < 16: segments = 16 # Minimum resolution
 	var angle_rad = deg_to_rad(angle_deg)
 	var half_w = road_width / 2.0
 	

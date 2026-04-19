@@ -13,7 +13,6 @@
 [ext_resource type="PackedScene" path="res://scenes/hud.tscn" id="9_fufvl"]
 [ext_resource type="PackedScene" path="res://scenes/blocks/RoadCurveWide.tscn" id="9_ryrif"]
 [ext_resource type="PackedScene" path="res://scenes/blocks/RoadStraightLong.tscn" id="11_vo5wb"]
-[ext_resource type="PackedScene" path="res://scenes/blocks/RoadSidePipeRight.tscn" id="13_cvqpw"]
 [ext_resource type="PackedScene" path="res://scenes/blocks/RoadStraightLongNoWalls.tscn" id="14_cvqpw"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_kd68p"]
@@ -51,19 +50,25 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 85, 0, -4)
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 33, 0, 0)
 
 [node name="RoadFinish" parent="Track" unique_id=1424810287 instance=ExtResource("5_cvqpw")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 69, 0, 56)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 69, 0, 48)
 
 [node name="RoadRamp" parent="Track" unique_id=679231525 instance=ExtResource("5_ryrif")]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -8.114277, -0.00045847893, 0)
 
 [node name="RoadLoop90" parent="Track" unique_id=1340403031 instance=ExtResource("6_hfke8")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 85, 0, 38)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 85, 0, 30)
+
+[node name="RoadLoop92" parent="Track" unique_id=1656137823 instance=ExtResource("6_hfke8")]
+transform = Transform3D(1, 0, 0, 0, -4.371139e-08, 1, 0, -1, -4.371139e-08, 85, 25, 54.3)
 
 [node name="RoadLoop91" parent="Track" unique_id=1514514054 instance=ExtResource("6_hfke8")]
-transform = Transform3D(-0.99999994, 0, -8.742277e-08, 0, 1, 0, 8.742277e-08, 0, -0.99999994, 69, 0, 38)
+transform = Transform3D(-0.99999994, 0, -8.742277e-08, 0, 1, 0, 8.742277e-08, 0, -0.99999994, 69, 0, 30)
+
+[node name="RoadLoop93" parent="Track" unique_id=1102228869 instance=ExtResource("6_hfke8")]
+transform = Transform3D(-0.9999999, -8.742277e-08, -3.8213705e-15, 0, -4.3711385e-08, 0.99999994, -8.742277e-08, 0.99999994, 4.3711385e-08, 69, 25, 5.744812)
 
 [node name="RoadLoop360" parent="Track" unique_id=1455387994 instance=ExtResource("7_pwued")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 77, 0, 38)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 77, 0, 30)
 
 [node name="RoadCurveTight" parent="Track" unique_id=1577248770 instance=ExtResource("8_levyu")]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 79, 0.1, -22)
@@ -83,29 +88,17 @@ transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -20,
 [node name="RoadStraightLong2" parent="Track" unique_id=348612342 instance=ExtResource("11_vo5wb")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 85, 0, -14)
 
-[node name="RoadSidePipeRight" parent="Track" unique_id=1959205017 instance=ExtResource("13_cvqpw")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 93, 0, 7)
-
-[node name="RoadSidePipeRight2" parent="Track" unique_id=228434690 instance=ExtResource("13_cvqpw")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 93, 0, 15)
-
-[node name="RoadSidePipeRight3" parent="Track" unique_id=1058258465 instance=ExtResource("13_cvqpw")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 93, 0, 31)
-
-[node name="RoadSidePipeRight4" parent="Track" unique_id=375331237 instance=ExtResource("13_cvqpw")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 93, 0, 23)
-
 [node name="RoadStraightLongNoWalls" parent="Track" unique_id=528220966 instance=ExtResource("14_cvqpw")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 85, 0, 6)
 
 [node name="RoadStraightLongNoWalls3" parent="Track" unique_id=159650536 instance=ExtResource("14_cvqpw")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 69, 0, 46)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 69, 0, 38)
 
 [node name="RoadStraightLongNoWalls2" parent="Track" unique_id=834112200 instance=ExtResource("14_cvqpw")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 85, 0, 30)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 85, 0, 22)
 
 [node name="Car" parent="." unique_id=1749673328 instance=ExtResource("6_ssd5m")]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -34, 1, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 85, 1, -18)
 
 [node name="FollowCamera" type="Camera3D" parent="." unique_id=1435456714]
 script = ExtResource("8_pwued")

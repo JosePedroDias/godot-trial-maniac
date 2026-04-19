@@ -1,0 +1,94 @@
+[gd_scene format=3 uid="uid://dnmgw7gpjhhsn"]
+
+[ext_resource type="PackedScene" path="res://scenes/blocks/RoadStart.tscn" id="1_7rrow"]
+[ext_resource type="PackedScene" path="res://scenes/blocks/RoadStraight.tscn" id="2_luigy"]
+[ext_resource type="PackedScene" path="res://scenes/blocks/RoadBooster.tscn" id="3_3w2me"]
+[ext_resource type="PackedScene" path="res://scenes/blocks/RoadFinish.tscn" id="4_jgd31"]
+[ext_resource type="PackedScene" path="res://scenes/blocks/RoadRamp.tscn" id="5_00jyw"]
+[ext_resource type="PackedScene" path="res://scenes/blocks/RoadLoop90.tscn" id="6_5c8ty"]
+[ext_resource type="PackedScene" path="res://scenes/blocks/RoadCurveTight.tscn" id="8_pljg5"]
+[ext_resource type="PackedScene" path="res://scenes/blocks/RoadCurveWide.tscn" id="9_dtmnc"]
+[ext_resource type="PackedScene" path="res://scenes/blocks/RoadStraightLong.tscn" id="10_3b64i"]
+[ext_resource type="PackedScene" path="res://scenes/blocks/RoadStraightLongNoWalls.tscn" id="11_54pmx"]
+[ext_resource type="PackedScene" path="res://scenes/car.tscn" id="12_wc32t"]
+[ext_resource type="Script" uid="uid://d3t3fpwfrfixw" path="res://scripts/follow_camera.gd" id="13_uufbi"]
+[ext_resource type="PackedScene" path="res://scenes/hud.tscn" id="14_o1tl8"]
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_kd68p"]
+
+[sub_resource type="Sky" id="Sky_tgmmc"]
+sky_material = SubResource("ProceduralSkyMaterial_kd68p")
+
+[sub_resource type="Environment" id="Environment_d3voq"]
+background_mode = 2
+sky = SubResource("Sky_tgmmc")
+ambient_light_source = 3
+tonemap_mode = 3
+
+[node name="Track1" type="Node3D" unique_id=733251138]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=521389051]
+environment = SubResource("Environment_d3voq")
+
+[node name="Sun" type="DirectionalLight3D" parent="." unique_id=1350857270]
+transform = Transform3D(0.70710677, -0.49999997, 0.49999997, 0, 0.70710677, 0.70710677, -0.70710677, -0.49999997, 0.49999997, 0, 0, 0)
+shadow_enabled = true
+
+[node name="Track" type="Node3D" parent="." unique_id=1090717165]
+
+[node name="RoadStart" parent="Track" unique_id=92110968 instance=ExtResource("1_7rrow")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -41, 0, 0)
+
+[node name="RoadStraight5" parent="Track" unique_id=1411489036 instance=ExtResource("2_luigy")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -45, 0, 0.027)
+
+[node name="RoadBooster" parent="Track" unique_id=9800978 instance=ExtResource("3_3w2me")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 85, 0, -4)
+
+[node name="RoadStraight6" parent="Track" unique_id=1499642161 instance=ExtResource("2_luigy")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 33, 0, 0)
+
+[node name="RoadFinish" parent="Track" unique_id=1424810287 instance=ExtResource("4_jgd31")]
+transform = Transform3D(1, 0, 0, 0, -4.371139e-08, 1, 0, -1, -4.371139e-08, 85, 25.883, 54.87358)
+
+[node name="RoadRamp" parent="Track" unique_id=679231525 instance=ExtResource("5_00jyw")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -19.114277, -0.00045847893, 0)
+
+[node name="RoadLoop90" parent="Track" unique_id=1340403031 instance=ExtResource("6_5c8ty")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 85, 0, 30)
+
+[node name="RoadCurveTight" parent="Track" unique_id=1577248770 instance=ExtResource("8_pljg5")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 79, 0.1, -22)
+
+[node name="RoadCurveWide" parent="Track" unique_id=1653715944 instance=ExtResource("9_dtmnc")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 35, 0.1, -14)
+
+[node name="RoadCurveWide2" parent="Track" unique_id=1521853554 instance=ExtResource("9_dtmnc")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 63, 0.1, -14)
+
+[node name="RoadStraightLong" parent="Track" unique_id=211024955 instance=ExtResource("10_3b64i")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 71, 0, -28)
+
+[node name="RoadStraightLong3" parent="Track" unique_id=2094518185 instance=ExtResource("10_3b64i")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -31, 0, 0)
+
+[node name="RoadStraightLong4" parent="Track" unique_id=922724593 instance=ExtResource("10_3b64i")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 23, 0, 0)
+
+[node name="RoadStraightLong2" parent="Track" unique_id=348612342 instance=ExtResource("10_3b64i")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 85, 0, -14)
+
+[node name="RoadStraightLongNoWalls" parent="Track" unique_id=528220966 instance=ExtResource("11_54pmx")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 85, 0, 6)
+
+[node name="RoadStraightLongNoWalls2" parent="Track" unique_id=834112200 instance=ExtResource("11_54pmx")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 85, 0, 22)
+
+[node name="Car" parent="." unique_id=1749673328 instance=ExtResource("12_wc32t")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -45, 1, 0)
+
+[node name="FollowCamera" type="Camera3D" parent="." unique_id=1435456714]
+script = ExtResource("13_uufbi")
+target_path = NodePath("../Car")
+
+[node name="HUD" parent="." unique_id=998022422 instance=ExtResource("14_o1tl8")]
