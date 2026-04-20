@@ -2,6 +2,8 @@
 
 A high-paced, Trackmania-inspired time trial racing game built with Godot 4 and Jolt Physics.
 
+This game was done with Gemini. The tracks themselves (though pretty primitive) so far were set up by me.
+
 ## Core Game Logic
 
 ### 1. Car Physics (`scripts/car_controller.gd`)
@@ -27,7 +29,6 @@ This script acts as a procedural generation utility for the track's modular piec
 **Note: This tool does NOT run automatically at game start.** It is a build-time utility used to update the `.tscn` files in `res://scenes/blocks/`.
 
 #### How to run the tool:
-Execute the following command from the project root:
 ```bash
 godot --headless -s scripts/create_blocks.gd
 ```
@@ -35,10 +36,21 @@ godot --headless -s scripts/create_blocks.gd
 - **Procedural Meshes:** Uses `SurfaceTool` to generate geometry for curves, side pipes, and loops.
 - **Block Types:** `START`, `FINISH`, `BOOSTER`, `STRAIGHT`, `STRAIGHT_LONG`, `STRAIGHT_LONG_WO_WALLS`, `RAMP`, `CURVE_TIGHT`, `CURVE_WIDE`, `CURVE_EXTRA_WIDE`, `SIDE_PIPE`, `LOOP_360`, `LOOP_90`.
 
-### 4. Camera System (`scripts/follow_camera.gd`)
+### 4. Car Generation Tool (`scripts/create_car_mesh.gd`)
+Procedurally constructs the racing vehicle using primitive meshes and saves it as `assets/open_seater_mesh.tscn`. 
+
+#### How to run the tool:
+```bash
+godot --headless -s scripts/create_car_mesh.gd
+```
+
+- **Visuals:** Tapered nose, front and rear wings, sidepods, and cockpit surround with metallic materials.
+- **Cleanup:** Automatically frees temporary nodes to ensure a clean exit without ObjectDB warnings.
+
+### 5. Camera System (`scripts/follow_camera.gd`)
 A smooth follow camera with 2-frame easing and high-speed stabilization.
 
-### 5. HUD & UI (`scripts/hud.gd`)
+### 6. HUD & UI (`scripts/hud.gd`)
 - **Timer:** Displays race duration using "Press Start 2P" font.
 - **Speedometer:** Real-time speed in KM/H.
 - **Record:** Displays the all-time best for the current track.
@@ -49,9 +61,9 @@ A smooth follow camera with 2-frame easing and high-speed stabilization.
 - **Accelerate/Brake:** Up/Down / W/S / Joypad Triggers or Assigned Axis
 - **Steer:** Left/Right / A/D / Joypad Stick or Assigned Axis
 - **Restart Race:** T / Joypad Button 3 (Y/Triangle)
-- **Next Track:** 2 / Joypad Button 9 (Select)
 - **Toggle SFX:** 1
+- **Next Track:** 2 / Joypad Button 9 (Select)
+- **Bind Joypad Axis:** 3
 - **Toggle Ghost:** 4
 - **Toggle Fullscreen:** 0
-- **Bind Joypad Axis:** 3
 - **Quit Game:** Escape
