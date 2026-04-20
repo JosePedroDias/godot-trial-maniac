@@ -67,3 +67,7 @@ A smooth follow camera with 2-frame easing and high-speed stabilization.
 - **Toggle Ghost:** 4
 - **Toggle Fullscreen:** 0
 - **Quit Game:** Escape
+
+## License
+
+This project is licensed under the **Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)** license. See the [LICENSE](LICENSE) file for details.
