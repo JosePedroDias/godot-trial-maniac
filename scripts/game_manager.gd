@@ -43,6 +43,7 @@ var _substate_timer = 0.0
 var _key_states = {}
 
 func _ready():
+	Input.set_mouse_mode(Input.MOUSE_MODE_HIDDEN)
 	_load_data()
 	current_state = RaceState.PRE_START
 	if get_tree().current_scene:
