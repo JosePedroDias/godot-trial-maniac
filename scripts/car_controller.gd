@@ -186,8 +186,43 @@ func _physics_process(delta):
 			gm.reset_race()
 		return
 
-	engine_input = Input.get_axis("ui_down", "ui_up")
-	steering_input = lerp(steering_input, Input.get_axis("ui_right", "ui_left"), steering_speed * delta)
+	# Get Input
+	var kb_engine = Input.get_axis("ui_down", "ui_up")
+	var kb_steer = Input.get_axis("ui_right", "ui_left")
+	
+	# Combine with custom joypad assignments (v3)
+	if gm:
+		var get_val = func(slot):
+			if slot.dev < 0: return 0.0
+			if slot.get("is_btn", false):
+				return 1.0 if Input.is_joy_button_pressed(slot.dev, slot.btn) else 0.0
+			
+			var cur_val = Input.get_joy_axis(slot.dev, slot.axis)
+			var snap = slot.get("snap", 0.0)
+			# Normalize: how much has it moved from its initial snapshot?
+			# We multiply by sign which was also relative to that snapshot.
+			return clamp((cur_val - snap) * slot.sign, 0.0, 1.0)
+		
+		var s_left = get_val.call(gm.steer_left)
+		var s_right = get_val.call(gm.steer_right)
+		var t_val = get_val.call(gm.throttle)
+		var b_val = get_val.call(gm.brake)
+		
+		# If any joypad binding exists for steering, use it. Otherwise fallback to Input Map.
+		if gm.steer_left.dev >= 0 or gm.steer_right.dev >= 0:
+			# Align with get_axis("ui_right", "ui_left") which is Left - Right
+			var joy_steer_combined = s_left - s_right
+			steering_input = lerp(steering_input, joy_steer_combined, steering_speed * delta * 2.0)
+		else:
+			steering_input = lerp(steering_input, kb_steer, steering_speed * delta)
+			
+		if gm.throttle.dev >= 0 or gm.brake.dev >= 0:
+			engine_input = t_val - b_val
+		else:
+			engine_input = kb_engine
+	else:
+		engine_input = kb_engine
+		steering_input = lerp(steering_input, kb_steer, steering_speed * delta)
 	
 	var on_ground = false
 	var is_on_sticky = false

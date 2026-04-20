@@ -4,6 +4,7 @@ extends CanvasLayer
 @onready var finish_label = $Control/FinishLabel
 @onready var speed_label = $Control/SpeedLabel
 @onready var record_label = $Control/RecordLabel
+@onready var binding_label = $Control/BindingLabel
 
 func _ready():
 	var gm = get_node_or_null("/root/GameManager")
@@ -12,7 +13,16 @@ func _ready():
 		gm.state_changed.connect(_on_state_changed)
 		gm.speed_updated.connect(_on_speed_updated)
 		gm.record_updated.connect(_on_record_updated)
+		gm.binding_step_changed.connect(_on_binding_step_changed)
 	finish_label.hide()
+	binding_label.hide()
+
+func _on_binding_step_changed(step_text):
+	if step_text == "":
+		binding_label.hide()
+	else:
+		binding_label.text = step_text
+		binding_label.show()
 
 func _on_record_updated(record):
 	var gm = get_node_or_null("/root/GameManager")
