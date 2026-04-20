@@ -2,12 +2,12 @@ extends RigidBody3D
 
 @export_group("Suspension")
 @export var suspension_rest_dist: float = 0.3
-@export var spring_strength: float = 50000.0
-@export var spring_damping: float = 2000.0
+@export var spring_strength: float = 80000.0
+@export var spring_damping: float = 8000.0
 @export var wheel_radius: float = 0.3
 
 @export_group("Engine")
-@export var engine_power: float = 30000.0
+@export var engine_power: float = 15000.0
 @export var max_speed: float = 120.0
 @export var booster_force: float = 40000.0
 @export var downforce: float = 10000.0
@@ -150,18 +150,18 @@ func _physics_process(delta):
 	var sfx_enabled = gm.sfx_enabled if gm else true
 
 	# Update Audio
-	var speed = linear_velocity.length()
+	var speed_cur = linear_velocity.length()
 	if gm:
-		gm.speed_updated.emit(speed * 3.6) # Convert m/s to km/h
+		gm.speed_updated.emit(speed_cur * 3.6) # Convert m/s to km/h
 	
 	if engine_player and sfx_enabled:
-		engine_player.pitch_scale = 0.5 + (speed / 50.0)
-		engine_player.volume_db = -10 + clamp(speed / 10.0, 0, 10)
+		engine_player.pitch_scale = 0.5 + (speed_cur / 50.0)
+		engine_player.volume_db = -10 + clamp(speed_cur / 10.0, 0, 10)
 	
 	# Skid and Brake detection
 	var is_skidding = false
 	var is_braking = false
-	if speed > 5.0:
+	if speed_cur > 5.0:
 		var lateral_speed = abs(global_basis.x.dot(linear_velocity))
 		if lateral_speed > 3.0:
 			is_skidding = true
@@ -199,8 +199,6 @@ func _physics_process(delta):
 			
 			var cur_val = Input.get_joy_axis(slot.dev, slot.axis)
 			var snap = slot.get("snap", 0.0)
-			# Normalize: how much has it moved from its initial snapshot?
-			# We multiply by sign which was also relative to that snapshot.
 			return clamp((cur_val - snap) * slot.sign, 0.0, 1.0)
 		
 		var s_left = get_val.call(gm.steer_left)
@@ -208,9 +206,7 @@ func _physics_process(delta):
 		var t_val = get_val.call(gm.throttle)
 		var b_val = get_val.call(gm.brake)
 		
-		# If any joypad binding exists for steering, use it. Otherwise fallback to Input Map.
 		if gm.steer_left.dev >= 0 or gm.steer_right.dev >= 0:
-			# Align with get_axis("ui_right", "ui_left") which is Left - Right
 			var joy_steer_combined = s_left - s_right
 			steering_input = lerp(steering_input, joy_steer_combined, steering_speed * delta * 2.0)
 		else:
@@ -238,7 +234,6 @@ func _physics_process(delta):
 			on_ground = true
 			var collider = ray.get_collider()
 			
-			# Block Detection
 			if collider.has_method("get_script") and collider.get_script() and collider.get_script().get_path() == "res://scripts/track_block.gd":
 				_check_track_block(collider)
 				if collider.is_sticky():
@@ -268,24 +263,21 @@ func _physics_process(delta):
 				# 2. Driving
 				var wheel_basis = ray.global_basis
 				if i < 2:
-					# Gradual speed-sensitive steering:
-					# Full steering at low speeds, gradually reducing to 15% at high speeds (100 m/s)
-					var speed_cur = linear_velocity.length()
 					var steer_speed_factor = lerp(1.0, 0.15, clamp(speed_cur / 100.0, 0.0, 1.0))
-					
 					var effective_steer = steering_input * deg_to_rad(steering_angle) * steer_speed_factor
 					wheel_basis = wheel_basis.rotated(global_basis.y, effective_steer)
 				
 				var forward_dir = wheel_basis.z
 				var right_dir = wheel_basis.x
 				
-				# Only apply engine forces if the wheel is touching the ground
 				if abs(engine_input) > 0.05:
 					var accel_force = forward_dir * engine_input * engine_power
 					apply_force(accel_force, ray.global_position - global_position)
 				
 				var lateral_vel = right_dir.dot(wheel_velocity)
-				var grip_force = -right_dir * lateral_vel * grip * mass
+				# Taper grip at low speeds to prevent physics jitter
+				var low_speed_taper = clamp(speed_cur / 2.0, 0.1, 1.0)
+				var grip_force = -right_dir * lateral_vel * grip * mass * low_speed_taper
 				apply_force(grip_force, ray.global_position - global_position)
 				
 				wheel.global_position = hit_point + hit_normal * wheel_radius
@@ -301,13 +293,10 @@ func _physics_process(delta):
 
 	if !on_ground:
 		var air_torque = Vector3.ZERO
-		# Air control now only handles pitch if the user wants separate keys
-		# For now, we remove the throttle-based pitch as it was confusing
 		apply_torque(global_basis * air_torque * mass)
 
 func _check_track_block(block):
 	var gm = get_node_or_null("/root/GameManager")
-	# BlockType.START = 1, FINISH = 2, BOOSTER = 3
 	match block.type:
 		1: # START
 			if gm: gm.start_race()
@@ -318,6 +307,5 @@ func _check_track_block(block):
 
 func _on_body_entered(_body):
 	var gm = get_node_or_null("/root/GameManager")
-	# Play collision sound if we hit something at decent speed and SFX is enabled
 	if linear_velocity.length() > 2.0 and collision_player and (not gm or gm.sfx_enabled):
 		collision_player.play()

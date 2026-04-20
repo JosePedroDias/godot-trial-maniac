@@ -7,8 +7,8 @@ A high-paced, Trackmania-inspired time trial racing game built with Godot 4 and 
 ### 1. Car Physics (`scripts/car_controller.gd`)
 The car is modeled as an open-seater racing vehicle (Formula style) using a custom Raycast-based suspension system.
 - **Visuals:** Features a procedurally generated mesh (`assets/open_seater_mesh.tscn`) with a tapered nose, front and rear wings, and sidepods.
-- **Suspension & Downforce:** Four raycasts calculate spring and damping forces. A custom "Sticky Downforce" system applies 10,000 units of force towards the track surface **only when driving on Loop or Side Pipe segments**.
-- **Performance:** Tuned with a 1,500kg mass and 30,000 engine power. Top speed is approximately 360 KM/H (100 m/s).
+- **Suspension & Downforce:** Four raycasts calculate spring and damping forces (stiffened for high-speed stability). A custom "Sticky Downforce" system applies 10,000 units of force towards the track surface **only when driving on Loop or Side Pipe segments**.
+- **Performance:** Tuned with a 1,500kg mass and 15,000 engine power for controlled acceleration. Top speed is approximately 360 KM/H (100 m/s).
 - **Engine & Steering:** Supports both standard Input Map and advanced per-device axis assignments. Steering is speed-sensitive.
 - **Audio:** Procedural engine loops, skid noise, brake squeals, and collision thumps.
 
@@ -17,8 +17,9 @@ A global singleton (Autoload) that handles the race lifecycle, track progression
 - **States:** `PRE_START`, `RACING`, `FINISHED`, `BINDING`.
 - **Timing:** Precision timer that starts at the start gate and stops at the finish gate.
 - **Track Progression:** Automatically transitions to the next track in the list 2 seconds after crossing the finish line. Manual switching via '2'.
-- **Persistence:** Highscores and Input Assignments are saved to `user://game_data.json`.
-- **Global Input:** Manages restart (T), SFX toggle (1), Next Track (2), Fullscreen (0), and Joypad Binding (3).
+- **Ghost Car:** Records your best run per track and displays it as a semi-transparent ghost during the race.
+- **Persistence:** Highscores, Input Assignments (v3), and Ghost data are saved to the user folder.
+- **Global Input:** Manages restart (T), SFX toggle (1), Next Track (2), Fullscreen (0), Joypad Binding (3), and Ghost Toggle (4).
 
 ### 3. Track Generation Tool (`scripts/create_blocks.gd`)
 This script acts as a procedural generation utility for the track's modular pieces. 
@@ -50,6 +51,7 @@ A smooth follow camera with 2-frame easing and high-speed stabilization.
 - **Restart Race:** T / Joypad Button 3 (Y/Triangle)
 - **Next Track:** 2 / Joypad Button 9 (Select)
 - **Toggle SFX:** 1
+- **Toggle Ghost:** 4
 - **Toggle Fullscreen:** 0
-- **Bind Joypad Axis:** 3 (Follow on-screen instructions to assign Steering, Throttle, and Brake)
+- **Bind Joypad Axis:** 3
 - **Quit Game:** Escape
