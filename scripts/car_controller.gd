@@ -2,14 +2,14 @@ extends RigidBody3D
 
 @export_group("Suspension")
 @export var suspension_rest_dist: float = 0.3
-@export var spring_strength: float = 80000.0
-@export var spring_damping: float = 8000.0
+@export var spring_strength: float = 120000.0
+@export var spring_damping: float = 12000.0
 @export var wheel_radius: float = 0.3
 
 @export_group("Engine")
 @export var engine_power: float = 15000.0
 @export var max_speed: float = 120.0
-@export var booster_force: float = 40000.0
+@export var booster_force: float = 20000.0
 @export var downforce: float = 10000.0
 
 @export_group("Steering")

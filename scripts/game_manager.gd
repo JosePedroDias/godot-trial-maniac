@@ -77,6 +77,12 @@ func _setup_ghost_actor():
 
 func start_race():
 	_current_run_ghost.clear()
+	
+	# Fix: if scene was reloaded, _ghost_actor might be invalid
+	if not is_instance_valid(_ghost_actor):
+		_setup_ghost_actor()
+		_load_ghost(get_tree().current_scene.scene_file_path)
+
 	if _ghost_actor and ghost_enabled:
 		_ghost_actor.start_playback(_best_ghost_data)
 
@@ -117,10 +123,12 @@ func next_track():
 	get_tree().change_scene_to_file(next_path)
 
 func reset_race():
+	# Don't try to stop_playback here as node will be gone
 	current_state = RaceState.PRE_START
 	race_time = 0.0
 	state_changed.emit(current_state)
 	get_tree().reload_current_scene()
+	# Ghost will be setup again in _ready() of GameManager after reload
 
 func start_binding():
 	current_state = RaceState.BINDING

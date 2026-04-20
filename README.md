@@ -7,8 +7,8 @@ A high-paced, Trackmania-inspired time trial racing game built with Godot 4 and 
 ### 1. Car Physics (`scripts/car_controller.gd`)
 The car is modeled as an open-seater racing vehicle (Formula style) using a custom Raycast-based suspension system.
 - **Visuals:** Features a procedurally generated mesh (`assets/open_seater_mesh.tscn`) with a tapered nose, front and rear wings, and sidepods.
-- **Suspension & Downforce:** Four raycasts calculate spring and damping forces (stiffened for high-speed stability). A custom "Sticky Downforce" system applies 10,000 units of force towards the track surface **only when driving on Loop or Side Pipe segments**.
-- **Performance:** Tuned with a 1,500kg mass and 15,000 engine power for controlled acceleration. Top speed is approximately 360 KM/H (100 m/s).
+- **Suspension & Downforce:** Four raycasts calculate spring and damping forces (significantly stiffened for high-speed stability and reduced wheel travel). A custom "Sticky Downforce" system applies 10,000 units of force towards the track surface **only when driving on Loop or Side Pipe segments**.
+- **Performance:** Tuned with a 1,500kg mass and 15,000 engine power for controlled acceleration. Top speed is approximately 360 KM/H (100 m/s). Boosters apply a 20,000 unit forward impulse.
 - **Engine & Steering:** Supports both standard Input Map and advanced per-device axis assignments. Steering is speed-sensitive.
 - **Audio:** Procedural engine loops, skid noise, brake squeals, and collision thumps.
 
