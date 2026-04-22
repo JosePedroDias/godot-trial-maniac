@@ -250,7 +250,7 @@ func _physics_process(delta):
 				# 2. Driving
 				var wheel_basis = ray.global_basis
 				if i < 2:
-					var steer_speed_factor = lerp(1.0, 0.15, clamp(speed_cur / 100.0, 0.0, 1.0))
+					var steer_speed_factor = exp(-speed_cur / 35.0) # Exponential drop-off
 					var effective_steer = steering_input * deg_to_rad(steering_angle) * steer_speed_factor
 					wheel_basis = wheel_basis.rotated(global_basis.y, effective_steer)
 				
@@ -274,7 +274,8 @@ func _physics_process(delta):
 			wheel.position.y = -suspension_rest_dist
 			var wheel_basis = ray.global_basis
 			if i < 2:
-				wheel_basis = wheel_basis.rotated(global_basis.y, steering_input * deg_to_rad(steering_angle))
+				var steer_speed_factor = exp(-speed_cur / 35.0)
+				wheel_basis = wheel_basis.rotated(global_basis.y, steering_input * deg_to_rad(steering_angle) * steer_speed_factor)
 			wheel.global_basis = wheel_basis.rotated(wheel_basis.z, PI/2.0)
 
 	if !on_ground:
