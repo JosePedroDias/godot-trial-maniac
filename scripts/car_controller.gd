@@ -32,7 +32,7 @@ var skid_player: AudioStreamPlayer3D
 var collision_player: AudioStreamPlayer3D
 
 var engine_rpm: float = 0.0
-var current_gear: int = 1
+var trails = []
 
 func _ready():
 	# Set up physics for collision detection
@@ -132,6 +132,14 @@ func _setup_audio():
 	coll_stream.data = c_data
 	collision_player.stream = coll_stream
 	collision_player.unit_size = 20.0
+	
+	# Set up trails
+	for i in range(4):
+		var trail = MeshInstance3D.new()
+		trail.set_script(load("res://scripts/trail_renderer.gd"))
+		# Add to scene root so they don't inherit car's transform/scale
+		get_tree().current_scene.add_child.call_deferred(trail)
+		trails.append(trail)
 
 func _physics_process(delta):
 	var gm = get_node_or_null("/root/GameManager")
@@ -213,6 +221,7 @@ func _physics_process(delta):
 	for i in range(raycasts.size()):
 		var ray = raycasts[i]
 		var wheel = wheels[i]
+		var trail = trails[i]
 		
 		wheel.position.x = ray.position.x
 		wheel.position.z = ray.position.z
@@ -250,7 +259,7 @@ func _physics_process(delta):
 				# 2. Driving
 				var wheel_basis = ray.global_basis
 				if i < 2:
-					var steer_speed_factor = exp(-speed_cur / 35.0) # Exponential drop-off
+					var steer_speed_factor = exp(-speed_cur / 35.0)
 					var effective_steer = steering_input * deg_to_rad(steering_angle) * steer_speed_factor
 					wheel_basis = wheel_basis.rotated(global_basis.y, effective_steer)
 				
@@ -268,6 +277,10 @@ func _physics_process(delta):
 				
 				wheel.global_position = hit_point + hit_normal * wheel_radius
 				wheel.global_basis = wheel_basis.rotated(wheel_basis.z, PI/2.0)
+				
+				# Trails: Only when braking or skidding
+				if is_braking or is_skidding:
+					trail.add_point(hit_point, hit_normal)
 			else:
 				wheel.position.y = -suspension_rest_dist
 		else:
@@ -284,16 +297,10 @@ func _physics_process(delta):
 
 func _update_engine_audio(delta, speed_kmh):
 	var throttle = abs(engine_input)
-	
-	# Direct linear mapping from speed to RPM (0 to 200 km/h range)
 	var target_rpm = clamp(speed_kmh / 200.0, 0.0, 1.0)
-	
-	# Smooth RPM transition
 	engine_rpm = lerp(engine_rpm, target_rpm, 10.0 * delta)
-	
 	engine_player.rpm = engine_rpm
 	engine_player.throttle = throttle
-	# Keep the volume scaling based on speed for realism
 	engine_player.volume_db = -10 + clamp(speed_kmh / 20.0, 0, 10)
 
 func _check_track_block(block):
