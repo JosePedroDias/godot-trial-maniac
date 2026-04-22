@@ -31,6 +31,9 @@ var engine_player: AudioStreamPlayer3D
 var skid_player: AudioStreamPlayer3D
 var collision_player: AudioStreamPlayer3D
 
+var engine_rpm: float = 0.0
+var current_gear: int = 1
+
 func _ready():
 	# Set up physics for collision detection
 	contact_monitor = true
@@ -64,6 +67,7 @@ func _update_sfx_mute(enabled):
 
 func _setup_audio():
 	engine_player = AudioStreamPlayer3D.new()
+	engine_player.set_script(load("res://scripts/engine_sound.gd"))
 	skid_player = AudioStreamPlayer3D.new()
 	collision_player = AudioStreamPlayer3D.new()
 	
@@ -71,22 +75,7 @@ func _setup_audio():
 	add_child(skid_player)
 	add_child(collision_player)
 	
-	# 1. Engine Sound (Sawtooth loop)
-	var engine_stream = AudioStreamWAV.new()
-	engine_stream.format = AudioStreamWAV.FORMAT_16_BITS
-	engine_stream.loop_mode = AudioStreamWAV.LOOP_FORWARD
-	engine_stream.mix_rate = 44100
-	var e_data = PackedByteArray()
-	var e_len = 441 # ~100Hz base
-	e_data.resize(e_len * 2)
-	for i in range(e_len):
-		var val = int((float(i) / e_len * 2.0 - 1.0) * 10000)
-		e_data.encode_s16(i * 2, val)
-	engine_stream.data = e_data
-	engine_stream.loop_end = e_len
-	engine_player.stream = engine_stream
-	engine_player.autoplay = true
-	engine_player.unit_size = 10.0
+	engine_player.unit_size = 30.0
 	engine_player.play()
 	
 	# 2. Skid Sound (Noise)
@@ -127,23 +116,22 @@ func _setup_audio():
 	brake_player.volume_db = -80
 	brake_player.play()
 	
-	# 4. Collision Sound (Thump - Made LOUDER and heavier)
+	# 4. Collision Sound (Thump)
 	var coll_stream = AudioStreamWAV.new()
 	coll_stream.format = AudioStreamWAV.FORMAT_16_BITS
 	coll_stream.mix_rate = 44100
 	var c_data = PackedByteArray()
-	var c_len = 22050 # 0.5s longer decay
+	var c_len = 22050 # 0.5s
 	c_data.resize(c_len * 2)
 	for i in range(c_len):
 		var t = float(i) / c_len
-		# Heavier thump: combined low freq and noise burst
 		var noise = (randf() * 2.0 - 1.0) * 15000 * exp(-t * 20.0)
 		var tone = sin(t * 80.0) * exp(-t * 8.0) * 20000
 		var val = int(clamp(tone + noise, -32768, 32767))
 		c_data.encode_s16(i * 2, val)
 	coll_stream.data = c_data
 	collision_player.stream = coll_stream
-	collision_player.unit_size = 20.0 # Increase spatial reach
+	collision_player.unit_size = 20.0
 
 func _physics_process(delta):
 	var gm = get_node_or_null("/root/GameManager")
@@ -151,12 +139,12 @@ func _physics_process(delta):
 
 	# Update Audio
 	var speed_cur = linear_velocity.length()
+	var speed_kmh = speed_cur * 3.6
 	if gm:
-		gm.speed_updated.emit(speed_cur * 3.6) # Convert m/s to km/h
+		gm.speed_updated.emit(speed_kmh) # Convert m/s to km/h
 	
 	if engine_player and sfx_enabled:
-		engine_player.pitch_scale = 0.5 + (speed_cur / 50.0)
-		engine_player.volume_db = -10 + clamp(speed_cur / 10.0, 0, 10)
+		_update_engine_audio(delta, speed_kmh)
 	
 	# Skid and Brake detection
 	var is_skidding = false
@@ -166,7 +154,7 @@ func _physics_process(delta):
 		if lateral_speed > 3.0:
 			is_skidding = true
 		
-		# Brake squeal logic: braking while moving forward or throttle while moving back
+		# Brake squeal logic
 		var forward_speed = global_basis.z.dot(linear_velocity)
 		if (forward_speed > 2.0 and engine_input < -0.1) or (forward_speed < -2.0 and engine_input > 0.1):
 			is_braking = true
@@ -190,7 +178,6 @@ func _physics_process(delta):
 	var kb_engine = Input.get_axis("ui_down", "ui_up")
 	var kb_steer = Input.get_axis("ui_right", "ui_left")
 	
-	# Combine with custom joypad assignments (v3)
 	if gm:
 		var get_val = func(slot):
 			if slot.dev < 0: return 0.0
@@ -255,7 +242,7 @@ func _physics_process(delta):
 				# 1.1 Apply Suspension Force
 				apply_force(total_force, ray.global_position - global_position)
 				
-				# 1.2 Apply Downforce (Sticky logic for loops/pipes)
+				# 1.2 Apply Downforce
 				if is_on_sticky:
 					var downforce_dir = -hit_normal
 					apply_force(downforce_dir * downforce / raycasts.size(), ray.global_position - global_position)
@@ -275,7 +262,6 @@ func _physics_process(delta):
 					apply_force(accel_force, ray.global_position - global_position)
 				
 				var lateral_vel = right_dir.dot(wheel_velocity)
-				# Taper grip at low speeds to prevent physics jitter
 				var low_speed_taper = clamp(speed_cur / 2.0, 0.1, 1.0)
 				var grip_force = -right_dir * lateral_vel * grip * mass * low_speed_taper
 				apply_force(grip_force, ray.global_position - global_position)
@@ -294,6 +280,41 @@ func _physics_process(delta):
 	if !on_ground:
 		var air_torque = Vector3.ZERO
 		apply_torque(global_basis * air_torque * mass)
+
+func _update_engine_audio(delta, speed_kmh):
+	var throttle = abs(engine_input)
+	
+	# Gear thresholds (km/h)
+	var gear_thresholds = [0.0, 60.0, 110.0, 170.0, 250.0, 450.0]
+	var gear_count = gear_thresholds.size() - 1
+	
+	# Determine gear based on speed
+	var new_gear = 1
+	for i in range(1, gear_thresholds.size()):
+		if speed_kmh < gear_thresholds[i]:
+			new_gear = i
+			break
+		else:
+			new_gear = gear_count
+			
+	if new_gear != current_gear:
+		current_gear = new_gear
+		# Slight RPM dip on shift
+		engine_rpm *= 0.6
+		
+	# RPM within gear
+	var gear_min = gear_thresholds[current_gear - 1]
+	var gear_max = gear_thresholds[current_gear]
+	
+	var gear_t = (speed_kmh - gear_min) / (gear_max - gear_min)
+	var target_rpm = lerp(0.1, 1.0, clamp(gear_t, 0.0, 1.0))
+	
+	# Smooth RPM
+	engine_rpm = lerp(engine_rpm, target_rpm, 10.0 * delta)
+	
+	engine_player.rpm = engine_rpm
+	engine_player.throttle = throttle
+	engine_player.volume_db = -10 + clamp(speed_kmh / 20.0, 0, 10)
 
 func _check_track_block(block):
 	var gm = get_node_or_null("/root/GameManager")
