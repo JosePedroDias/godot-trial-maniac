@@ -7,7 +7,7 @@ extends RigidBody3D
 @export var wheel_radius: float = 0.3
 
 @export_group("Engine")
-@export var engine_power: float = 15000.0
+@export var engine_power: float = 18000.0
 @export var max_speed: float = 120.0
 @export var booster_force: float = 20000.0
 @export var downforce: float = 10000.0
@@ -92,11 +92,12 @@ func _setup_audio():
 	skid_stream.data = s_data
 	skid_stream.loop_end = s_len
 	skid_player.stream = skid_stream
-	skid_player.volume_db = -80 # Start silent
+	skid_player.unit_size = 30.0
 	skid_player.play()
 	
 	# 3. Braking Sound (High pitch squeal)
 	var brake_player = AudioStreamPlayer3D.new()
+	brake_player.unit_size = 30.0
 	add_child(brake_player)
 	self.set_meta("brake_player", brake_player)
 	var brake_stream = AudioStreamWAV.new()
@@ -144,10 +145,18 @@ func _setup_audio():
 func _physics_process(delta):
 	var gm = get_node_or_null("/root/GameManager")
 	var sfx_enabled = gm.sfx_enabled if gm else true
+	
+	var on_ground = false
+	for ray in raycasts:
+		if ray.is_colliding():
+			on_ground = true
+			break
 
 	# Update Audio
 	var speed_cur = linear_velocity.length()
 	var speed_kmh = speed_cur * 3.6
+	var forward_speed = global_basis.z.dot(linear_velocity)
+	
 	if gm:
 		gm.speed_updated.emit(speed_kmh) # Convert m/s to km/h
 	
@@ -162,18 +171,22 @@ func _physics_process(delta):
 		if lateral_speed > 3.0:
 			is_skidding = true
 		
-		# Brake squeal logic
-		var forward_speed = global_basis.z.dot(linear_velocity)
+		# Brake logic: braking while moving forward or throttle while moving back
 		if (forward_speed > 2.0 and engine_input < -0.1) or (forward_speed < -2.0 and engine_input > 0.1):
 			is_braking = true
+		
+		# Apply actual braking force opposite to velocity
+		if is_braking:
+			var brake_force = -linear_velocity.normalized() * engine_power * 0.67
+			apply_central_force(brake_force)
 	
 	if skid_player and sfx_enabled:
-		var target_skid_vol = -5 if is_skidding else -80
+		var target_skid_vol = 5 if (is_skidding and on_ground) else -80
 		skid_player.volume_db = lerp(skid_player.volume_db, float(target_skid_vol), 10.0 * delta)
 	
 	var brake_plr = get_meta("brake_player") as AudioStreamPlayer3D
 	if brake_plr and sfx_enabled:
-		var target_brake_vol = -10 if is_braking else -80
+		var target_brake_vol = 0 if (is_braking and on_ground) else -80
 		brake_plr.volume_db = lerp(brake_plr.volume_db, float(target_brake_vol), 15.0 * delta)
 
 	# Out of bounds check
@@ -211,7 +224,6 @@ func _physics_process(delta):
 		engine_input = kb_engine
 		steering_input = lerp(steering_input, kb_steer, steering_speed * delta)
 	
-	var on_ground = false
 	var is_on_sticky = false
 	
 	for i in range(raycasts.size()):
@@ -263,12 +275,40 @@ func _physics_process(delta):
 				var right_dir = wheel_basis.x
 				
 				if abs(engine_input) > 0.05:
-					var accel_force = forward_dir * engine_input * engine_power
-					apply_force(accel_force, ray.global_position - global_position)
+					# engine_input > 0 is forward, < 0 is reverse/brake.
+					# Allow engine power if we are pushing in the same direction we're moving,
+					# OR if we are nearly stopped (allowing us to start moving).
+					var starting_from_stop = abs(forward_speed) < 1.0
+					var pushing_forward = forward_speed > 0 and engine_input > 0
+					var pushing_reverse = forward_speed < 0 and engine_input < 0
+					
+					if starting_from_stop or pushing_forward or pushing_reverse:
+						var accel_force = forward_dir * engine_input * engine_power
+						apply_force(accel_force, ray.global_position - global_position)
 				
 				var lateral_vel = right_dir.dot(wheel_velocity)
-				var low_speed_taper = clamp(speed_cur / 2.0, 0.1, 1.0)
-				var grip_force = -right_dir * lateral_vel * grip * mass * low_speed_taper
+				# Stronger taper at low speeds to prevent physics jitter
+				var low_speed_taper = clamp(speed_cur / 5.0, 0.0, 1.0)
+				
+				# Drifting logic: reduce rear grip when braking
+				var grip_factor = 1.0
+				if i >= 2: # Rear wheels
+					if is_braking:
+						grip_factor = 0.15 # Slightly more than before for stability
+					
+					# Maintain drift with throttle
+					if is_skidding and engine_input > 0.1:
+						grip_factor = min(grip_factor, 0.5)
+					
+					# Recovery: increase grip as we align with movement
+					if speed_cur > 1.0:
+						var move_dir = linear_velocity.normalized()
+						var alignment = abs(forward_dir.dot(move_dir))
+						# Only recover if we aren't intentionally sliding
+						if !is_braking:
+							grip_factor = lerp(grip_factor, 1.0, alignment)
+				
+				var grip_force = -right_dir * lateral_vel * grip * mass * low_speed_taper * grip_factor
 				apply_force(grip_force, ray.global_position - global_position)
 				
 				wheel.global_position = hit_point + hit_normal * wheel_radius
