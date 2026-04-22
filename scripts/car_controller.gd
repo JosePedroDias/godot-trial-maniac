@@ -183,11 +183,11 @@ func _physics_process(delta):
 		return
 
 	# Get Input
-	var kb_engine = Input.get_axis("ui_down", "ui_up")
-	var kb_steer = Input.get_axis("ui_right", "ui_left")
-	
 	if gm:
 		var get_val = func(slot):
+			if slot.get("is_kb", false):
+				return 1.0 if Input.is_key_pressed(slot.key) else 0.0
+			
 			if slot.dev < 0: return 0.0
 			if slot.get("is_btn", false):
 				return 1.0 if Input.is_joy_button_pressed(slot.dev, slot.btn) else 0.0
@@ -201,17 +201,13 @@ func _physics_process(delta):
 		var t_val = get_val.call(gm.throttle)
 		var b_val = get_val.call(gm.brake)
 		
-		if gm.steer_left.dev >= 0 or gm.steer_right.dev >= 0:
-			var joy_steer_combined = s_left - s_right
-			steering_input = lerp(steering_input, joy_steer_combined, steering_speed * delta * 2.0)
-		else:
-			steering_input = lerp(steering_input, kb_steer, steering_speed * delta)
-			
-		if gm.throttle.dev >= 0 or gm.brake.dev >= 0:
-			engine_input = t_val - b_val
-		else:
-			engine_input = kb_engine
+		var target_steer = s_left - s_right
+		var steer_speed = steering_speed * 2.0 if gm.steer_left.get("is_kb", false) else steering_speed
+		steering_input = lerp(steering_input, target_steer, steer_speed * delta)
+		engine_input = t_val - b_val
 	else:
+		var kb_engine = Input.get_axis("ui_down", "ui_up")
+		var kb_steer = Input.get_axis("ui_right", "ui_left")
 		engine_input = kb_engine
 		steering_input = lerp(steering_input, kb_steer, steering_speed * delta)
 	
