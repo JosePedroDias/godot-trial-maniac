@@ -22,7 +22,9 @@ sky_material = SubResource("ProceduralSkyMaterial_kd68p")
 [sub_resource type="Environment" id="Environment_d3voq"]
 background_mode = 2
 sky = SubResource("Sky_tgmmc")
-ambient_light_source = 3
+ambient_light_source = 2
+ambient_light_color = Color(0.5, 0.5, 0.5, 1)
+ambient_light_energy = 2.0
 tonemap_mode = 3
 
 [node name="Track1" type="Node3D" unique_id=733251138]
