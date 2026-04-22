@@ -27,32 +27,32 @@ func _fill_buffer():
 	if frames_available == 0:
 		return
 		
-	# Base frequency for idle is around 40Hz
-	# Max frequency around 200Hz
-	var base_freq = lerp(40.0, 200.0, rpm)
+	# Frequency scaling based on RPM
+	var base_freq = lerp(30.0, 160.0, rpm)
 	
 	for i in range(frames_available):
 		var increment = base_freq / sample_rate
 		phase = fmod(phase + increment, 1.0)
 		
-		# Base + harmonics
-		var s = sin(phase * TAU)
-		s += 0.5 * sin(fmod(phase * 2.0, 1.0) * TAU)
-		s += 0.25 * sin(fmod(phase * 3.0, 1.0) * TAU)
-		s += 0.125 * sin(fmod(phase * 4.0, 1.0) * TAU)
+		# Stable Sawtooth Synthesis
+		var s1 = 2.0 * (phase - floor(0.5 + phase))
+		var phase2 = fmod(phase + 0.35, 1.0)
+		var s2 = 2.0 * (phase2 - floor(0.5 + phase2))
 		
-		# Modulation: add some noise
-		var noise = (randf() - 0.5) * 0.1
+		# Combine for a fixed "engine" timbre
+		var s = s1 * 0.6 + s2 * 0.4
+		s += 0.3 * sin(phase * 0.5 * TAU) # Sub-bass weight
+		
+		# Constant Soft Clipping for a consistent grit
+		# We use a fixed drive level instead of throttle-based
+		s *= 2.0 
+		s = s / (1.0 + abs(s))
+		
+		# Subtle constant mechanical noise
+		var noise = (randf() - 0.5) * 0.05
 		s += noise
 		
-		# Soft clipping (Cubic distortion)
-		# Increase amplitude before clipping to get more "bite"
-		s = s * (1.2 + throttle * 0.8)
-		s = clamp(s, -1.5, 1.5)
-		s = s - (s * s * s / 3.0)
-		
-		# Final volume: significantly higher than before
-		# AudioStreamPlayer3D handles spatialization, we just need a strong signal
-		var volume = 0.4 + throttle * 0.3
-		var sample = Vector2(s, s) * volume
+		# The resulting sample has a constant character, 
+		# only the 'base_freq' changes with speed.
+		var sample = Vector2(s, s) * 0.7
 		playback.push_frame(sample)

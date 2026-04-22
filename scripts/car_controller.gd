@@ -285,36 +285,15 @@ func _physics_process(delta):
 func _update_engine_audio(delta, speed_kmh):
 	var throttle = abs(engine_input)
 	
-	# Gear thresholds (km/h)
-	var gear_thresholds = [0.0, 60.0, 110.0, 170.0, 250.0, 450.0]
-	var gear_count = gear_thresholds.size() - 1
+	# Direct linear mapping from speed to RPM (0 to 200 km/h range)
+	var target_rpm = clamp(speed_kmh / 200.0, 0.0, 1.0)
 	
-	# Determine gear based on speed
-	var new_gear = 1
-	for i in range(1, gear_thresholds.size()):
-		if speed_kmh < gear_thresholds[i]:
-			new_gear = i
-			break
-		else:
-			new_gear = gear_count
-			
-	if new_gear != current_gear:
-		current_gear = new_gear
-		# Slight RPM dip on shift
-		engine_rpm *= 0.6
-		
-	# RPM within gear
-	var gear_min = gear_thresholds[current_gear - 1]
-	var gear_max = gear_thresholds[current_gear]
-	
-	var gear_t = (speed_kmh - gear_min) / (gear_max - gear_min)
-	var target_rpm = lerp(0.1, 1.0, clamp(gear_t, 0.0, 1.0))
-	
-	# Smooth RPM
+	# Smooth RPM transition
 	engine_rpm = lerp(engine_rpm, target_rpm, 10.0 * delta)
 	
 	engine_player.rpm = engine_rpm
 	engine_player.throttle = throttle
+	# Keep the volume scaling based on speed for realism
 	engine_player.volume_db = -10 + clamp(speed_kmh / 20.0, 0, 10)
 
 func _check_track_block(block):
