@@ -26,6 +26,7 @@ extends RigidBody3D
 
 var steering_input = 0.0
 var engine_input = 0.0
+var fall_timer: float = 0.0
 
 var engine_player: AudioStreamPlayer3D
 var skid_player: AudioStreamPlayer3D
@@ -210,11 +211,15 @@ func _physics_process(delta):
 			resistance *= 2.0 # Extra resistance when coasting
 		apply_central_force(resistance)
 		
-	# Out of bounds check
-	if global_position.y < -20.0:
-		if gm:
-			gm.reset_race()
-		return
+	# Fall detection (ditch fixed Y < -20 check)
+	if !on_ground and linear_velocity.y < -5.0:
+		fall_timer += delta
+		if fall_timer > 2.0:
+			if gm: gm.reset_race()
+			fall_timer = 0.0
+			return
+	else:
+		fall_timer = 0.0
 
 	# Get Input
 	if gm:

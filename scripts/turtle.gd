@@ -36,15 +36,18 @@ func move_forward(distance: float) -> void:
 
 ## Rotates the turtle around its local Y-axis (Yaw).
 func turn_left(angle_degrees: float) -> void:
-	transform.basis = transform.basis.rotated(transform.basis.y, deg_to_rad(angle_degrees))
+	transform = transform.rotated_local(Vector3.UP, deg_to_rad(angle_degrees))
+	transform.basis = transform.basis.orthonormalized()
 
 ## Rotates the turtle around its local X-axis (Pitch).
 func turn_up(angle_degrees: float) -> void:
-	transform.basis = transform.basis.rotated(transform.basis.x, deg_to_rad(angle_degrees))
+	transform = transform.rotated_local(Vector3.RIGHT, deg_to_rad(angle_degrees))
+	transform.basis = transform.basis.orthonormalized()
 
 ## Rotates the turtle around its local Z-axis (Roll).
 func roll(angle_degrees: float) -> void:
-	transform.basis = transform.basis.rotated(transform.basis.z, deg_to_rad(angle_degrees))
+	transform = transform.rotated_local(Vector3.BACK, deg_to_rad(angle_degrees))
+	transform.basis = transform.basis.orthonormalized()
 
 ## Saves the current state (transform) onto the stack.
 func push_state() -> void:
