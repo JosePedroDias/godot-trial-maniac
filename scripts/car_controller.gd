@@ -13,9 +13,9 @@ extends RigidBody3D
 @export var downforce: float = 10000.0
 
 @export_group("Steering")
-@export var steering_angle: float = 25.0
+@export var steering_angle: float = 27.5
 @export var steering_speed: float = 4.0
-@export var grip: float = 20.0
+@export var grip: float = 24.0
 
 @onready var raycasts = [
 	$RayCastFL, $RayCastFR, $RayCastRL, $RayCastRR
@@ -331,7 +331,7 @@ func _physics_process(delta):
 				var grip_factor = 1.0
 				if i >= 2: # Rear wheels
 					if is_braking:
-						grip_factor = 0.15 # Slightly more than before for stability
+						grip_factor = 0.18 # Increased from 0.15 to reduce drift
 					
 					# Maintain drift with throttle
 					if is_skidding and engine_input > 0.1:
