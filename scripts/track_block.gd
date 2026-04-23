@@ -4,6 +4,21 @@ enum BlockType { STRAIGHT, START, FINISH, BOOSTER, RAMP, CURVE_TIGHT, CURVE_WIDE
 
 @export var type: BlockType = BlockType.STRAIGHT
 
+func _ready():
+	if type == BlockType.START or type == BlockType.FINISH:
+		var area = get_node_or_null("Gate/DetectionArea")
+		if area:
+			area.body_entered.connect(_on_gate_body_entered)
+
+func _on_gate_body_entered(body):
+	if body.name == "Car":
+		var gm = get_node_or_null("/root/GameManager")
+		if gm:
+			if type == BlockType.START:
+				gm.start_race()
+			elif type == BlockType.FINISH:
+				gm.finish_race()
+
 func is_sticky() -> bool:
 	return type == BlockType.SIDE_PIPE or \
 		   type == BlockType.LOOP_360 or type == BlockType.LOOP_90

@@ -363,10 +363,6 @@ func _update_engine_audio(delta, speed_kmh):
 func _check_track_block(block):
 	var gm = get_node_or_null("/root/GameManager")
 	match block.type:
-		1: # START
-			if gm: gm.start_race()
-		2: # FINISH
-			if gm: gm.finish_race()
 		3: # BOOSTER
 			apply_central_force(global_basis.z * booster_force)
 

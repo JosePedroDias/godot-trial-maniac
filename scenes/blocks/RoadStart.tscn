@@ -53,45 +53,54 @@ albedo_color = Color(0.1, 0.8, 0.1, 1)
 material = SubResource("StandardMaterial3D_i5gqv")
 size = Vector3(8, 0.1, 0.1)
 
-[node name="RoadStart" type="StaticBody3D" unique_id=2065964011]
+[sub_resource type="BoxShape3D" id="BoxShape3D_chwrp"]
+size = Vector3(8, 2.1, 0.5)
+
+[node name="RoadStart" type="StaticBody3D" unique_id=2006429857]
 script = ExtResource("1_jtr2t")
 type = 1
 
-[node name="@MeshInstance3D@19" type="MeshInstance3D" parent="." unique_id=1060779524]
+[node name="@MeshInstance3D@20" type="MeshInstance3D" parent="." unique_id=1664657584]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
 mesh = SubResource("BoxMesh_dhrhf")
 
-[node name="@MeshInstance3D@20" type="MeshInstance3D" parent="." unique_id=483134653]
+[node name="@MeshInstance3D@21" type="MeshInstance3D" parent="." unique_id=1825633269]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.05, 0.725, 0)
 mesh = SubResource("BoxMesh_megug")
 
-[node name="@CollisionShape3D@21" type="CollisionShape3D" parent="." unique_id=1852690160]
+[node name="@CollisionShape3D@22" type="CollisionShape3D" parent="." unique_id=2136333376]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.05, 0.725, 0)
 shape = SubResource("BoxShape3D_ekaa0")
 
-[node name="@MeshInstance3D@22" type="MeshInstance3D" parent="." unique_id=2071798973]
+[node name="@MeshInstance3D@23" type="MeshInstance3D" parent="." unique_id=330543188]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.05, 0.725, 0)
 mesh = SubResource("BoxMesh_afs7a")
 
-[node name="@CollisionShape3D@23" type="CollisionShape3D" parent="." unique_id=341720868]
+[node name="@CollisionShape3D@24" type="CollisionShape3D" parent="." unique_id=41116376]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.05, 0.725, 0)
 shape = SubResource("BoxShape3D_j4rq6")
 
-[node name="@CollisionShape3D@24" type="CollisionShape3D" parent="." unique_id=1066148372]
+[node name="@CollisionShape3D@25" type="CollisionShape3D" parent="." unique_id=949040294]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
 shape = SubResource("BoxShape3D_3htkd")
 
-[node name="Gate" type="Node3D" parent="." unique_id=641075424]
+[node name="Gate" type="Node3D" parent="." unique_id=30683366]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
 
-[node name="@MeshInstance3D@16" type="MeshInstance3D" parent="Gate" unique_id=1644849529]
+[node name="@MeshInstance3D@16" type="MeshInstance3D" parent="Gate" unique_id=904971198]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.95, 1, 0)
 mesh = SubResource("BoxMesh_rgjno")
 
-[node name="@MeshInstance3D@17" type="MeshInstance3D" parent="Gate" unique_id=1950055287]
+[node name="@MeshInstance3D@17" type="MeshInstance3D" parent="Gate" unique_id=2008417220]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.95, 1, 0)
 mesh = SubResource("BoxMesh_kjvdd")
 
-[node name="@MeshInstance3D@18" type="MeshInstance3D" parent="Gate" unique_id=803946070]
+[node name="@MeshInstance3D@18" type="MeshInstance3D" parent="Gate" unique_id=1166747743]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0)
 mesh = SubResource("BoxMesh_fblpb")
+
+[node name="DetectionArea" type="Area3D" parent="Gate" unique_id=662736104]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.05, 0)
+
+[node name="@CollisionShape3D@19" type="CollisionShape3D" parent="Gate/DetectionArea" unique_id=55593476]
+shape = SubResource("BoxShape3D_chwrp")

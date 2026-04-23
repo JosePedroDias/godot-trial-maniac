@@ -257,7 +257,24 @@ func _create_gate(color: Color) -> Node3D:
 	var top = _create_mesh(Vector3(ROAD_WIDTH, 0.1, 0.1), color)
 	top.position = Vector3(0, 2, 0)
 	gate.add_child(top)
+	
+	# Add detection area
+	var area = Area3D.new()
+	area.name = "DetectionArea"
+	var col = CollisionShape3D.new()
+	var shape = BoxShape3D.new()
+	shape.size = Vector3(ROAD_WIDTH, 2.1, 0.5) # Matches user's ~2.1m height
+	col.shape = shape
+	area.add_child(col)
+	area.position = Vector3(0, 1.05, 0) # Center of 2.1m height, starts at road surface
+	gate.add_child(area)
+	
 	return gate
+
+func _set_owner_recursive(node: Node, owner: Node):
+	for child in node.get_children():
+		child.owner = owner
+		_set_owner_recursive(child, owner)
 
 func _save_block(name: String, type_idx: int, color: Color, color2: Color, size: Vector3 = Vector3(ROAD_WIDTH, ROAD_THICKNESS, ROAD_LENGTH), extra_node: Node = null, rotation: Vector3 = Vector3.ZERO, custom_mesh: MeshInstance3D = null, has_walls: bool = true):
 	var root = StaticBody3D.new()
@@ -318,8 +335,7 @@ func _save_block(name: String, type_idx: int, color: Color, color2: Color, size:
 		root.add_child(extra_node)
 		extra_node.owner = root
 		extra_node.position.y = mesh.position.y
-		for child in extra_node.get_children():
-			child.owner = root
+		_set_owner_recursive(extra_node, root)
 	
 	var packed = PackedScene.new()
 	packed.pack(root)
