@@ -3,13 +3,13 @@
 [ext_resource type="Script" path="res://scripts/track_block.gd" id="1_di856"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_gquh6"]
-albedo_color = Color(0.2, 0.2, 0.2, 1)
+vertex_color_use_as_albedo = true
 
 [sub_resource type="ArrayMesh" id="ArrayMesh_wnt7r"]
 _surfaces = [{
 "aabb": AABB(-4.1, -0.38637036, -7.830934, 8.2, 2.6984046, 7.895639),
-"attribute_data": PackedByteArray("AAAAAAAAAAAAAAA+AAAAAAAAgD4AAAAAAADAPgAAAAAAAAA/AAAAAAAAID8AAAAAAABAPwAAAAAAAGA/AAAAAAAAgD8AAAAAAAAAAM3MTD8AAAA+zcxMPwAAgD7NzEw/AADAPs3MTD8AAAA/zcxMPwAAID/NzEw/AABAP83MTD8AAGA/zcxMPwAAgD/NzEw/"),
-"format": 34359742487,
+"attribute_data": PackedByteArray("ZmZm/wAAAAAAAAAAZmZm/wAAAD4AAAAAMzMz/wAAgD4AAAAAMzMz/wAAwD4AAAAAZmZm/wAAAD8AAAAAZmZm/wAAID8AAAAAMzMz/wAAQD8AAAAAMzMz/wAAYD8AAAAAZmZm/wAAgD8AAAAAZmZm/wAAAADNzEw/ZmZm/wAAAD7NzEw/MzMz/wAAgD7NzEw/MzMz/wAAwD7NzEw/ZmZm/wAAAD/NzEw/ZmZm/wAAID/NzEw/MzMz/wAAQD/NzEw/MzMz/wAAYD/NzEw/ZmZm/wAAgD/NzEw/"),
+"format": 34359742495,
 "index_count": 48,
 "index_data": PackedByteArray("AAABAAkAAQAKAAkAAQACAAoAAgALAAoAAgADAAsAAwAMAAsAAwAEAAwABAANAAwABAAFAA0ABQAOAA0ABQAGAA4ABgAPAA4ABgAHAA8ABwAQAA8ABwAIABAACAARABAA"),
 "primitive": 3,
@@ -21,13 +21,13 @@ _surfaces = [{
 [sub_resource type="ConcavePolygonShape3D" id="ConcavePolygonShape3D_b7ju5"]
 data = PackedVector3Array(-4.1, 0.24149999, 0.0647, -4, 0.24149999, 0.0647, -4.1, 2.312, -7.6626997, -4, 0.24149999, 0.0647, -4, 2.312, -7.6626997, -4.1, 2.312, -7.6626997, -4, 0.24149999, 0.0647, -4, 0, 0, -4, 2.312, -7.6626997, -4, 0, 0, -4, 2.0706, -7.7274, -4, 2.312, -7.6626997, -4, 0, 0, 4, 0, 0, -4, 2.0706, -7.7274, 4, 0, 0, 4, 2.0706, -7.7274, -4, 2.0706, -7.7274, 4, 0, 0, 4, 0.24149999, 0.0647, 4, 2.0706, -7.7274, 4, 0.24149999, 0.0647, 4, 2.312, -7.6626997, 4, 2.0706, -7.7274, 4, 0.24149999, 0.0647, 4.1, 0.24149999, 0.0647, 4, 2.312, -7.6626997, 4.1, 0.24149999, 0.0647, 4.1, 2.312, -7.6626997, 4, 2.312, -7.6626997, 4.1, 0.24149999, 0.0647, 4.1, -0.38639998, -0.10349999, 4.1, 2.312, -7.6626997, 4.1, -0.38639998, -0.10349999, 4.1, 1.6841999, -7.8308997, 4.1, 2.312, -7.6626997, 4.1, -0.38639998, -0.10349999, -4.1, -0.38639998, -0.10349999, 4.1, 1.6841999, -7.8308997, -4.1, -0.38639998, -0.10349999, -4.1, 1.6841999, -7.8308997, 4.1, 1.6841999, -7.8308997, -4.1, -0.38639998, -0.10349999, -4.1, 0.24149999, 0.0647, -4.1, 1.6841999, -7.8308997, -4.1, 0.24149999, 0.0647, -4.1, 2.312, -7.6626997, -4.1, 1.6841999, -7.8308997)
 
-[node name="RoadRamp" type="StaticBody3D" unique_id=633611683]
+[node name="RoadRamp" type="StaticBody3D" unique_id=691048323]
 script = ExtResource("1_di856")
 type = 4
 
-[node name="@MeshInstance3D@34" type="MeshInstance3D" parent="." unique_id=1026789044]
+[node name="@MeshInstance3D@34" type="MeshInstance3D" parent="." unique_id=2046952772]
 material_override = SubResource("StandardMaterial3D_gquh6")
 mesh = SubResource("ArrayMesh_wnt7r")
 
-[node name="@CollisionShape3D@35" type="CollisionShape3D" parent="." unique_id=2101097926]
+[node name="@CollisionShape3D@35" type="CollisionShape3D" parent="." unique_id=1733073136]
 shape = SubResource("ConcavePolygonShape3D_b7ju5")

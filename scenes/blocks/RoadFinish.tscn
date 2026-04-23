@@ -3,13 +3,13 @@
 [ext_resource type="Script" path="res://scripts/track_block.gd" id="1_ch3mv"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_gdi5k"]
-albedo_color = Color(0.2, 0.2, 0.2, 1)
+vertex_color_use_as_albedo = true
 
 [sub_resource type="ArrayMesh" id="ArrayMesh_1jv2j"]
 _surfaces = [{
 "aabb": AABB(-4.1, -0.4, -4, 8.2, 0.65, 4),
-"attribute_data": PackedByteArray("AAAAAAAAAAAAAAA+AAAAAAAAgD4AAAAAAADAPgAAAAAAAAA/AAAAAAAAID8AAAAAAABAPwAAAAAAAGA/AAAAAAAAgD8AAAAAAAAAAM3MzD4AAAA+zczMPgAAgD7NzMw+AADAPs3MzD4AAAA/zczMPgAAID/NzMw+AABAP83MzD4AAGA/zczMPgAAgD/NzMw+"),
-"format": 34359742487,
+"attribute_data": PackedByteArray("ZmZm/wAAAAAAAAAAZmZm/wAAAD4AAAAAMzMz/wAAgD4AAAAAMzMz/wAAwD4AAAAAZmZm/wAAAD8AAAAAZmZm/wAAID8AAAAAMzMz/wAAQD8AAAAAMzMz/wAAYD8AAAAAZmZm/wAAgD8AAAAAZmZm/wAAAADNzMw+ZmZm/wAAAD7NzMw+MzMz/wAAgD7NzMw+MzMz/wAAwD7NzMw+ZmZm/wAAAD/NzMw+ZmZm/wAAID/NzMw+MzMz/wAAQD/NzMw+MzMz/wAAYD/NzMw+ZmZm/wAAgD/NzMw+"),
+"format": 34359742495,
 "index_count": 48,
 "index_data": PackedByteArray("AAABAAkAAQAKAAkAAQACAAoAAgALAAoAAgADAAsAAwAMAAsAAwAEAAwABAANAAwABAAFAA0ABQAOAA0ABQAGAA4ABgAPAA4ABgAHAA8ABwAQAA8ABwAIABAACAARABAA"),
 "primitive": 3,
@@ -39,33 +39,33 @@ size = Vector3(8.3, 0.1, 0.1)
 [sub_resource type="BoxShape3D" id="BoxShape3D_y65is"]
 size = Vector3(8, 3, 0.5)
 
-[node name="RoadFinish" type="StaticBody3D" unique_id=1768794015]
+[node name="RoadFinish" type="StaticBody3D" unique_id=88827011]
 script = ExtResource("1_ch3mv")
 type = 2
 
-[node name="@MeshInstance3D@20" type="MeshInstance3D" parent="." unique_id=1108489349]
+[node name="@MeshInstance3D@20" type="MeshInstance3D" parent="." unique_id=1145500472]
 material_override = SubResource("StandardMaterial3D_gdi5k")
 mesh = SubResource("ArrayMesh_1jv2j")
 
-[node name="@CollisionShape3D@21" type="CollisionShape3D" parent="." unique_id=1636015391]
+[node name="@CollisionShape3D@21" type="CollisionShape3D" parent="." unique_id=5588688]
 shape = SubResource("ConcavePolygonShape3D_tue10")
 
-[node name="Gate" type="Node3D" parent="." unique_id=874467157]
+[node name="Gate" type="Node3D" parent="." unique_id=1377595524]
 
-[node name="@MeshInstance3D@16" type="MeshInstance3D" parent="Gate" unique_id=121642775]
+[node name="@MeshInstance3D@16" type="MeshInstance3D" parent="Gate" unique_id=1604844866]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.15, 1, 0)
 mesh = SubResource("BoxMesh_lcwd8")
 
-[node name="@MeshInstance3D@17" type="MeshInstance3D" parent="Gate" unique_id=1881452516]
+[node name="@MeshInstance3D@17" type="MeshInstance3D" parent="Gate" unique_id=2067566973]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.15, 1, 0)
 mesh = SubResource("BoxMesh_cwltg")
 
-[node name="@MeshInstance3D@18" type="MeshInstance3D" parent="Gate" unique_id=1775133263]
+[node name="@MeshInstance3D@18" type="MeshInstance3D" parent="Gate" unique_id=1121795407]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0)
 mesh = SubResource("BoxMesh_o1lx7")
 
-[node name="DetectionArea" type="Area3D" parent="Gate" unique_id=1178685183]
+[node name="DetectionArea" type="Area3D" parent="Gate" unique_id=1759113716]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
 
-[node name="@CollisionShape3D@19" type="CollisionShape3D" parent="Gate/DetectionArea" unique_id=952634340]
+[node name="@CollisionShape3D@19" type="CollisionShape3D" parent="Gate/DetectionArea" unique_id=77135475]
 shape = SubResource("BoxShape3D_y65is")

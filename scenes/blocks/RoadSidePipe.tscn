@@ -3,13 +3,13 @@
 [ext_resource type="Script" path="res://scripts/track_block.gd" id="1_2vy4u"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_poo50"]
-albedo_color = Color(0.2, 0.2, 0.2, 1)
+vertex_color_use_as_albedo = true
 
 [sub_resource type="ArrayMesh" id="ArrayMesh_4d11y"]
 _surfaces = [{
 "aabb": AABB(-4, 0, -8, 8, 8, 8),
-"attribute_data": PackedByteArray("AAAAAAAAAAAAAAA+AAAAAAAAgD4AAAAAAADAPgAAAAAAAAA/AAAAAAAAID8AAAAAAABAPwAAAAAAAGA/AAAAAAAAgD8AAAAAAAAAAM3MTD8AAAA+zcxMPwAAgD7NzEw/AADAPs3MTD8AAAA/zcxMPwAAID/NzEw/AABAP83MTD8AAGA/zcxMPwAAgD/NzEw/"),
-"format": 34359742487,
+"attribute_data": PackedByteArray("MzMz/wAAAAAAAAAAMzMz/wAAAD4AAAAAMzMz/wAAgD4AAAAAMzMz/wAAwD4AAAAAMzMz/wAAAD8AAAAAMzMz/wAAID8AAAAAMzMz/wAAQD8AAAAAMzMz/wAAYD8AAAAAMzMz/wAAgD8AAAAAMzMz/wAAAADNzEw/MzMz/wAAAD7NzEw/MzMz/wAAgD7NzEw/MzMz/wAAwD7NzEw/MzMz/wAAAD/NzEw/MzMz/wAAID/NzEw/MzMz/wAAQD/NzEw/MzMz/wAAYD/NzEw/MzMz/wAAgD/NzEw/"),
+"format": 34359742495,
 "index_count": 48,
 "index_data": PackedByteArray("AAABAAkAAQAKAAkAAQACAAoAAgALAAoAAgADAAsAAwAMAAsAAwAEAAwABAANAAwABAAFAA0ABQAOAA0ABQAGAA4ABgAPAA4ABgAHAA8ABwAQAA8ABwAIABAACAARABAA"),
 "primitive": 3,
@@ -21,13 +21,13 @@ _surfaces = [{
 [sub_resource type="ConcavePolygonShape3D" id="ConcavePolygonShape3D_agq23"]
 data = PackedVector3Array(4, 4, 0, 2.8284, 6.8283997, 0, 4, 4, -8, 2.8284, 6.8283997, 0, 2.8284, 6.8283997, -8, 4, 4, -8, 2.8284, 6.8283997, 0, 0, 8, 0, 2.8284, 6.8283997, -8, 0, 8, 0, 0, 8, -8, 2.8284, 6.8283997, -8, 0, 8, 0, -2.8284, 6.8283997, 0, 0, 8, -8, -2.8284, 6.8283997, 0, -2.8284, 6.8283997, -8, 0, 8, -8, -2.8284, 6.8283997, 0, -4, 4, 0, -2.8284, 6.8283997, -8, -4, 4, 0, -4, 4, -8, -2.8284, 6.8283997, -8, -4, 4, 0, -2.8284, 1.1716, 0, -4, 4, -8, -2.8284, 1.1716, 0, -2.8284, 1.1716, -8, -4, 4, -8, -2.8284, 1.1716, 0, 0, 0, 0, -2.8284, 1.1716, -8, 0, 0, 0, 0, 0, -8, -2.8284, 1.1716, -8, 0, 0, 0, 2.8284, 1.1716, 0, 0, 0, -8, 2.8284, 1.1716, 0, 2.8284, 1.1716, -8, 0, 0, -8, 2.8284, 1.1716, 0, 4, 4, 0, 2.8284, 1.1716, -8, 4, 4, 0, 4, 4, -8, 2.8284, 1.1716, -8)
 
-[node name="RoadSidePipe" type="StaticBody3D" unique_id=174069185]
+[node name="RoadSidePipe" type="StaticBody3D" unique_id=1927508289]
 script = ExtResource("1_2vy4u")
 type = 9
 
-[node name="@MeshInstance3D@36" type="MeshInstance3D" parent="." unique_id=56990937]
+[node name="@MeshInstance3D@36" type="MeshInstance3D" parent="." unique_id=1168667695]
 material_override = SubResource("StandardMaterial3D_poo50")
 mesh = SubResource("ArrayMesh_4d11y")
 
-[node name="@CollisionShape3D@37" type="CollisionShape3D" parent="." unique_id=1771978553]
+[node name="@CollisionShape3D@37" type="CollisionShape3D" parent="." unique_id=2116244377]
 shape = SubResource("ConcavePolygonShape3D_agq23")

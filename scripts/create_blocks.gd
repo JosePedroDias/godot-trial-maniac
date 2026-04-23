@@ -8,41 +8,27 @@ const ROAD_THICKNESS = 0.4
 const WALL_HEIGHT = 0.25
 const WALL_THICKNESS = 0.1
 
-func _create_turtle() -> MeshTurtle:
+func _create_turtle(color: Color = Color(0.2, 0.2, 0.2)) -> MeshTurtle:
 	var turtle = MeshTurtle.new()
 	# Convention: Road surface at Y=0, walls ABOVE, thickness BELOW.
-	var p: Array[Vector2] = []
-	var hw = ROAD_WIDTH / 2.0
-	var wt = WALL_THICKNESS
-	var wh = WALL_HEIGHT
-	
-	p.append(Vector2(-hw - wt, wh))
-	p.append(Vector2(-hw, wh))
-	p.append(Vector2(-hw, 0))
-	p.append(Vector2(hw, 0))
-	p.append(Vector2(hw, wh))
-	p.append(Vector2(hw + wt, wh))
-	p.append(Vector2(hw + wt, -ROAD_THICKNESS))
-	p.append(Vector2(-hw - wt, -ROAD_THICKNESS))
-	p.append(Vector2(-hw - wt, wh))
-	
-	turtle.set_profile(p)
+	var res = MeshTurtle.create_road_profile(ROAD_WIDTH, ROAD_THICKNESS, WALL_HEIGHT, color)
+	turtle.set_profile(res.points, res.colors)
 	# Start at (0,0,0) facing -Z (Identity)
 	return turtle
 
 func _create_straight(length: float, color: Color) -> MeshInstance3D:
-	var turtle = _create_turtle()
+	var turtle = _create_turtle(color)
 	turtle.move_and_extrude(length)
 	
 	var mesh_node = MeshInstance3D.new()
 	mesh_node.mesh = turtle.commit_mesh()
 	var mat = StandardMaterial3D.new()
-	mat.albedo_color = color
+	mat.vertex_color_use_as_albedo = true
 	mesh_node.material_override = mat
 	return mesh_node
 
 func _create_curve(radius: float, angle_deg: float, is_left: bool, color: Color) -> MeshInstance3D:
-	var turtle = _create_turtle()
+	var turtle = _create_turtle(color)
 	var center_radius = radius + ROAD_WIDTH/2.0
 	var arc_len = deg_to_rad(abs(angle_deg)) * center_radius
 	
@@ -53,19 +39,19 @@ func _create_curve(radius: float, angle_deg: float, is_left: bool, color: Color)
 	var mesh_node = MeshInstance3D.new()
 	mesh_node.mesh = turtle.commit_mesh()
 	var mat = StandardMaterial3D.new()
-	mat.albedo_color = color
+	mat.vertex_color_use_as_albedo = true
 	mesh_node.material_override = mat
 	return mesh_node
 
 func _create_loop(radius: float, angle_deg: float, color: Color) -> MeshInstance3D:
-	var turtle = _create_turtle()
+	var turtle = _create_turtle(color)
 	var arc_len = deg_to_rad(abs(angle_deg)) * radius
 	turtle.smooth_step(0, angle_deg, 0, arc_len, 48)
 		
 	var mesh_node = MeshInstance3D.new()
 	mesh_node.mesh = turtle.commit_mesh()
 	var mat = StandardMaterial3D.new()
-	mat.albedo_color = color
+	mat.vertex_color_use_as_albedo = true
 	mesh_node.material_override = mat
 	return mesh_node
 
@@ -131,7 +117,7 @@ func _save_block(name: String, type_idx: int, mesh_node: MeshInstance3D, extra: 
 	root.free()
 
 func _create_ramp(length: float, angle_deg: float, color: Color) -> MeshInstance3D:
-	var turtle = _create_turtle()
+	var turtle = _create_turtle(color)
 	# Start slightly inclined to match previous block connection point?
 	# Actually, if we want it to start at Y=0, we just turn and move.
 	turtle.turn_up(angle_deg)
@@ -140,7 +126,7 @@ func _create_ramp(length: float, angle_deg: float, color: Color) -> MeshInstance
 	var mesh_node = MeshInstance3D.new()
 	mesh_node.mesh = turtle.commit_mesh()
 	var mat = StandardMaterial3D.new()
-	mat.albedo_color = color
+	mat.vertex_color_use_as_albedo = true
 	mesh_node.material_override = mat
 	return mesh_node
 
@@ -148,18 +134,20 @@ func _create_side_pipe(length: float, color: Color) -> MeshInstance3D:
 	var turtle = MeshTurtle.new()
 	# A pipe profile: 8 points in a circle
 	var p: Array[Vector2] = []
+	var c: Array[Color] = []
 	var radius = ROAD_WIDTH / 2.0
 	for i in range(9):
 		var a = float(i) * PI * 2.0 / 8.0
 		p.append(Vector2(cos(a) * radius, sin(a) * radius + radius)) # Bottom at Y=0
+		c.append(color)
 	
-	turtle.set_profile(p)
+	turtle.set_profile(p, c)
 	turtle.move_and_extrude(length)
 	
 	var mesh_node = MeshInstance3D.new()
 	mesh_node.mesh = turtle.commit_mesh()
 	var mat = StandardMaterial3D.new()
-	mat.albedo_color = color
+	mat.vertex_color_use_as_albedo = true
 	mesh_node.material_override = mat
 	return mesh_node
 

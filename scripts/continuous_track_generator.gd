@@ -25,7 +25,8 @@ func generate(seed_val: int = -1, max_steps: int = 100) -> String:
 
 	# Prepare MeshTurtle
 	var turtle = MeshTurtle.new()
-	turtle.set_profile(MeshTurtle.create_road_profile(ROAD_WIDTH, ROAD_THICKNESS, WALL_HEIGHT))
+	var profile_res = MeshTurtle.create_road_profile(ROAD_WIDTH, ROAD_THICKNESS, WALL_HEIGHT)
+	turtle.set_profile(profile_res.points, profile_res.colors)
 	
 	# Prepare Start Area
 	var car = track_root.get_node("Car")
@@ -166,7 +167,7 @@ func generate(seed_val: int = -1, max_steps: int = 100) -> String:
 	static_body.add_child(collision_shape)
 	
 	var mat = StandardMaterial3D.new()
-	mat.albedo_color = Color(0.15, 0.15, 0.15)
+	mat.vertex_color_use_as_albedo = true
 	mesh_instance.material_override = mat
 	
 	var track_node = track_root.get_node_or_null("Track")
