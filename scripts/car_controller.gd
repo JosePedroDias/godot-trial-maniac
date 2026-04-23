@@ -8,7 +8,7 @@ extends RigidBody3D
 
 @export_group("Engine")
 @export var engine_power: float = 18000.0
-@export var max_speed: float = 120.0
+@export var max_speed: float = 150.0
 @export var booster_force: float = 20000.0
 @export var downforce: float = 10000.0
 
@@ -161,6 +161,12 @@ func _physics_process(delta):
 	if gm:
 		gm.speed_updated.emit(speed_kmh) # Convert m/s to km/h
 	
+	# Speed Cap: Strict clamp to 150 km/h (41.66 m/s)
+	if speed_kmh > max_speed:
+		linear_velocity = linear_velocity.normalized() * (max_speed / 3.6)
+		speed_cur = linear_velocity.length()
+		speed_kmh = max_speed
+
 	if engine_player and sfx_enabled:
 		_update_engine_audio(delta, speed_kmh)
 	
@@ -305,7 +311,7 @@ func _physics_process(delta):
 				var forward_dir = wheel_basis.z
 				var right_dir = wheel_basis.x
 				
-				if abs(engine_input) > 0.05 and !is_braking:
+				if abs(engine_input) > 0.05 and !is_braking and speed_kmh < max_speed:
 					# engine_input > 0 is forward, < 0 is reverse/brake.
 					# Allow engine power if we are pushing in the same direction we're moving,
 					# OR if we are nearly stopped (allowing us to start moving).
