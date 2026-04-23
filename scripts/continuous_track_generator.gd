@@ -3,7 +3,7 @@ extends Node
 const MeshTurtle = preload("res://scripts/mesh_turtle.gd")
 
 const ROAD_WIDTH = 8.0
-const ROAD_THICKNESS = 0.2
+const ROAD_THICKNESS = 0.4
 const WALL_HEIGHT = 0.25
 const STEP_LENGTH = 6.0
 
@@ -39,7 +39,9 @@ func generate(seed_val: int = -1, max_steps: int = 100) -> String:
 	start_block.transform = turtle.get_transform()
 	
 	# 2. Setup Starting forbidden zone
-	# Just the platform points
+	centerline_points.append(turtle.get_position()) 
+	
+	# Platform behind start
 	turtle.push_state()
 	turtle.turn_left(180)
 	for i in range(5):
@@ -50,16 +52,15 @@ func generate(seed_val: int = -1, max_steps: int = 100) -> String:
 	# Actually extrude platform
 	turtle.push_state()
 	turtle.turn_left(180)
-	turtle.move_and_extrude(16.0)
+	turtle.move_and_extrude(20.0)
 	turtle.stop_extrusion() # BREAK CONNECTION here
 	turtle.pop_state()
-
 	
-	# Position Car
+	# Position Car on platform (y=2.0 to be safe)
 	var car_basis = Basis().rotated(Vector3.UP, PI)
-	car.transform = Transform3D(car_basis, Vector3(0, 1.0, 10.0))
+	car.transform = Transform3D(car_basis, Vector3(0, 2.0, 10.0))
 	
-	# 3. Main Flowing Generation Loop
+	# 3. Main Organic Generation Loop
 	var steps_placed = 0
 	var attempts = 0
 	
@@ -75,29 +76,31 @@ func generate(seed_val: int = -1, max_steps: int = 100) -> String:
 	
 	while steps_placed < max_steps and attempts < 2000:
 		if timer <= 0:
-			# Subtler yaw for wider, faster turns
-			tgt_yaw = rng.randf_range(-2.5, 2.5)
-			if rng.randf() < 0.5: tgt_yaw = 0.0
+			# Subtler targets to prevent spiraling
+			tgt_yaw = rng.randf_range(-3.5, 3.5)
+			if rng.randf() < 0.4: tgt_yaw = 0.0
 			
 			var h = turtle.get_position().y
-			if h < -6.0: tgt_pitch = rng.randf_range(0.5, 1.5)
-			elif h > 10.0: tgt_pitch = rng.randf_range(-1.5, -0.5)
+			if h < -5.0: tgt_pitch = rng.randf_range(1.0, 2.5)
+			elif h > 8.0: tgt_pitch = rng.randf_range(-2.5, -1.0)
 			else:
-				tgt_pitch = rng.randf_range(-1.5, 1.5)
-				if rng.randf() < 0.7: tgt_pitch = 0.0
+				tgt_pitch = rng.randf_range(-2.0, 2.0)
+				if rng.randf() < 0.6: tgt_pitch = 0.0
 			
 			tgt_roll = rng.randf_range(-3.0, 3.0)
-			if rng.randf() < 0.8: tgt_roll = 0.0
+			if rng.randf() < 0.7: tgt_roll = 0.0
 			
-			timer = rng.randi_range(10, 20)
+			timer = rng.randi_range(8, 16)
 		
-		# Very slow transitions
-		cur_yaw = lerp(cur_yaw, tgt_yaw, 0.04)
-		cur_pitch = lerp(cur_pitch, tgt_pitch, 0.06)
-		cur_roll = lerp(cur_roll, tgt_roll, 0.04)
+		# Slower, steadier transitions
+		cur_yaw = lerp(cur_yaw, tgt_yaw, 0.06)
+		cur_pitch = lerp(cur_pitch, tgt_pitch, 0.08)
+		cur_roll = lerp(cur_roll, tgt_roll, 0.06)
 		
-		# Straightening bias: pull cur_yaw towards 0 if we are far from targets
-		cur_yaw = lerp(cur_yaw, 0.0, 0.01)
+		# RELAXED STRAIGHTENING: Constantly pull towards level/forward (Reduced by 33%)
+		cur_yaw = lerp(cur_yaw, 0.0, 0.013)
+		cur_pitch = lerp(cur_pitch, 0.0, 0.013)
+		cur_roll = lerp(cur_roll, 0.0, 0.033)
 		
 		# Predict next point
 		turtle.push_state()
@@ -109,15 +112,15 @@ func generate(seed_val: int = -1, max_steps: int = 100) -> String:
 		var next_basis = turtle.get_transform().basis
 		turtle.pop_state()
 		
-		# Constraints
-		var too_steep = next_basis.y.dot(Vector3.UP) < 0.88
+		# Constraints (Tighten to ~25 degrees)
+		var too_steep = next_basis.y.dot(Vector3.UP) < 0.90
 		
-		# Collision (Larger margin for high speed)
+		# Collision
 		var collision = false
 		if not too_steep:
 			for i in range(centerline_points.size()):
-				if i > centerline_points.size() - 12: continue
-				if next_p.distance_to(centerline_points[i]) < ROAD_WIDTH * 2.0:
+				if i > centerline_points.size() - 15: continue
+				if next_p.distance_to(centerline_points[i]) < ROAD_WIDTH * 1.8:
 					collision = true
 					break
 		
@@ -128,10 +131,11 @@ func generate(seed_val: int = -1, max_steps: int = 100) -> String:
 			timer -= 1
 			attempts = 0
 		else:
-			tgt_yaw = -tgt_yaw * 1.5
+			# Recover
+			tgt_yaw = -cur_yaw * 1.2
 			tgt_pitch = -cur_pitch * 0.5
 			tgt_roll = -cur_roll
-			timer = 15
+			timer = 12
 			attempts += 1
 			
 	# 4. Place RoadlessFinish Block
