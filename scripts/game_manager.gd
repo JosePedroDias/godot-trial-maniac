@@ -10,8 +10,6 @@ var sfx_enabled = true
 var ghost_enabled = true
 
 var tracks = [
-	"res://scenes/track1.tscn", 
-	"res://scenes/track2.tscn",
 	"res://scenes/track_12345.tscn",
 	"res://scenes/track_54321.tscn",
 	"res://scenes/track_98765.tscn",
