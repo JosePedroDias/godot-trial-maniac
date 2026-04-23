@@ -166,19 +166,33 @@ func _physics_process(delta):
 	# Skid and Brake detection
 	var is_skidding = false
 	var is_braking = false
+	
 	if speed_cur > 5.0:
 		var lateral_speed = abs(global_basis.x.dot(linear_velocity))
 		if lateral_speed > 3.0:
 			is_skidding = true
+	
+	# Brake logic: available at any speed
+	if (forward_speed > 0.1 and engine_input < -0.1) or (forward_speed < -0.1 and engine_input > 0.1):
+		is_braking = true
+	
+	# Apply actual braking force opposite to velocity
+	if is_braking:
+		var lateral_speed = abs(global_basis.x.dot(linear_velocity))
+		# If we are sliding sideways (drifting), don't kill the momentum too hard
+		# This allows the "loose rear" to swing around.
+		var drift_mod = lerp(1.0, 0.1, clamp(lateral_speed / 5.0, 0.0, 1.0))
 		
-		# Brake logic: braking while moving forward or throttle while moving back
-		if (forward_speed > 2.0 and engine_input < -0.1) or (forward_speed < -2.0 and engine_input > 0.1):
-			is_braking = true
+		# Stronger speed factor at very low speeds
+		var speed_factor = lerp(5.0, 1.0, clamp(speed_cur / 10.0, 0.0, 1.0))
+		var brake_force = -linear_velocity.normalized() * engine_power * 1.0 * speed_factor * drift_mod
+		apply_central_force(brake_force)
 		
-		# Apply actual braking force opposite to velocity
-		if is_braking:
-			var brake_force = -linear_velocity.normalized() * engine_power * 0.67
-			apply_central_force(brake_force)
+		# Snap to stop if we are crawling while braking (and not sliding)
+		if speed_cur < 2.0 and lateral_speed < 1.0:
+			linear_velocity *= 0.5
+			if speed_cur < 0.2:
+				linear_velocity = Vector3.ZERO
 	
 	if skid_player and sfx_enabled:
 		var target_skid_vol = 5 if (is_skidding and on_ground) else -80
@@ -189,6 +203,13 @@ func _physics_process(delta):
 		var target_brake_vol = 0 if (is_braking and on_ground) else -80
 		brake_plr.volume_db = lerp(brake_plr.volume_db, float(target_brake_vol), 15.0 * delta)
 
+	# Rolling resistance and Drag
+	if on_ground:
+		var resistance = -linear_velocity * mass * 0.2
+		if abs(engine_input) < 0.05:
+			resistance *= 2.0 # Extra resistance when coasting
+		apply_central_force(resistance)
+		
 	# Out of bounds check
 	if global_position.y < -20.0:
 		if gm:
@@ -274,7 +295,7 @@ func _physics_process(delta):
 				var forward_dir = wheel_basis.z
 				var right_dir = wheel_basis.x
 				
-				if abs(engine_input) > 0.05:
+				if abs(engine_input) > 0.05 and !is_braking:
 					# engine_input > 0 is forward, < 0 is reverse/brake.
 					# Allow engine power if we are pushing in the same direction we're moving,
 					# OR if we are nearly stopped (allowing us to start moving).
