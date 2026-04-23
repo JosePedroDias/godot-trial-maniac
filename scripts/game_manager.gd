@@ -9,7 +9,13 @@ var best_time = 0.0
 var sfx_enabled = true
 var ghost_enabled = true
 
-var tracks = ["res://scenes/track1.tscn", "res://scenes/track2.tscn"]
+var tracks = [
+	"res://scenes/track1.tscn", 
+	"res://scenes/track2.tscn",
+	"res://scenes/track_12345.tscn",
+	"res://scenes/track_54321.tscn",
+	"res://scenes/track_98765.tscn"
+]
 var current_track_index = 0
 var highscores = {} 
 const SAVE_PATH = "user://game_data.json"
@@ -47,6 +53,10 @@ func _ready():
 	Input.set_mouse_mode(Input.MOUSE_MODE_HIDDEN)
 	_load_data()
 	current_state = RaceState.PRE_START
+	# Use call_deferred to ensure the scene tree is fully loaded
+	_init_scene.call_deferred()
+
+func _init_scene():
 	if get_tree().current_scene:
 		_setup_ghost_actor()
 		var scene_path = get_tree().current_scene.scene_file_path
@@ -56,6 +66,12 @@ func _ready():
 			best_time = float(highscores.get(scene_path, 600.0))
 			_load_ghost(scene_path)
 			get_tree().create_timer(0.1).timeout.connect(_emit_initial_record)
+		_update_window_title()
+
+func _update_window_title():
+	var scene_path = tracks[current_track_index]
+	var track_name = scene_path.get_file().get_basename()
+	DisplayServer.window_set_title("Godot Trial Maniac - " + track_name)
 
 func _setup_ghost_actor():
 	if _ghost_actor: 
@@ -120,6 +136,7 @@ func next_track():
 	var next_path = tracks[current_track_index]
 	best_time = float(highscores.get(next_path, 600.0))
 	current_state = RaceState.PRE_START
+	_update_window_title()
 	get_tree().change_scene_to_file(next_path)
 
 func reset_race():
