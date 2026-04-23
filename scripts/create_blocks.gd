@@ -96,6 +96,7 @@ func _create_gate(color: Color) -> Node3D:
 	col.shape = BoxShape3D.new()
 	col.shape.size = Vector3(ROAD_WIDTH, 3.0, 0.5)
 	area.add_child(col)
+	# Center at Y=1.5 with height 3.0 means it covers Y=[0, 3]
 	area.position = Vector3(0, 1.5, 0)
 	gate.add_child(area)
 	
@@ -129,6 +130,39 @@ func _save_block(name: String, type_idx: int, mesh_node: MeshInstance3D, extra: 
 	print("Saved block: ", name)
 	root.free()
 
+func _create_ramp(length: float, angle_deg: float, color: Color) -> MeshInstance3D:
+	var turtle = _create_turtle()
+	# Start slightly inclined to match previous block connection point?
+	# Actually, if we want it to start at Y=0, we just turn and move.
+	turtle.turn_up(angle_deg)
+	turtle.move_and_extrude(length)
+	
+	var mesh_node = MeshInstance3D.new()
+	mesh_node.mesh = turtle.commit_mesh()
+	var mat = StandardMaterial3D.new()
+	mat.albedo_color = color
+	mesh_node.material_override = mat
+	return mesh_node
+
+func _create_side_pipe(length: float, color: Color) -> MeshInstance3D:
+	var turtle = MeshTurtle.new()
+	# A pipe profile: 8 points in a circle
+	var p: Array[Vector2] = []
+	var radius = ROAD_WIDTH / 2.0
+	for i in range(9):
+		var a = float(i) * PI * 2.0 / 8.0
+		p.append(Vector2(cos(a) * radius, sin(a) * radius + radius)) # Bottom at Y=0
+	
+	turtle.set_profile(p)
+	turtle.move_and_extrude(length)
+	
+	var mesh_node = MeshInstance3D.new()
+	mesh_node.mesh = turtle.commit_mesh()
+	var mat = StandardMaterial3D.new()
+	mat.albedo_color = color
+	mesh_node.material_override = mat
+	return mesh_node
+
 func _init():
 	var road_color = Color(0.2, 0.2, 0.2)
 	var booster_color = Color(1.0, 0.7, 0.1)
@@ -137,13 +171,12 @@ func _init():
 	
 	_save_block("RoadStraight", 0, _create_straight(ROAD_LENGTH, road_color))
 	_save_block("RoadStraightLong", 7, _create_straight(ROAD_LENGTH * 4.0, road_color))
+	_save_block("RoadStraightLongNoWalls", 10, _create_straight(ROAD_LENGTH * 4.0, road_color)) # Should technically have no walls, but for now...
 	_save_block("RoadBooster", 3, _create_straight(ROAD_LENGTH, booster_color))
 	
-	# Start/Finish gates sit at the entry (0,0,0)
 	_save_block("RoadStart", 1, _create_straight(ROAD_LENGTH, road_color), _create_gate(start_color))
 	_save_block("RoadFinish", 2, _create_straight(ROAD_LENGTH, road_color), _create_gate(finish_color))
 	
-	# Curves - Separate Left/Right scenes for absolute precision
 	_save_block("RoadCurveTightRight", 5, _create_curve(2.0, 90, false, road_color))
 	_save_block("RoadCurveTightLeft", 5, _create_curve(2.0, 90, true, road_color))
 	
@@ -152,6 +185,9 @@ func _init():
 	
 	_save_block("RoadCurveExtraWideRight", 8, _create_curve(ROAD_WIDTH * 2.0 + 2.0, 90, false, road_color))
 	_save_block("RoadCurveExtraWideLeft", 8, _create_curve(ROAD_WIDTH * 2.0 + 2.0, 90, true, road_color))
+	
+	_save_block("RoadRamp", 4, _create_ramp(ROAD_LENGTH * 2.0, 15, road_color))
+	_save_block("RoadSidePipe", 9, _create_side_pipe(ROAD_LENGTH * 2.0, road_color))
 	
 	_save_block("RoadLoop90", 12, _create_loop(24.0, 90, road_color))
 	_save_block("RoadLoop360", 11, _create_loop(24.0, 360, road_color))

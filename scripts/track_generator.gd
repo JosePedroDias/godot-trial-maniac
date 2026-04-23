@@ -140,7 +140,7 @@ func _setup_start_area(root, track_node, turtle, car):
 	turtle.pop_state()
 	
 	var car_basis = Basis().rotated(Vector3.UP, PI)
-	car.transform = Transform3D(car_basis, turtle.get_position() + Vector3(0, 1.5, 2.0))
+	car.transform = Transform3D(car_basis, turtle.get_position() + Vector3(0, 1.0, 2.0))
 	car.owner = root 
 	
 	var start_block = _place_block(track_node, turtle, "RoadStart")

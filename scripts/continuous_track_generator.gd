@@ -56,9 +56,11 @@ func generate(seed_val: int = -1, max_steps: int = 100) -> String:
 	turtle.stop_extrusion() # BREAK CONNECTION here
 	turtle.pop_state()
 	
-	# Position Car on platform (y=2.0 to be safe)
-	var car_basis = Basis().rotated(Vector3.UP, PI)
-	car.transform = Transform3D(car_basis, Vector3(0, 2.0, 10.0))
+	# Position Car on platform (y=1.0 to be safe)
+	# Platform is 20m long, extruded from (0,0,0) towards +Z (due to 180 turn)
+	# So platform ends at Z=20.
+	var car_basis = Basis().rotated(Vector3.UP, PI) # Facing -Z (towards the track)
+	car.transform = Transform3D(car_basis, Vector3(0, 1.0, 15.0))
 	
 	# 3. Main Organic Generation Loop
 	var steps_placed = 0
@@ -155,6 +157,8 @@ func generate(seed_val: int = -1, max_steps: int = 100) -> String:
 	
 	var static_body = StaticBody3D.new()
 	static_body.name = "StaticBody"
+	static_body.set_script(load("res://scripts/track_block.gd"))
+	static_body.type = 0 # STRAIGHT
 	mesh_instance.add_child(static_body)
 	
 	var collision_shape = CollisionShape3D.new()

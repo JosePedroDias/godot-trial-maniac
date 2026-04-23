@@ -64,7 +64,7 @@ func _add_slice() -> void:
 
 ## Moves forward and adds a geometry slice.
 func move_and_extrude(distance: float) -> void:
-	if _vertices.size() == 0:
+	if _vertices.size() == 0 or _skip_connection:
 		_add_slice()
 	
 	move_forward(distance)
@@ -73,7 +73,7 @@ func move_and_extrude(distance: float) -> void:
 
 ## Rotates and adds a slice (useful for turning in place).
 func turn_and_extrude(angle_degrees: float, steps: int = 1) -> void:
-	if _vertices.size() == 0:
+	if _vertices.size() == 0 or _skip_connection:
 		_add_slice()
 		
 	var step_angle = angle_degrees / float(steps)
@@ -83,7 +83,7 @@ func turn_and_extrude(angle_degrees: float, steps: int = 1) -> void:
 
 ## Rotates and moves simultaneously in small increments to create smooth geometry.
 func smooth_step(yaw: float, pitch: float, roll: float, distance: float, sub_steps: int = 4) -> void:
-	if _vertices.size() == 0:
+	if _vertices.size() == 0 or _skip_connection:
 		_add_slice()
 		
 	var step_yaw = yaw / float(sub_steps)
@@ -101,7 +101,6 @@ func smooth_step(yaw: float, pitch: float, roll: float, distance: float, sub_ste
 
 ## Returns the generated mesh.
 func commit_mesh() -> Mesh:
-	# No longer need generate_normals() as we provide them
 	return _st.commit()
 
 ## Static helper to create a standard road profile.
@@ -109,13 +108,22 @@ static func create_road_profile(width: float, thickness: float, wall_h: float = 
 	var p: Array[Vector2] = []
 	var hw = width / 2.0
 	
-	# Simple flat road
-	p.append(Vector2(-hw, thickness)) # Left top
-	p.append(Vector2(hw, thickness))  # Right top
-	
-	# If walls requested
+	# Profile points (X, Y)
 	if wall_h > 0:
-		p.insert(0, Vector2(-hw, thickness + wall_h))
-		p.append(Vector2(hw, thickness + wall_h))
+		p.append(Vector2(-hw - 0.1, wall_h))
+		p.append(Vector2(-hw, wall_h))
+		p.append(Vector2(-hw, 0))
+		p.append(Vector2(hw, 0))
+		p.append(Vector2(hw, wall_h))
+		p.append(Vector2(hw + 0.1, wall_h))
+		p.append(Vector2(hw + 0.1, -thickness))
+		p.append(Vector2(-hw - 0.1, -thickness))
+		p.append(Vector2(-hw - 0.1, wall_h))
+	else:
+		p.append(Vector2(-hw, 0))
+		p.append(Vector2(hw, 0))
+		p.append(Vector2(hw, -thickness))
+		p.append(Vector2(-hw, -thickness))
+		p.append(Vector2(-hw, 0))
 		
 	return p

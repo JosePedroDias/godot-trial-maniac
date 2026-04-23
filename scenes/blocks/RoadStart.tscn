@@ -39,33 +39,33 @@ size = Vector3(8.3, 0.1, 0.1)
 [sub_resource type="BoxShape3D" id="BoxShape3D_j4rq6"]
 size = Vector3(8, 3, 0.5)
 
-[node name="RoadStart" type="StaticBody3D" unique_id=324892481]
+[node name="RoadStart" type="StaticBody3D" unique_id=2069885074]
 script = ExtResource("1_jtr2t")
 type = 1
 
-[node name="@MeshInstance3D@12" type="MeshInstance3D" parent="." unique_id=69018726]
+[node name="@MeshInstance3D@14" type="MeshInstance3D" parent="." unique_id=750731071]
 material_override = SubResource("StandardMaterial3D_ij7u6")
 mesh = SubResource("ArrayMesh_dhrhf")
 
-[node name="@CollisionShape3D@13" type="CollisionShape3D" parent="." unique_id=206246997]
+[node name="@CollisionShape3D@15" type="CollisionShape3D" parent="." unique_id=1908334928]
 shape = SubResource("ConcavePolygonShape3D_q06no")
 
-[node name="Gate" type="Node3D" parent="." unique_id=1254357501]
+[node name="Gate" type="Node3D" parent="." unique_id=1753170727]
 
-[node name="@MeshInstance3D@8" type="MeshInstance3D" parent="Gate" unique_id=1980458557]
+[node name="@MeshInstance3D@10" type="MeshInstance3D" parent="Gate" unique_id=454199500]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.15, 1, 0)
 mesh = SubResource("BoxMesh_ekaa0")
 
-[node name="@MeshInstance3D@9" type="MeshInstance3D" parent="Gate" unique_id=1567058449]
+[node name="@MeshInstance3D@11" type="MeshInstance3D" parent="Gate" unique_id=1809341415]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.15, 1, 0)
 mesh = SubResource("BoxMesh_gk5iy")
 
-[node name="@MeshInstance3D@10" type="MeshInstance3D" parent="Gate" unique_id=1585864855]
+[node name="@MeshInstance3D@12" type="MeshInstance3D" parent="Gate" unique_id=2015700809]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0)
 mesh = SubResource("BoxMesh_afs7a")
 
-[node name="DetectionArea" type="Area3D" parent="Gate" unique_id=335242421]
+[node name="DetectionArea" type="Area3D" parent="Gate" unique_id=1215378046]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
 
-[node name="@CollisionShape3D@11" type="CollisionShape3D" parent="Gate/DetectionArea" unique_id=625720577]
+[node name="@CollisionShape3D@13" type="CollisionShape3D" parent="Gate/DetectionArea" unique_id=1874668094]
 shape = SubResource("BoxShape3D_j4rq6")
