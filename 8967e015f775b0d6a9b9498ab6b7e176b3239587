@@ -1,0 +1,1 @@
+{"v":4,"author":"jose.pedro.dias@gmail.com","week":"2026-04-20","files":{"scripts/car_controller.gd":{"ai_del_ai":0,"ai_del_usr":0,"usr_del_usr":3,"usr_del_ai":0,"ai_add":0,"usr_hashes":["e58bc9f0","65d5dc30","6db15d0c"],"usr_add":3,"usr_lines":[16,18,334]}},"agents":["user_only"],"source":"hook","orig_sha":"8967e015f775b0d6a9b9498ab6b7e176b3239587"}
