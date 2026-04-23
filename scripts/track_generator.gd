@@ -5,110 +5,102 @@ const Turtle = preload("res://scripts/turtle.gd")
 const ROAD_WIDTH = 8.0
 const ROAD_LENGTH = 4.0
 
-# Block definitions derived from scripts/create_blocks.gd (Turtle version)
-# Curves now start at (0, 0, R) and end at (R, 0, 0)
+# Block definitions with "Origin is Entry" convention
 var block_defs = {
 	"RoadStart": {
 		"path": "res://scenes/blocks/RoadStart.tscn",
-		"entry_t": Transform3D(Basis(), Vector3(0, 0, 2)),
-		"exit_t": Transform3D(Basis(), Vector3(0, 0, -2)),
-		"aabb": AABB(Vector3(-4, 0, -2), Vector3(8, 2.5, 4)),
+		"entry_t": Transform3D.IDENTITY,
+		"exit_t": Transform3D(Basis(), Vector3(0, 0, -4.0)),
+		"aabb": AABB(Vector3(-4, 0, -4), Vector3(8, 2.5, 4)),
 		"weight": 0
 	},
 	"RoadFinish": {
 		"path": "res://scenes/blocks/RoadFinish.tscn",
-		"entry_t": Transform3D(Basis(), Vector3(0, 0, 2)),
-		"exit_t": Transform3D(Basis(), Vector3(0, 0, -2)),
-		"aabb": AABB(Vector3(-4, 0, -2), Vector3(8, 2.5, 4)),
+		"entry_t": Transform3D.IDENTITY,
+		"exit_t": Transform3D(Basis(), Vector3(0, 0, -4.0)),
+		"aabb": AABB(Vector3(-4, 0, -4), Vector3(8, 2.5, 4)),
 		"weight": 0
 	},
 	"RoadStraight": {
 		"path": "res://scenes/blocks/RoadStraight.tscn",
-		"entry_t": Transform3D(Basis(), Vector3(0, 0, 2)),
-		"exit_t": Transform3D(Basis(), Vector3(0, 0, -2)),
-		"aabb": AABB(Vector3(-4, 0, -2), Vector3(8, 1, 4)),
-		"weight": 20
+		"entry_t": Transform3D.IDENTITY,
+		"exit_t": Transform3D(Basis(), Vector3(0, 0, -4.0)),
+		"aabb": AABB(Vector3(-4, 0, -4), Vector3(8, 1, 4)),
+		"weight": 10
 	},
 	"RoadStraightLong": {
 		"path": "res://scenes/blocks/RoadStraightLong.tscn",
-		"entry_t": Transform3D(Basis(), Vector3(0, 0, 8)),
-		"exit_t": Transform3D(Basis(), Vector3(0, 0, -8)),
-		"aabb": AABB(Vector3(-4, 0, -8), Vector3(8, 1, 16)),
-		"weight": 15
+		"entry_t": Transform3D.IDENTITY,
+		"exit_t": Transform3D(Basis(), Vector3(0, 0, -16.0)),
+		"aabb": AABB(Vector3(-4, 0, -16), Vector3(8, 1, 16)),
+		"weight": 8
 	},
 	"RoadBooster": {
 		"path": "res://scenes/blocks/RoadBooster.tscn",
-		"entry_t": Transform3D(Basis(), Vector3(0, 0, 2)),
-		"exit_t": Transform3D(Basis(), Vector3(0, 0, -2)),
-		"aabb": AABB(Vector3(-4, 0, -2), Vector3(8, 1, 4)),
+		"entry_t": Transform3D.IDENTITY,
+		"exit_t": Transform3D(Basis(), Vector3(0, 0, -4.0)),
+		"aabb": AABB(Vector3(-4, 0, -4), Vector3(8, 1, 4)),
 		"weight": 5
 	},
 	"RoadCurveTightRight": {
-		"path": "res://scenes/blocks/RoadCurveTight.tscn",
-		# radius 2.0 -> center_radius 6.0. Entry (0,0,6), Exit (6,0,0)
-		"entry_t": Transform3D(Basis(), Vector3(0, 0, 6)),
-		"exit_t": Transform3D(Basis().rotated(Vector3.UP, -PI/2.0), Vector3(6, 0, 0)),
-		"aabb": AABB(Vector3(0, 0, 0), Vector3(10, 1, 10)),
-		"weight": 5
+		"path": "res://scenes/blocks/RoadCurveTightRight.tscn",
+		"entry_t": Transform3D.IDENTITY,
+		"exit_t": Transform3D(Basis().rotated(Vector3.UP, -PI/2.0), Vector3(6, 0, -6)),
+		"aabb": AABB(Vector3(-4, 0, -10), Vector3(14, 1, 14)),
+		"weight": 15
 	},
 	"RoadCurveTightLeft": {
-		"path": "res://scenes/blocks/RoadCurveTight.tscn",
-		# Flip: Entry (6,0,0), Exit (0,0,6)
-		"entry_t": Transform3D(Basis().rotated(Vector3.UP, PI), Vector3(6, 0, 0)),
-		"exit_t": Transform3D(Basis().rotated(Vector3.UP, PI/2.0), Vector3(0, 0, 6)),
-		"aabb": AABB(Vector3(0, 0, 0), Vector3(10, 1, 10)),
-		"weight": 5
+		"path": "res://scenes/blocks/RoadCurveTightLeft.tscn",
+		"entry_t": Transform3D.IDENTITY,
+		"exit_t": Transform3D(Basis().rotated(Vector3.UP, PI/2.0), Vector3(-6, 0, -6)),
+		"aabb": AABB(Vector3(-10, 0, -10), Vector3(14, 1, 14)),
+		"weight": 15
 	},
 	"RoadCurveWideRight": {
-		"path": "res://scenes/blocks/RoadCurveWide.tscn",
-		# center_radius 14.0
-		"entry_t": Transform3D(Basis(), Vector3(0, 0, 14)),
-		"exit_t": Transform3D(Basis().rotated(Vector3.UP, -PI/2.0), Vector3(14, 0, 0)),
-		"aabb": AABB(Vector3(0, 0, 0), Vector3(18, 1, 18)),
-		"weight": 4
+		"path": "res://scenes/blocks/RoadCurveWideRight.tscn",
+		"entry_t": Transform3D.IDENTITY,
+		"exit_t": Transform3D(Basis().rotated(Vector3.UP, -PI/2.0), Vector3(14, 0, -14)),
+		"aabb": AABB(Vector3(-4, 0, -18), Vector3(22, 1, 22)),
+		"weight": 12
 	},
 	"RoadCurveWideLeft": {
-		"path": "res://scenes/blocks/RoadCurveWide.tscn",
-		"entry_t": Transform3D(Basis().rotated(Vector3.UP, PI), Vector3(14, 0, 0)),
-		"exit_t": Transform3D(Basis().rotated(Vector3.UP, PI/2.0), Vector3(0, 0, 14)),
-		"aabb": AABB(Vector3(0, 0, 0), Vector3(18, 1, 18)),
-		"weight": 4
+		"path": "res://scenes/blocks/RoadCurveWideLeft.tscn",
+		"entry_t": Transform3D.IDENTITY,
+		"exit_t": Transform3D(Basis().rotated(Vector3.UP, PI/2.0), Vector3(-14, 0, -14)),
+		"aabb": AABB(Vector3(-18, 0, -18), Vector3(22, 1, 22)),
+		"weight": 12
 	},
 	"RoadCurveExtraWideRight": {
-		"path": "res://scenes/blocks/RoadCurveExtraWide.tscn",
-		# center_radius 22.0
-		"entry_t": Transform3D(Basis(), Vector3(0, 0, 22)),
-		"exit_t": Transform3D(Basis().rotated(Vector3.UP, -PI/2.0), Vector3(22, 0, 0)),
-		"aabb": AABB(Vector3(0, 0, 0), Vector3(26, 1, 26)),
-		"weight": 3
+		"path": "res://scenes/blocks/RoadCurveExtraWideRight.tscn",
+		"entry_t": Transform3D.IDENTITY,
+		"exit_t": Transform3D(Basis().rotated(Vector3.UP, -PI/2.0), Vector3(22, 0, -22)),
+		"aabb": AABB(Vector3(-4, 0, -26), Vector3(30, 1, 30)),
+		"weight": 10
 	},
 	"RoadCurveExtraWideLeft": {
-		"path": "res://scenes/blocks/RoadCurveExtraWide.tscn",
-		"entry_t": Transform3D(Basis().rotated(Vector3.UP, PI), Vector3(22, 0, 0)),
-		"exit_t": Transform3D(Basis().rotated(Vector3.UP, PI/2.0), Vector3(0, 0, 22)),
-		"aabb": AABB(Vector3(0, 0, 0), Vector3(26, 1, 26)),
-		"weight": 3
+		"path": "res://scenes/blocks/RoadCurveExtraWideLeft.tscn",
+		"entry_t": Transform3D.IDENTITY,
+		"exit_t": Transform3D(Basis().rotated(Vector3.UP, PI/2.0), Vector3(-22, 0, -22)),
+		"aabb": AABB(Vector3(-26, 0, -26), Vector3(30, 1, 30)),
+		"weight": 10
 	}
 }
 
 var occupied_aabbs: Array[AABB] = []
 var rng = RandomNumberGenerator.new()
 
-func generate(seed_val: int = -1, max_blocks: int = 20) -> String:
-	if seed_val == -1:
-		seed_val = Time.get_ticks_msec()
+func generate(seed_val: int = -1, max_blocks: int = 25) -> String:
+	if seed_val == -1: seed_val = Time.get_ticks_msec()
 	rng.seed = seed_val
 	print("Generating track with seed: ", seed_val)
 
 	occupied_aabbs.clear()
 	_total_attempts = 0
 
-	# Load base track and instantiate
 	var base_scene = load("res://scenes/base_track.tscn")
 	var track_root = base_scene.instantiate()
 	track_root.name = "TrackScene"
 
-	# Find or create Track node
 	var track_node = track_root.get_node_or_null("Track")
 	if not track_node:
 		track_node = Node3D.new()
@@ -119,21 +111,18 @@ func generate(seed_val: int = -1, max_blocks: int = 20) -> String:
 	var car = track_root.get_node("Car")
 	var turtle = Turtle.new()
 	
-	# 0. Setup Start Area
 	_setup_start_area(track_root, track_node, turtle, car)
 	
-	# 1. Recursive Generation
 	_best_path_nodes = []
-	_generate_recursive(track_node, turtle, max_blocks - 3, 0, "RoadStraight") 
+	var success = _generate_recursive(track_node, turtle, max_blocks - 3, 0, "RoadStraight") 
 	
-	if _best_path_nodes.size() < (max_blocks - 3):
-		print("  [Warning] Backtracking limit. Completing from best path.")
+	if not success:
+		print("  [Warning] Backtracking limit. Path: ", _best_path_nodes.size())
 		turtle.set_position(_best_path_transform.origin)
 		turtle.set_orientation(_best_path_transform.basis)
 		_try_place_block(track_node, turtle, "RoadStraightLong", true)
 		_try_place_block(track_node, turtle, "RoadFinish", true)
 
-	# 2. Save Scene
 	var scene = PackedScene.new()
 	scene.pack(track_root)
 	var path = "res://scenes/track_%d.tscn" % seed_val
@@ -144,27 +133,23 @@ func generate(seed_val: int = -1, max_blocks: int = 20) -> String:
 	return path
 
 func _setup_start_area(root, track_node, turtle, car):
-	# Platform
 	turtle.push_state()
 	turtle.turn_left(180)
 	var platform = _place_block(track_node, turtle, "RoadStraight")
 	occupied_aabbs.append(_transform_aabb(platform.transform, block_defs["RoadStraight"].aabb))
 	turtle.pop_state()
 	
-	# Car (higher to sit on thicker road surface)
 	var car_basis = Basis().rotated(Vector3.UP, PI)
-	car.transform = Transform3D(car_basis, turtle.get_position() + Vector3(0, 1.5, 2.5))
+	car.transform = Transform3D(car_basis, turtle.get_position() + Vector3(0, 1.5, 2.0))
 	car.owner = root 
 	
-	# RoadStart
 	var start_block = _place_block(track_node, turtle, "RoadStart")
 	occupied_aabbs.append(_transform_aabb(start_block.transform, block_defs["RoadStart"].aabb))
 	
 	_try_place_block(track_node, turtle, "RoadStraight", true)
-	_try_place_block(track_node, turtle, "RoadStraight", true)
 
 var _total_attempts = 0
-const MAX_SEARCH_ATTEMPTS = 15000
+const MAX_SEARCH_ATTEMPTS = 50000
 var _best_path_nodes: Array[Node3D] = []
 var _best_path_transform: Transform3D = Transform3D.IDENTITY
 
@@ -183,12 +168,13 @@ func _generate_recursive(track_node: Node3D, turtle: Turtle, remaining: int, dep
 
 	if remaining <= 0:
 		if _try_place_block(track_node, turtle, "RoadFinish", false):
+			print("  [Final] Placing RoadFinish")
 			return true
 		return false
 
 	var options = _get_weighted_shuffled_blocks()
+
 	for block_name in options:
-		# Booster constraint
 		if block_name == "RoadBooster" and _is_curve(last_block_name): continue
 		if _is_curve(block_name) and last_block_name == "RoadBooster": continue
 
@@ -210,24 +196,32 @@ func _undo_last_placement(track_node: Node3D, turtle: Turtle):
 func _get_weighted_shuffled_blocks() -> Array[String]:
 	var pool: Array[String] = []
 	for b_name in block_defs:
-		if block_defs[b_name].weight > 0:
-			for i in range(block_defs[b_name].weight): pool.append(b_name)
-	pool.shuffle()
+		var w = block_defs[b_name].weight
+		if w > 0:
+			for i in range(w): pool.append(b_name)
+	
+	var shuffled: Array[String] = []
+	while pool.size() > 0:
+		var idx = rng.randi() % pool.size()
+		shuffled.append(pool[idx])
+		pool.remove_at(idx)
+		
 	var unique: Array[String] = []
-	for b in pool:
+	for b in shuffled:
 		if not unique.has(b): unique.append(b)
 	return unique
 
 func _try_place_block(root: Node3D, turtle: Turtle, block_name: String, force: bool = false) -> bool:
 	var def = block_defs[block_name]
-	var block_transform = turtle.get_transform() * def.entry_t.affine_inverse()
+	var block_transform = turtle.get_transform() 
 	var world_aabb = _transform_aabb(block_transform, def.aabb)
 	
 	if not force:
-		var check_aabb = world_aabb.grow(-0.1)
-		for i in range(occupied_aabbs.size()):
+		var check_aabb = world_aabb.grow(-0.4) 
+		for i in range(occupied_aabbs.size() - 1): 
 			if block_name == "RoadFinish" and i <= 3: continue
-			if occupied_aabbs[i].intersects(check_aabb): return false
+			if occupied_aabbs[i].intersects(check_aabb): 
+				return false
 	
 	_place_block(root, turtle, block_name)
 	occupied_aabbs.append(world_aabb)
@@ -236,9 +230,10 @@ func _try_place_block(root: Node3D, turtle: Turtle, block_name: String, force: b
 func _place_block(root: Node3D, turtle: Turtle, block_name: String) -> Node3D:
 	var def = block_defs[block_name]
 	var block = load(def.path).instantiate() as Node3D
+	block.name = block_name
 	root.add_child(block)
 	block.owner = root.owner if root.owner else root
-	block.transform = turtle.get_transform() * def.entry_t.affine_inverse()
+	block.transform = turtle.get_transform()
 	var exit_world = block.transform * def.exit_t
 	turtle.set_position(exit_world.origin)
 	turtle.set_orientation(exit_world.basis)

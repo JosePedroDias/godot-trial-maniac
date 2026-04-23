@@ -10,7 +10,7 @@ const WALL_THICKNESS = 0.1
 
 func _create_turtle() -> MeshTurtle:
 	var turtle = MeshTurtle.new()
-	# Road surface at Y=0, walls above, thickness below.
+	# Convention: Road surface at Y=0, walls ABOVE, thickness BELOW.
 	var p: Array[Vector2] = []
 	var hw = ROAD_WIDTH / 2.0
 	var wt = WALL_THICKNESS
@@ -27,11 +27,11 @@ func _create_turtle() -> MeshTurtle:
 	p.append(Vector2(-hw - wt, wh))
 	
 	turtle.set_profile(p)
+	# Start at (0,0,0) facing -Z (Identity)
 	return turtle
 
 func _create_straight(length: float, color: Color) -> MeshInstance3D:
 	var turtle = _create_turtle()
-	turtle.set_position(Vector3(0, 0, length/2.0))
 	turtle.move_and_extrude(length)
 	
 	var mesh_node = MeshInstance3D.new()
@@ -41,12 +41,14 @@ func _create_straight(length: float, color: Color) -> MeshInstance3D:
 	mesh_node.material_override = mat
 	return mesh_node
 
-func _create_curve(radius: float, angle_deg: float, color: Color) -> MeshInstance3D:
+func _create_curve(radius: float, angle_deg: float, is_left: bool, color: Color) -> MeshInstance3D:
 	var turtle = _create_turtle()
 	var center_radius = radius + ROAD_WIDTH/2.0
-	turtle.set_position(Vector3(0, 0, center_radius))
 	var arc_len = deg_to_rad(abs(angle_deg)) * center_radius
-	turtle.smooth_step(-angle_deg, 0, 0, arc_len, 32)
+	
+	# Turn Left (positive yaw) or Right (negative yaw)
+	var yaw = angle_deg if is_left else -angle_deg
+	turtle.smooth_step(yaw, 0, 0, arc_len, 32)
 	
 	var mesh_node = MeshInstance3D.new()
 	mesh_node.mesh = turtle.commit_mesh()
@@ -136,11 +138,21 @@ func _init():
 	_save_block("RoadStraight", 0, _create_straight(ROAD_LENGTH, road_color))
 	_save_block("RoadStraightLong", 7, _create_straight(ROAD_LENGTH * 4.0, road_color))
 	_save_block("RoadBooster", 3, _create_straight(ROAD_LENGTH, booster_color))
+	
+	# Start/Finish gates sit at the entry (0,0,0)
 	_save_block("RoadStart", 1, _create_straight(ROAD_LENGTH, road_color), _create_gate(start_color))
 	_save_block("RoadFinish", 2, _create_straight(ROAD_LENGTH, road_color), _create_gate(finish_color))
-	_save_block("RoadCurveTight", 5, _create_curve(2.0, 90, road_color))
-	_save_block("RoadCurveWide", 6, _create_curve(ROAD_WIDTH + 2.0, 90, road_color))
-	_save_block("RoadCurveExtraWide", 8, _create_curve(ROAD_WIDTH * 2.0 + 2.0, 90, road_color))
+	
+	# Curves - Separate Left/Right scenes for absolute precision
+	_save_block("RoadCurveTightRight", 5, _create_curve(2.0, 90, false, road_color))
+	_save_block("RoadCurveTightLeft", 5, _create_curve(2.0, 90, true, road_color))
+	
+	_save_block("RoadCurveWideRight", 6, _create_curve(ROAD_WIDTH + 2.0, 90, false, road_color))
+	_save_block("RoadCurveWideLeft", 6, _create_curve(ROAD_WIDTH + 2.0, 90, true, road_color))
+	
+	_save_block("RoadCurveExtraWideRight", 8, _create_curve(ROAD_WIDTH * 2.0 + 2.0, 90, false, road_color))
+	_save_block("RoadCurveExtraWideLeft", 8, _create_curve(ROAD_WIDTH * 2.0 + 2.0, 90, true, road_color))
+	
 	_save_block("RoadLoop90", 12, _create_loop(24.0, 90, road_color))
 	_save_block("RoadLoop360", 11, _create_loop(24.0, 360, road_color))
 	
