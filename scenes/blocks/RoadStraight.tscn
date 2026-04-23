@@ -1,60 +1,32 @@
-[gd_scene format=3]
+[gd_scene format=4]
 
 [ext_resource type="Script" path="res://scripts/track_block.gd" id="1_f8f86"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_76lxt"]
 albedo_color = Color(0.2, 0.2, 0.2, 1)
 
-[sub_resource type="BoxMesh" id="BoxMesh_3pn70"]
-material = SubResource("StandardMaterial3D_76lxt")
-size = Vector3(8, 0.2, 4)
+[sub_resource type="ArrayMesh" id="ArrayMesh_3pn70"]
+_surfaces = [{
+"aabb": AABB(-4.1, -0.4, -2, 8.2, 0.65, 4),
+"attribute_data": PackedByteArray("AAAAAAAAAAAAAAA+AAAAAAAAgD4AAAAAAADAPgAAAAAAAAA/AAAAAAAAID8AAAAAAABAPwAAAAAAAGA/AAAAAAAAgD8AAAAAAAAAAM3MzD4AAAA+zczMPgAAgD7NzMw+AADAPs3MzD4AAAA/zczMPgAAID/NzMw+AABAP83MzD4AAGA/zczMPgAAgD/NzMw+"),
+"format": 34359742487,
+"index_count": 48,
+"index_data": PackedByteArray("AAABAAkAAQAKAAkAAQACAAoAAgALAAoAAgADAAsAAwAMAAsAAwAEAAwABAANAAwABAAFAA0ABQAOAA0ABQAGAA4ABgAPAA4ABgAHAA8ABwAQAA8ABwAIABAACAARABAA"),
+"primitive": 3,
+"uv_scale": Vector4(0, 0, 0, 0),
+"vertex_count": 18,
+"vertex_data": PackedByteArray("MzODwAAAgD4AAABAAACAwAAAgD4AAABAAACAwAAAAAAAAABAAACAQAAAAAAAAABAAACAQAAAgD4AAABAMzODQAAAgD4AAABAMzODQM3MzL4AAABAMzODwM3MzL4AAABAMzODwAAAgD4AAABAMzODwAAAgD4AAADAAACAwAAAgD4AAADAAACAwAAAAAAAAADAAACAQAAAAAAAAADAAACAQAAAgD4AAADAMzODQAAAgD4AAADAMzODQM3MzL4AAADAMzODwM3MzL4AAADAMzODwAAAgD4AAADA/3///wAA/7//f///AAD/v/9///8AAP+//3///wAA/7//f///AAD/v/9///8AAP+//3///wAA/7//f///AAD/v/9///8AAP+//3///wAA/7//f///AAD/v/9///8AAP+//3///wAA/7//f///AAD/v/9///8AAP+//3///wAA/7//f///AAD/v/9///8AAP+/")
+}]
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ruv38"]
-albedo_color = Color(0.36, 0.36, 0.36, 1)
+[sub_resource type="ConcavePolygonShape3D" id="ConcavePolygonShape3D_ruv38"]
+data = PackedVector3Array(-4.1, 0.25, 2, -4, 0.25, 2, -4.1, 0.25, -2, -4, 0.25, 2, -4, 0.25, -2, -4.1, 0.25, -2, -4, 0.25, 2, -4, 0, 2, -4, 0.25, -2, -4, 0, 2, -4, 0, -2, -4, 0.25, -2, -4, 0, 2, 4, 0, 2, -4, 0, -2, 4, 0, 2, 4, 0, -2, -4, 0, -2, 4, 0, 2, 4, 0.25, 2, 4, 0, -2, 4, 0.25, 2, 4, 0.25, -2, 4, 0, -2, 4, 0.25, 2, 4.1, 0.25, 2, 4, 0.25, -2, 4.1, 0.25, 2, 4.1, 0.25, -2, 4, 0.25, -2, 4.1, 0.25, 2, 4.1, -0.39999998, 2, 4.1, 0.25, -2, 4.1, -0.39999998, 2, 4.1, -0.39999998, -2, 4.1, 0.25, -2, 4.1, -0.39999998, 2, -4.1, -0.39999998, 2, 4.1, -0.39999998, -2, -4.1, -0.39999998, 2, -4.1, -0.39999998, -2, 4.1, -0.39999998, -2, -4.1, -0.39999998, 2, -4.1, 0.25, 2, -4.1, -0.39999998, -2, -4.1, 0.25, 2, -4.1, 0.25, -2, -4.1, -0.39999998, -2)
 
-[sub_resource type="BoxMesh" id="BoxMesh_d2ndy"]
-material = SubResource("StandardMaterial3D_ruv38")
-size = Vector3(0.1, 0.25, 4)
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_ihvk3"]
-size = Vector3(0.1, 0.25, 4)
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_x2hhu"]
-albedo_color = Color(0.36, 0.36, 0.36, 1)
-
-[sub_resource type="BoxMesh" id="BoxMesh_oto2m"]
-material = SubResource("StandardMaterial3D_x2hhu")
-size = Vector3(0.1, 0.25, 4)
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_fu1db"]
-size = Vector3(0.1, 0.25, 4)
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_djyc3"]
-size = Vector3(8, 0.2, 4)
-
-[node name="RoadStraight" type="StaticBody3D" unique_id=971448553]
+[node name="RoadStraight" type="StaticBody3D" unique_id=699912855]
 script = ExtResource("1_f8f86")
 
-[node name="@MeshInstance3D@2" type="MeshInstance3D" parent="." unique_id=528426312]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
-mesh = SubResource("BoxMesh_3pn70")
+[node name="@MeshInstance3D@2" type="MeshInstance3D" parent="." unique_id=708378021]
+material_override = SubResource("StandardMaterial3D_76lxt")
+mesh = SubResource("ArrayMesh_3pn70")
 
-[node name="@MeshInstance3D@3" type="MeshInstance3D" parent="." unique_id=779813497]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.05, 0.725, 0)
-mesh = SubResource("BoxMesh_d2ndy")
-
-[node name="@CollisionShape3D@4" type="CollisionShape3D" parent="." unique_id=1567706575]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.05, 0.725, 0)
-shape = SubResource("BoxShape3D_ihvk3")
-
-[node name="@MeshInstance3D@5" type="MeshInstance3D" parent="." unique_id=146829557]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.05, 0.725, 0)
-mesh = SubResource("BoxMesh_oto2m")
-
-[node name="@CollisionShape3D@6" type="CollisionShape3D" parent="." unique_id=1023609531]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.05, 0.725, 0)
-shape = SubResource("BoxShape3D_fu1db")
-
-[node name="@CollisionShape3D@7" type="CollisionShape3D" parent="." unique_id=632738754]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
-shape = SubResource("BoxShape3D_djyc3")
+[node name="@CollisionShape3D@3" type="CollisionShape3D" parent="." unique_id=1901848844]
+shape = SubResource("ConcavePolygonShape3D_ruv38")

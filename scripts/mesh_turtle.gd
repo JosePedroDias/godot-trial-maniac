@@ -48,9 +48,9 @@ func _add_slice() -> void:
 			var v4 = curr_start + i + 1
 			
 			# Triangle 1
-			_st.add_index(v1); _st.add_index(v3); _st.add_index(v2)
+			_st.add_index(v1); _st.add_index(v2); _st.add_index(v3)
 			# Triangle 2
-			_st.add_index(v2); _st.add_index(v3); _st.add_index(v4)
+			_st.add_index(v2); _st.add_index(v4); _st.add_index(v3)
 			
 	_skip_connection = false
 	
@@ -71,18 +71,14 @@ func move_and_extrude(distance: float) -> void:
 	_total_dist += distance
 	_add_slice()
 
-## Rotates and adds a slice (useful for smooth curves).
+## Rotates and adds a slice (useful for turning in place).
 func turn_and_extrude(angle_degrees: float, steps: int = 1) -> void:
 	if _vertices.size() == 0:
 		_add_slice()
 		
 	var step_angle = angle_degrees / float(steps)
-	# For turn distance, we approximate based on the outer radius or center
-	var approx_dist = abs(deg_to_rad(angle_degrees) * 4.0) / steps # 4.0 is approx radius
-	
 	for i in range(steps):
 		turn_left(step_angle)
-		_total_dist += approx_dist
 		_add_slice()
 
 ## Rotates and moves simultaneously in small increments to create smooth geometry.
