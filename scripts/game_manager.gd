@@ -28,8 +28,8 @@ signal sfx_toggled(is_enabled)
 signal ghost_toggled(is_enabled)
 signal binding_step_changed(step_text)
 
-var _current_run_ghost: Array[Transform3D] = []
-var _best_ghost_data: Array[Transform3D] = []
+var _current_run_ghost: Array = []
+var _best_ghost_data: Array = []
 var _ghost_actor = null
 
 var _binding_step = -1 # -1: Choice (K/J)
@@ -67,15 +67,21 @@ func _setup_ghost_actor():
 	_ghost_actor.name = "GhostCar"
 	_ghost_actor.set_script(load("res://scripts/ghost_car.gd"))
 	
+	var wheels_to_copy = ["WheelFL", "WheelFR", "WheelRL", "WheelRR"]
+	var ghost_wheels = []
+	
 	for child in car_scene.get_children():
 		if child is MeshInstance3D or child is Node3D:
 			if not (child is CollisionShape3D or child is RayCast3D):
 				var duplicate = child.duplicate()
 				_ghost_actor.add_child(duplicate)
+				if wheels_to_copy.has(child.name):
+					ghost_wheels.append(duplicate)
 	
 	car_scene.free()
 	get_tree().current_scene.add_child(_ghost_actor)
 	_ghost_actor.visible = false
+	_ghost_actor.set_meta("wheels", ghost_wheels)
 
 func start_race():
 	_current_run_ghost.clear()
@@ -134,14 +140,28 @@ func _process(delta):
 	if current_state == RaceState.RACING:
 		race_time = (Time.get_ticks_msec() / 1000.0) - start_time
 		time_updated.emit(race_time)
-		var car = get_tree().current_scene.get_node_or_null("Car")
-		if car:
-			_current_run_ghost.append(car.global_transform)
 	
 	if current_state == RaceState.BINDING:
 		_process_binding_logic(delta)
 	
 	_handle_global_input()
+
+func _physics_process(delta):
+	if current_state == RaceState.RACING:
+		var car = get_tree().current_scene.get_node_or_null("Car")
+		if car:
+			var snapshot = {
+				"b": car.global_transform,
+				"w": [
+					car.get_node("WheelFL").transform,
+					car.get_node("WheelFR").transform,
+					car.get_node("WheelRL").transform,
+					car.get_node("WheelRR").transform
+				]
+			}
+			_current_run_ghost.append(snapshot)
+	
+	_prev_key_states = _key_states.duplicate()
 
 func _process_binding_logic(delta):
 	if _binding_step == -1:
@@ -283,7 +303,28 @@ func _handle_global_input():
 	if Input.is_key_pressed(KEY_4) and not _get_prev_key_state(KEY_4): toggle_ghost()
 	if Input.is_key_pressed(KEY_0) and not _get_prev_key_state(KEY_0): _toggle_fullscreen()
 	
+	if Input.is_key_pressed(KEY_9) and not _get_prev_key_state(KEY_9): reset_all_data()
+	_key_states[KEY_9] = Input.is_key_pressed(KEY_9)
+	
 	if Input.is_action_just_pressed("ui_cancel"): get_tree().quit()
+
+func reset_all_data():
+	highscores.clear()
+	for track in tracks:
+		highscores[track] = 600.0
+		var path = "user://ghost_" + track.get_file().get_basename() + ".res"
+		if FileAccess.file_exists(path):
+			DirAccess.remove_absolute(path)
+	
+	_best_ghost_data = []
+	best_time = 600.0
+	_save_data()
+	
+	if _ghost_actor:
+		_ghost_actor.stop_playback()
+	
+	record_updated.emit(best_time)
+	print("ALL DATA RESET")
 
 # Helper to check previous frame state BEFORE it was updated in this frame
 var _prev_key_states = {}
@@ -368,7 +409,3 @@ func format_time(time_seconds: float) -> String:
 
 func _emit_initial_record():
 	record_updated.emit(best_time)
-
-# Override _physics_process to handle the state sync at the very end of frame
-func _physics_process(delta):
-	_prev_key_states = _key_states.duplicate()
