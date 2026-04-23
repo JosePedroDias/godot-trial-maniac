@@ -13,8 +13,8 @@ extends RigidBody3D
 @export var downforce: float = 10000.0
 
 @export_group("Steering")
-@export var steering_angle: float = 30.0
-@export var steering_speed: float = 5.0
+@export var steering_angle: float = 25.0
+@export var steering_speed: float = 4.0
 @export var grip: float = 20.0
 
 @onready var raycasts = [
@@ -241,12 +241,16 @@ func _physics_process(delta):
 		var b_val = get_val.call(gm.brake)
 		
 		var target_steer = s_left - s_right
+		# Squared input for softer center
+		target_steer = sign(target_steer) * pow(abs(target_steer), 1.5)
+		
 		var steer_speed = steering_speed * 2.0 if gm.steer_left.get("is_kb", false) else steering_speed
 		steering_input = lerp(steering_input, target_steer, steer_speed * delta)
 		engine_input = t_val - b_val
 	else:
 		var kb_engine = Input.get_axis("ui_down", "ui_up")
 		var kb_steer = Input.get_axis("ui_right", "ui_left")
+		kb_steer = sign(kb_steer) * pow(abs(kb_steer), 1.5)
 		engine_input = kb_engine
 		steering_input = lerp(steering_input, kb_steer, steering_speed * delta)
 	
@@ -293,7 +297,8 @@ func _physics_process(delta):
 				# 2. Driving
 				var wheel_basis = ray.global_basis
 				if i < 2:
-					var steer_speed_factor = exp(-speed_cur / 35.0)
+					# More aggressive steering reduction at high speed (30.0 instead of 35.0)
+					var steer_speed_factor = exp(-speed_cur / 30.0)
 					var effective_steer = steering_input * deg_to_rad(steering_angle) * steer_speed_factor
 					wheel_basis = wheel_basis.rotated(global_basis.y, effective_steer)
 				
