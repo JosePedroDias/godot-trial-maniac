@@ -31,11 +31,11 @@ func _create_curve(radius: float, angle_deg: float, is_left: bool, color: Color)
 	var turtle = _create_turtle(color)
 	var center_radius = radius + ROAD_WIDTH/2.0
 	var arc_len = deg_to_rad(abs(angle_deg)) * center_radius
-	
+
 	# Turn Left (positive yaw) or Right (negative yaw)
 	var yaw = angle_deg if is_left else -angle_deg
 	turtle.smooth_step(yaw, 0, 0, arc_len, 32)
-	
+
 	var mesh_node = MeshInstance3D.new()
 	mesh_node.mesh = turtle.commit_mesh()
 	var mat = StandardMaterial3D.new()
@@ -47,13 +47,14 @@ func _create_loop(radius: float, angle_deg: float, color: Color) -> MeshInstance
 	var turtle = _create_turtle(color)
 	var arc_len = deg_to_rad(abs(angle_deg)) * radius
 	turtle.smooth_step(0, angle_deg, 0, arc_len, 48)
-		
+
 	var mesh_node = MeshInstance3D.new()
 	mesh_node.mesh = turtle.commit_mesh()
 	var mat = StandardMaterial3D.new()
 	mat.vertex_color_use_as_albedo = true
 	mesh_node.material_override = mat
 	return mesh_node
+
 
 func _create_gate(color: Color) -> Node3D:
 	var gate = Node3D.new()

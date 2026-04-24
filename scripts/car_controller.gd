@@ -11,6 +11,7 @@ extends RigidBody3D
 @export var max_speed: float = 150.0
 @export var booster_force: float = 20000.0
 @export var downforce: float = 10000.0
+@export var aero_downforce: float = 1.0 # Minimal helper
 
 @export_group("Steering")
 @export var steering_angle: float = 27.5
@@ -40,10 +41,13 @@ func _ready():
 	contact_monitor = true
 	max_contacts_reported = 4
 	body_entered.connect(_on_body_entered)
+	
+	angular_damp = 0.5 # Natural feel
+	linear_damp = 0.05 # Natural feel
 
-	# Set up raycasts
+	# Set up raycasts - use a longer reach (0.8m) to catch the ground
 	for ray in raycasts:
-		ray.target_position = Vector3(0, -(suspension_rest_dist + wheel_radius), 0)
+		ray.target_position = Vector3(0, -0.8, 0)
 		ray.add_exception(self)
 	
 	_setup_audio()
@@ -187,15 +191,11 @@ func _physics_process(delta):
 	if is_braking:
 		var lateral_speed = abs(global_basis.x.dot(linear_velocity))
 		# If we are sliding sideways (drifting), don't kill the momentum too hard
-		# This allows the "loose rear" to swing around.
 		var drift_mod = lerp(1.0, 0.1, clamp(lateral_speed / 5.0, 0.0, 1.0))
-		
-		# Stronger speed factor at very low speeds
 		var speed_factor = lerp(5.0, 1.0, clamp(speed_cur / 10.0, 0.0, 1.0))
 		var brake_force = -linear_velocity.normalized() * engine_power * 1.0 * speed_factor * drift_mod
 		apply_central_force(brake_force)
 		
-		# Snap to stop if we are crawling while braking (and not sliding)
 		if speed_cur < 2.0 and lateral_speed < 1.0:
 			linear_velocity *= 0.5
 			if speed_cur < 0.2:
@@ -214,10 +214,10 @@ func _physics_process(delta):
 	if on_ground:
 		var resistance = -linear_velocity * mass * 0.2
 		if abs(engine_input) < 0.05:
-			resistance *= 2.0 # Extra resistance when coasting
+			resistance *= 2.0
 		apply_central_force(resistance)
 		
-	# Fall detection (ditch fixed Y < -20 check)
+	# Fall detection
 	if !on_ground and linear_velocity.y < -5.0:
 		fall_timer += delta
 		if fall_timer > 2.0:
@@ -232,11 +232,9 @@ func _physics_process(delta):
 		var get_val = func(slot):
 			if slot.get("is_kb", false):
 				return 1.0 if Input.is_key_pressed(slot.key) else 0.0
-			
 			if slot.dev < 0: return 0.0
 			if slot.get("is_btn", false):
 				return 1.0 if Input.is_joy_button_pressed(slot.dev, slot.btn) else 0.0
-			
 			var cur_val = Input.get_joy_axis(slot.dev, slot.axis)
 			var snap = slot.get("snap", 0.0)
 			return clamp((cur_val - snap) * slot.sign, 0.0, 1.0)
@@ -247,7 +245,6 @@ func _physics_process(delta):
 		var b_val = get_val.call(gm.brake)
 		
 		var target_steer = s_left - s_right
-		# Squared input for softer center
 		target_steer = sign(target_steer) * pow(abs(target_steer), 1.5)
 		
 		var steer_speed = steering_speed * 2.0 if gm.steer_left.get("is_kb", false) else steering_speed
@@ -260,8 +257,10 @@ func _physics_process(delta):
 		engine_input = kb_engine
 		steering_input = lerp(steering_input, kb_steer, steering_speed * delta)
 	
+	# Apply Aero Downforce
+	apply_central_force(-global_basis.y * speed_cur * speed_cur * aero_downforce)
+
 	var is_on_sticky = false
-	
 	for i in range(raycasts.size()):
 		var ray = raycasts[i]
 		var wheel = wheels[i]
@@ -273,15 +272,17 @@ func _physics_process(delta):
 		if ray.is_colliding():
 			on_ground = true
 			var collider = ray.get_collider()
-			
 			if collider.has_method("get_script") and collider.get_script() and collider.get_script().get_path() == "res://scripts/track_block.gd":
 				_check_track_block(collider)
-				if collider.is_sticky():
-					is_on_sticky = true
+				if collider.is_sticky(): is_on_sticky = true
 			
 			var hit_point = ray.get_collision_point()
 			var hit_normal = ray.get_collision_normal()
 			var dist = (ray.global_position - hit_point).length()
+			
+			# 0. Downforce
+			if is_on_sticky:
+				apply_force(-hit_normal * downforce / 4.0, ray.global_position - global_position)
 			
 			# 1. Suspension
 			var compression = (suspension_rest_dist + wheel_radius) - dist
@@ -290,79 +291,49 @@ func _physics_process(delta):
 				var upward_vel = hit_normal.dot(wheel_velocity)
 				var spring_force = compression * spring_strength
 				var damping_force = upward_vel * spring_damping
-				var total_force = (spring_force - damping_force) * hit_normal
 				
-				# 1.1 Apply Suspension Force
-				apply_force(total_force, ray.global_position - global_position)
-				
-				# 1.2 Apply Downforce
-				if is_on_sticky:
-					var downforce_dir = -hit_normal
-					apply_force(downforce_dir * downforce / raycasts.size(), ray.global_position - global_position)
+				# Direct application, no filtering
+				apply_force((spring_force - damping_force) * hit_normal, ray.global_position - global_position)
 				
 				# 2. Driving
 				var wheel_basis = ray.global_basis
 				if i < 2:
-					# More aggressive steering reduction at high speed (30.0 instead of 35.0)
 					var steer_speed_factor = exp(-speed_cur / 30.0)
-					var effective_steer = steering_input * deg_to_rad(steering_angle) * steer_speed_factor
-					wheel_basis = wheel_basis.rotated(global_basis.y, effective_steer)
+					wheel_basis = wheel_basis.rotated(global_basis.y, steering_input * deg_to_rad(steering_angle) * steer_speed_factor)
 				
 				var forward_dir = wheel_basis.z
 				var right_dir = wheel_basis.x
 				
 				if abs(engine_input) > 0.05 and !is_braking and speed_kmh < max_speed:
-					# engine_input > 0 is forward, < 0 is reverse/brake.
-					# Allow engine power if we are pushing in the same direction we're moving,
-					# OR if we are nearly stopped (allowing us to start moving).
-					var starting_from_stop = abs(forward_speed) < 1.0
-					var pushing_forward = forward_speed > 0 and engine_input > 0
-					var pushing_reverse = forward_speed < 0 and engine_input < 0
-					
-					if starting_from_stop or pushing_forward or pushing_reverse:
-						var accel_force = forward_dir * engine_input * engine_power
-						apply_force(accel_force, ray.global_position - global_position)
+					var accel_force = forward_dir * engine_input * engine_power
+					apply_force(accel_force, ray.global_position - global_position)
 				
 				var lateral_vel = right_dir.dot(wheel_velocity)
-				# Stronger taper at low speeds to prevent physics jitter
 				var low_speed_taper = clamp(speed_cur / 5.0, 0.0, 1.0)
-				
-				# Drifting logic: reduce rear grip when braking
 				var grip_factor = 1.0
 				if i >= 2: # Rear wheels
-					if is_braking:
-						grip_factor = 0.18 # Increased from 0.15 to reduce drift
-					
-					# Maintain drift with throttle
-					if is_skidding and engine_input > 0.1:
-						grip_factor = min(grip_factor, 0.5)
-					
-					# Recovery: increase grip as we align with movement
-					if speed_cur > 1.0:
-						var move_dir = linear_velocity.normalized()
-						var alignment = abs(forward_dir.dot(move_dir))
-						# Only recover if we aren't intentionally sliding
-						if !is_braking:
-							grip_factor = lerp(grip_factor, 1.0, alignment)
+					if is_braking: grip_factor = 0.18
+					elif is_skidding and engine_input > 0.1: grip_factor = 0.5
 				
-				var grip_force = -right_dir * lateral_vel * grip * mass * low_speed_taper * grip_factor
-				apply_force(grip_force, ray.global_position - global_position)
+				apply_force(-right_dir * lateral_vel * grip * mass * low_speed_taper * grip_factor, ray.global_position - global_position)
 				
-				wheel.global_position = hit_point + hit_normal * wheel_radius
-				wheel.global_basis = wheel_basis.rotated(wheel_basis.z, PI/2.0)
-				
-				# Trails: Only when braking or skidding
 				if is_braking or is_skidding:
 					trail.add_point(hit_point, hit_normal)
-			else:
-				wheel.position.y = -suspension_rest_dist
+			
+			# Visual Wheel Position
+			wheel.global_position = hit_point + hit_normal * wheel_radius
+			var wheel_basis_vis = ray.global_basis
+			if i < 2:
+				var steer_speed_factor = exp(-speed_cur / 30.0)
+				wheel_basis_vis = wheel_basis_vis.rotated(global_basis.y, steering_input * deg_to_rad(steering_angle) * steer_speed_factor)
+			wheel.global_basis = wheel_basis_vis.rotated(wheel_basis_vis.z, PI/2.0)
 		else:
 			wheel.position.y = -suspension_rest_dist
-			var wheel_basis = ray.global_basis
+			var wheel_basis_vis = ray.global_basis
 			if i < 2:
 				var steer_speed_factor = exp(-speed_cur / 35.0)
-				wheel_basis = wheel_basis.rotated(global_basis.y, steering_input * deg_to_rad(steering_angle) * steer_speed_factor)
-			wheel.global_basis = wheel_basis.rotated(wheel_basis.z, PI/2.0)
+				wheel_basis_vis = wheel_basis_vis.rotated(global_basis.y, steering_input * deg_to_rad(steering_angle) * steer_speed_factor)
+			wheel.global_basis = wheel_basis_vis.rotated(wheel_basis_vis.z, PI/2.0)
 
 	if !on_ground:
 		var air_torque = Vector3.ZERO

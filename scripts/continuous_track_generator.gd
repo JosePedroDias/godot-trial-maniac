@@ -130,6 +130,7 @@ func generate(seed_val: int = -1, max_steps: int = 100) -> String:
 		if not collision and not too_steep:
 			turtle.smooth_step(cur_yaw, cur_pitch, cur_roll, STEP_LENGTH, 6)
 			centerline_points.append(turtle.get_position())
+
 			steps_placed += 1
 			timer -= 1
 			attempts = 0
