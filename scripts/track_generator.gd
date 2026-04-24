@@ -125,7 +125,7 @@ func generate(seed_val: int = -1, max_blocks: int = 25) -> String:
 
 	var scene = PackedScene.new()
 	scene.pack(track_root)
-	var path = "res://scenes/track_%d.tscn" % seed_val
+	var path = "res://scenes/blocky_track_%d.tscn" % seed_val
 	ResourceSaver.save(scene, path)
 	print("Track saved: ", path)
 	
