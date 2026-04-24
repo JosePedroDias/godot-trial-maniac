@@ -41,10 +41,10 @@ func _on_state_changed(state):
 	var gm = get_node_or_null("/root/GameManager")
 	if gm:
 		if state == gm.RaceState.FINISHED:
-			var is_new_record = gm.race_time <= gm.best_time # It was already updated in gm
+			var is_new_record = gm.time_diff < 0
 			var record_text = "Finished!"
 			if is_new_record:
-				record_text = "NEW RECORD!"
+				record_text = "NEW RECORD! " + gm.format_diff(gm.time_diff)
 			
 			finish_label.text = record_text + "\nTime: " + gm.format_time(gm.race_time) + "\nBest: " + gm.format_time(gm.best_time)
 			finish_label.show()

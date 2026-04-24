@@ -6,6 +6,7 @@ var current_state = RaceState.PRE_START
 var start_time = 0.0
 var race_time = 0.0
 var best_time = 0.0
+var time_diff = 0.0
 var sfx_enabled = true
 var ghost_enabled = true
 
@@ -13,9 +14,13 @@ var tracks = [
 	"res://scenes/blocky_track_12345.tscn",
 	"res://scenes/blocky_track_54321.tscn",
 	"res://scenes/blocky_track_98765.tscn",
+	"res://scenes/blocky_track_13579.tscn",
+	"res://scenes/blocky_track_24680.tscn",
 	"res://scenes/continuos_track_111.tscn",
 	"res://scenes/continuos_track_222.tscn",
-	"res://scenes/continuos_track_333.tscn"
+	"res://scenes/continuos_track_333.tscn",
+	"res://scenes/continuos_track_444.tscn",
+	"res://scenes/continuos_track_555.tscn"
 ]
 var current_track_index = 0
 var highscores = {} 
@@ -120,7 +125,9 @@ func finish_race():
 		current_state = RaceState.FINISHED
 		if _ghost_actor: _ghost_actor.is_playing = false
 		race_time = (Time.get_ticks_msec() / 1000.0) - start_time
+		time_diff = 0.0
 		if race_time < best_time:
+			time_diff = race_time - best_time
 			best_time = race_time
 			highscores[tracks[current_track_index]] = best_time
 			_best_ghost_data = _current_run_ghost.duplicate()
@@ -175,6 +182,12 @@ func _physics_process(delta):
 					car.get_node("WheelFR").transform,
 					car.get_node("WheelRL").transform,
 					car.get_node("WheelRR").transform
+				],
+				"a": [
+					car.engine_rpm,
+					abs(car.engine_input),
+					car.is_skidding and car.on_ground,
+					car.is_braking and car.on_ground
 				]
 			}
 			_current_run_ghost.append(snapshot)
@@ -424,6 +437,10 @@ func format_time(time_seconds: float) -> String:
 	var seconds = int(time_seconds) % 60
 	var msec = int((time_seconds - int(time_seconds)) * 1000)
 	return "%02d:%02d.%03d" % [minutes, seconds, msec]
+
+func format_diff(diff_seconds: float) -> String:
+	var sign_str = "+" if diff_seconds > 0 else ""
+	return "(" + sign_str + "%.3fs!)" % diff_seconds
 
 func _emit_initial_record():
 	record_updated.emit(best_time)

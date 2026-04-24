@@ -35,6 +35,11 @@ var collision_player: AudioStreamPlayer3D
 
 var engine_rpm: float = 0.0
 var trails = []
+var _wheel_rotation: float = 0.0
+
+var on_ground: bool = false
+var is_skidding: bool = false
+var is_braking: bool = false
 
 func _ready():
 	# Set up physics for collision detection
@@ -151,7 +156,7 @@ func _physics_process(delta):
 	var gm = get_node_or_null("/root/GameManager")
 	var sfx_enabled = gm.sfx_enabled if gm else true
 	
-	var on_ground = false
+	on_ground = false
 	for ray in raycasts:
 		if ray.is_colliding():
 			on_ground = true
@@ -171,12 +176,15 @@ func _physics_process(delta):
 		speed_cur = linear_velocity.length()
 		speed_kmh = max_speed
 
+	# Update Wheel Rotation
+	_wheel_rotation += (forward_speed * delta) / wheel_radius
+
 	if engine_player and sfx_enabled:
 		_update_engine_audio(delta, speed_kmh)
 	
 	# Skid and Brake detection
-	var is_skidding = false
-	var is_braking = false
+	is_skidding = false
+	is_braking = false
 	
 	if speed_cur > 5.0:
 		var lateral_speed = abs(global_basis.x.dot(linear_velocity))
@@ -326,6 +334,10 @@ func _physics_process(delta):
 			if i < 2:
 				var steer_speed_factor = exp(-speed_cur / 30.0)
 				wheel_basis_vis = wheel_basis_vis.rotated(global_basis.y, steering_input * deg_to_rad(steering_angle) * steer_speed_factor)
+			
+			# Apply rolling rotation (around local X of the wheel)
+			wheel_basis_vis = wheel_basis_vis.rotated(wheel_basis_vis.x, _wheel_rotation)
+			
 			wheel.global_basis = wheel_basis_vis.rotated(wheel_basis_vis.z, PI/2.0)
 		else:
 			wheel.position.y = -suspension_rest_dist
@@ -333,6 +345,10 @@ func _physics_process(delta):
 			if i < 2:
 				var steer_speed_factor = exp(-speed_cur / 35.0)
 				wheel_basis_vis = wheel_basis_vis.rotated(global_basis.y, steering_input * deg_to_rad(steering_angle) * steer_speed_factor)
+			
+			# Apply rolling rotation even when in air
+			wheel_basis_vis = wheel_basis_vis.rotated(wheel_basis_vis.x, _wheel_rotation)
+			
 			wheel.global_basis = wheel_basis_vis.rotated(wheel_basis_vis.z, PI/2.0)
 
 	if !on_ground:
