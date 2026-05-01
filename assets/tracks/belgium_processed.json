@@ -1,5 +1,7 @@
 {
   "track_name": "belgium",
+  "reverseDirection": true,
+  "startPositionRatio": 0.51,
   "total_length": 7024.956064329714,
   "points": [
     {

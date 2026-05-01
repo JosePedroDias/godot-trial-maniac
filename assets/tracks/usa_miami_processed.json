@@ -1,5 +1,7 @@
 {
   "track_name": "usa_miami",
+  "reverseDirection": true,
+  "startPositionRatio": 0.38,
   "total_length": 5415.571861555246,
   "points": [
     {

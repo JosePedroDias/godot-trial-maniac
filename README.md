@@ -38,6 +38,13 @@ Generates one massive, flowing mesh using smoothed random steering.
 - **Logic:** Uses lerped targets for Yaw, Pitch, and Roll to create roller-coaster-like paths with collision detection to prevent self-intersection.
 - **Regenerate Tracks:** `godot --headless -s scripts/test_gen_continuous.gd`
 
+#### C. JSON-based Track Generator (`scripts/track_from_json.gd`)
+Generates tracks from external point data (e.g., F1 circuit data).
+- **Optional JSON Fields:**
+  - `reverseDirection` (boolean): If `true`, reverses the point sequence and flips tangents. Useful for fixing clockwise/counter-clockwise errors.
+  - `startPositionRatio` (float, 0.0 to 1.0): Rotates the starting point of the track loop by the given ratio. Useful for aligning the start/finish gate.
+- **Regenerate Tracks:** `godot --headless -s scripts/test_gen_json.gd`
+
 ### 4. Build Tools
 These scripts are utility tools used to generate the static assets of the game.
 

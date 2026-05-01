@@ -21,6 +21,24 @@ func generate_from_json(json_path: String, car_path: String = "res://scenes/mani
 	var track_name = data.get("track_name", "custom_track")
 	var points_data = data.get("points", [])
 	
+	# Handle optional transformations
+	if data.get("reverseDirection", false):
+		points_data.reverse()
+		# Flip tangents because direction is reversed
+		for p in points_data:
+			p.tx = -p.tx
+			p.ty = -p.ty
+			p.tz = -p.tz
+
+	var start_ratio = data.get("startPositionRatio", 0.0)
+	if start_ratio != 0.0:
+		var n = points_data.size()
+		var offset = int(round(start_ratio * n)) % n
+		if offset > 0:
+			points_data = points_data.slice(offset) + points_data.slice(0, offset)
+		elif offset < 0:
+			points_data = points_data.slice(n + offset) + points_data.slice(0, n + offset)
+
 	print("Generating F1 track: ", track_name, " with ", points_data.size(), " points")
 
 	# Load base track and instantiate

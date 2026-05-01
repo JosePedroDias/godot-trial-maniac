@@ -1,5 +1,7 @@
 {
   "track_name": "spain",
+  "reverseDirection": true,
+  "startPositionRatio": 0.76,
   "total_length": 4687.839536573099,
   "points": [
 	{

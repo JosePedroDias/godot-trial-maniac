@@ -13,18 +13,18 @@ var sfx_enabled = true
 var ghost_enabled = true
 
 var tracks = [
+	"res://scenes/bahrain_track.tscn",
 	"res://scenes/usa_miami_track.tscn",
 	"res://scenes/spain_track.tscn",
 	"res://scenes/austria_track.tscn",
 	"res://scenes/belgium_track.tscn",
-	"res://scenes/bahrain_track.tscn",
-	"res://scenes/blocky_track_12345.tscn",
-	"res://scenes/blocky_track_54321.tscn",
+	#"res://scenes/blocky_track_12345.tscn",
+	#"res://scenes/blocky_track_54321.tscn",
 	#"res://scenes/blocky_track_98765.tscn",
 	#"res://scenes/blocky_track_13579.tscn",
 	#"res://scenes/blocky_track_24680.tscn",
-	"res://scenes/continuos_track_111.tscn",
-	"res://scenes/continuos_track_222.tscn",
+	#"res://scenes/continuos_track_111.tscn",
+	#"res://scenes/continuos_track_222.tscn",
 	#"res://scenes/continuos_track_333.tscn",
 	#"res://scenes/continuos_track_444.tscn",
 	#"res://scenes/continuos_track_555.tscn"
@@ -197,8 +197,13 @@ func start_race():
 	if not is_instance_valid(_ghost_actor):
 		_setup_ghost_actor()
 		_load_ghost(get_tree().current_scene.scene_file_path)
-	if _ghost_actor and ghost_enabled:
-		_ghost_actor.start_playback(_best_ghost_data)
+	
+	if _ghost_actor:
+		if ghost_enabled and _best_ghost_data.size() > 0:
+			_ghost_actor.start_playback(_best_ghost_data)
+		else:
+			_ghost_actor.stop_playback()
+			
 	var scene_path = get_tree().current_scene.scene_file_path
 	best_time = float(highscores.get(scene_path, 600.0))
 	record_updated.emit(best_time)
