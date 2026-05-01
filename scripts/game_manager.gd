@@ -29,6 +29,7 @@ var tracks = [
 ]
 var current_track_index = 0
 var highscores = {} 
+var selected_car = "res://scenes/mania_car.tscn"
 const SAVE_PATH = "user://game_data.json"
 
 # Input Assignments v3 - Extended for Keyboard
@@ -71,11 +72,22 @@ func _ready():
 	Input.set_mouse_mode(Input.MOUSE_MODE_HIDDEN)
 	_load_data()
 	current_state = RaceState.PRE_START
-	# Use call_deferred to ensure the scene tree is fully loaded
+	
+	# Connect to tree signals to detect when a new scene is loaded
+	get_tree().node_added.connect(_on_node_added)
+	
+	# Initial setup
 	_init_scene.call_deferred()
+
+func _on_node_added(node):
+	# If the node added is the new current scene root
+	if node.get_parent() == get_tree().root and node.name != "GameManager":
+		_init_scene.call_deferred()
 
 func _init_scene():
 	if get_tree().current_scene:
+		print("Initializing scene: ", get_tree().current_scene.name)
+		_replace_car_at_runtime()
 		_setup_ghost_actor()
 		var scene_path = get_tree().current_scene.scene_file_path
 		var idx = tracks.find(scene_path)
@@ -91,12 +103,66 @@ func _update_window_title():
 	var track_name = scene_path.get_file().get_basename()
 	DisplayServer.window_set_title("Godot Trial Maniac - " + track_name)
 
+func _toggle_camera():
+	var cam = get_tree().current_scene.find_child("FollowCamera", true, false)
+	if cam and cam.has_method("toggle_mode"):
+		cam.toggle_mode()
+		var mode_name = ["FOLLOW", "FAR", "TRACK VIEW"][cam.mode]
+		binding_step_changed.emit("CAM: " + mode_name)
+		get_tree().create_timer(1.0).timeout.connect(func(): binding_step_changed.emit(""))
+
+func _replace_car_at_runtime():
+	var scene = get_tree().current_scene
+	if not scene:
+		print("DEBUG: No current scene yet.")
+		return
+		
+	# Find Car anywhere in the hierarchy
+	var old_car = scene.find_child("Car", true, false)
+	
+	if not old_car: 
+		print("DEBUG: No 'Car' node found in scene: ", scene.name)
+		# Try looking for anything with "Car" in the name
+		old_car = scene.find_child("*Car*", true, false)
+		if not old_car:
+			return
+	
+	# Check if it's already the right one (optional but good for log)
+	if old_car.scene_file_path == selected_car:
+		print("DEBUG: Car already matches selected_car: ", selected_car)
+		return
+
+	print("DEBUG: Swapping ", old_car.name, " (", old_car.scene_file_path, ") with ", selected_car)
+	var car_scene = load(selected_car)
+	if not car_scene:
+		print("ERROR: Could not load car scene: ", selected_car)
+		return
+		
+	var new_car = car_scene.instantiate()
+	new_car.name = "Car"
+	
+	var old_transform = old_car.global_transform
+	var parent = old_car.get_parent()
+	
+	parent.add_child(new_car)
+	new_car.global_transform = old_transform
+	
+	var cam = scene.find_child("FollowCamera", true, false)
+	if cam:
+		cam.target = new_car
+		cam.target_path = cam.get_path_to(new_car)
+		print("DEBUG: Camera target updated to new Car.")
+	
+	old_car.name = "OldCar_Deleted"
+	old_car.queue_free()
+	print("DEBUG: Swap complete.")
+
 func _setup_ghost_actor():
 	if _ghost_actor: 
 		_ghost_actor.queue_free()
 		_ghost_actor = null
 		
-	var car_scene = load("res://scenes/car.tscn").instantiate()
+	var car_scene = load(selected_car).instantiate()
 	_ghost_actor = Node3D.new()
 	_ghost_actor.name = "GhostCar"
 	_ghost_actor.set_script(load("res://scripts/ghost_car.gd"))
@@ -327,6 +393,8 @@ func _apply_joy_step_data(data):
 func _handle_global_input():
 	# Update key states regardless of BINDING state to prevent stuck keys
 	_key_states[KEY_1] = Input.is_key_pressed(KEY_1)
+	_key_states[KEY_5] = Input.is_key_pressed(KEY_5)
+	_key_states[KEY_6] = Input.is_key_pressed(KEY_6)
 	_key_states[KEY_3] = Input.is_key_pressed(KEY_3)
 	_key_states[KEY_4] = Input.is_key_pressed(KEY_4)
 	_key_states[KEY_0] = Input.is_key_pressed(KEY_0)
@@ -341,6 +409,8 @@ func _handle_global_input():
 	if Input.is_action_just_pressed("restart"): reset_race()
 	
 	if Input.is_key_pressed(KEY_1) and not _get_prev_key_state(KEY_1): toggle_sfx()
+	if Input.is_key_pressed(KEY_5) and not _get_prev_key_state(KEY_5): toggle_car()
+	if Input.is_key_pressed(KEY_6) and not _get_prev_key_state(KEY_6): _toggle_camera()
 	if Input.is_action_just_pressed("next_track"): next_track()
 	if Input.is_key_pressed(KEY_3) and not _get_prev_key_state(KEY_3): start_binding()
 	if Input.is_key_pressed(KEY_4) and not _get_prev_key_state(KEY_4): toggle_ghost()
@@ -385,6 +455,20 @@ func toggle_sfx():
 	sfx_toggled.emit(sfx_enabled)
 	return sfx_enabled
 
+func toggle_car():
+	if selected_car == "res://scenes/mania_car.tscn":
+		selected_car = "res://scenes/f1_2026_car.tscn"
+	else:
+		selected_car = "res://scenes/mania_car.tscn"
+	_save_data()
+	
+	var car_name = "F1 2026" if "f1" in selected_car else "MANIA"
+	binding_step_changed.emit("CAR: " + car_name)
+	get_tree().create_timer(1.0).timeout.connect(func(): binding_step_changed.emit(""))
+	
+	print("Car changed to: ", selected_car)
+	reset_race()
+
 func toggle_ghost():
 	ghost_enabled = !ghost_enabled
 	if _ghost_actor: _ghost_actor.visible = ghost_enabled and _ghost_actor.is_playing
@@ -415,6 +499,8 @@ func _load_data():
 				if data.has("scores"):
 					var scores = data.scores
 					for k in scores: highscores[k] = float(scores[k])
+				if data.has("selected_car"):
+					selected_car = data.selected_car
 				if data.has("input_v3"):
 					var input = data.input_v3
 					steer_left = input.get("steer_left", steer_left)
@@ -428,6 +514,7 @@ func _save_data():
 	var file = FileAccess.open(SAVE_PATH, FileAccess.WRITE)
 	var data = {
 		"scores": highscores,
+		"selected_car": selected_car,
 		"input_v3": {
 			"steer_left": steer_left,
 			"steer_right": steer_right,

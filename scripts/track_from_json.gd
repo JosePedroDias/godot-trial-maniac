@@ -6,7 +6,7 @@ const ROAD_WIDTH = 16.0
 const KERB_WIDTH = 1.8
 const GRASS_WIDTH = 12.0
 
-func generate_from_json(json_path: String) -> String:
+func generate_from_json(json_path: String, car_path: String = "res://scenes/mania_car.tscn") -> String:
 	var file = FileAccess.open(json_path, FileAccess.READ)
 	if not file:
 		print("Error opening file: ", json_path)
@@ -27,6 +27,22 @@ func generate_from_json(json_path: String) -> String:
 	var base_scene = load("res://scenes/base_track.tscn")
 	var track_root = base_scene.instantiate()
 	track_root.name = track_name
+
+	# Replace the car instance with the selected car
+	var old_car = track_root.get_node("Car")
+	var car_parent = old_car.get_parent()
+	
+	var selected_car_scene = load(car_path)
+	var car = selected_car_scene.instantiate()
+	car.name = "Car"
+	car_parent.remove_child(old_car)
+	old_car.free()
+	car_parent.add_child(car)
+	car.owner = track_root
+
+	# Update camera target
+	var camera = track_root.get_node("FollowCamera")
+	camera.target_path = camera.get_path_to(car)
 
 	# Prepare MeshTurtle
 	var turtle = MeshTurtle.new()
@@ -51,9 +67,7 @@ func generate_from_json(json_path: String) -> String:
 	var cp = get_p.call(car_idx)
 	var car_pos = Vector3(cp.x, cp.y + 1.0, cp.z)
 	var car_tangent = Vector3(cp.tx, cp.ty, cp.tz)
-	var car = track_root.get_node("Car")
 	car.transform = Transform3D(Basis.looking_at(-car_tangent, Vector3.UP), car_pos)
-	car.owner = track_root
 	
 	var finish_idx = -5
 	var fp = get_p.call(finish_idx)

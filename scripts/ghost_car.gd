@@ -87,7 +87,7 @@ func _init_skid_and_brake_streams():
 func _set_transparent(node):
 	for child in node.get_children():
 		if child is MeshInstance3D:
-			var mat = child.mesh.material
+			var mat = child.get_active_material(0)
 			if mat is StandardMaterial3D:
 				var ghost_mat = mat.duplicate()
 				ghost_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA

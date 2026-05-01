@@ -3,7 +3,7 @@ extends RigidBody3D
 @export_group("Suspension")
 @export var suspension_rest_dist: float = 0.3
 @export var spring_strength: float = 120000.0
-@export var spring_damping: float = 12000.0
+@export var spring_damping: float = 20000.0
 @export var wheel_radius: float = 0.3
 
 @export_group("Engine")
@@ -11,7 +11,7 @@ extends RigidBody3D
 @export var max_speed: float = 150.0
 @export var booster_force: float = 20000.0
 @export var downforce: float = 10000.0
-@export var aero_downforce: float = 1.0 # Minimal helper
+@export var aero_downforce: float = 5.0 # Increased for F1 feel
 
 @export_group("Steering")
 @export var steering_angle: float = 27.5
@@ -297,8 +297,10 @@ func _physics_process(delta):
 			if compression > 0:
 				var wheel_velocity = linear_velocity + angular_velocity.cross(ray.global_position - global_position)
 				var upward_vel = hit_normal.dot(wheel_velocity)
-				var spring_force = compression * spring_strength
-				var damping_force = upward_vel * spring_damping
+				# Scale suspension by mass ratio relative to 1000kg
+				var mass_ratio = mass / 1000.0
+				var spring_force = compression * spring_strength * mass_ratio
+				var damping_force = upward_vel * spring_damping * mass_ratio
 				
 				# Direct application, no filtering
 				apply_force((spring_force - damping_force) * hit_normal, ray.global_position - global_position)
