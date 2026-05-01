@@ -118,6 +118,9 @@ func generate_from_json(json_path: String, car_path: String = "res://scenes/mani
 	update_kerb_color.call(total_dist + prev_pos.distance_to(Vector3(last_p_data.x, last_p_data.y, last_p_data.z)))
 	turtle.add_slice()
 
+	# NEW: Smoothing pass to fix intersections/folds
+	turtle.smooth_mesh(3)
+
 	# 5. Commit Mesh and Add to Scene
 	var mesh = turtle.commit_mesh()
 	var mesh_instance = MeshInstance3D.new()
