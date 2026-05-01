@@ -27,7 +27,7 @@ func stop_extrusion() -> void:
 	_skip_connection = true
 
 ## Captures the current cross-section vertices in world space.
-func _add_slice() -> void:
+func add_slice() -> void:
 	var slice_verts: Array[Vector3] = []
 	var slice_normals: Array[Vector3] = []
 	var slice_colors: Array[Color] = []
@@ -74,26 +74,26 @@ func _add_slice() -> void:
 ## Moves forward and adds a geometry slice.
 func move_and_extrude(distance: float) -> void:
 	if _vertices.size() == 0 or _skip_connection:
-		_add_slice()
+		add_slice()
 	
 	move_forward(distance)
 	_total_dist += distance
-	_add_slice()
+	add_slice()
 
 ## Rotates and adds a slice (useful for turning in place).
 func turn_and_extrude(angle_degrees: float, steps: int = 1) -> void:
 	if _vertices.size() == 0 or _skip_connection:
-		_add_slice()
+		add_slice()
 		
 	var step_angle = angle_degrees / float(steps)
 	for i in range(steps):
 		turn_left(step_angle)
-		_add_slice()
+		add_slice()
 
 ## Rotates and moves simultaneously in small increments to create smooth geometry.
 func smooth_step(yaw: float, pitch: float, roll: float, distance: float, sub_steps: int = 4) -> void:
 	if _vertices.size() == 0 or _skip_connection:
-		_add_slice()
+		add_slice()
 		
 	var step_yaw = yaw / float(sub_steps)
 	var step_pitch = pitch / float(sub_steps)
@@ -106,7 +106,7 @@ func smooth_step(yaw: float, pitch: float, roll: float, distance: float, sub_ste
 		roll(step_roll)
 		move_forward(step_dist)
 		_total_dist += step_dist
-		_add_slice()
+		add_slice()
 
 ## Returns the generated mesh.
 func commit_mesh() -> Mesh:
@@ -148,4 +148,31 @@ static func create_road_profile(width: float, thickness: float, wall_h: float = 
 		p.append(Vector2(-hw, -thickness)); c.append(base_color)
 		p.append(Vector2(-hw, 0)); c.append(base_color)
 		
+	return {"points": p, "colors": c}
+
+static func create_f1_profile(width: float = 16.0, kerb_w: float = 1.5, grass_w: float = 10.0) -> Dictionary:
+	var p: Array[Vector2] = []
+	var c: Array[Color] = []
+	var hw = width / 2.0
+	
+	var col_asphalt = Color(0.15, 0.15, 0.15)
+	var col_grass = Color(0.1, 0.4, 0.1)
+	var col_kerb = Color.WHITE # Will be alternated in generation
+	
+	# Grass Left
+	p.append(Vector2(-hw - kerb_w - grass_w, -0.2)); c.append(col_grass)
+	p.append(Vector2(-hw - kerb_w, 0)); c.append(col_grass)
+	# Kerb Left
+	p.append(Vector2(-hw - kerb_w, 0)); c.append(col_kerb)
+	p.append(Vector2(-hw, 0.1)); c.append(col_kerb)
+	# Road
+	p.append(Vector2(-hw, 0)); c.append(col_asphalt)
+	p.append(Vector2(hw, 0)); c.append(col_asphalt)
+	# Kerb Right
+	p.append(Vector2(hw, 0.1)); c.append(col_kerb)
+	p.append(Vector2(hw + kerb_w, 0)); c.append(col_kerb)
+	# Grass Right
+	p.append(Vector2(hw + kerb_w, 0)); c.append(col_grass)
+	p.append(Vector2(hw + kerb_w + grass_w, -0.2)); c.append(col_grass)
+	
 	return {"points": p, "colors": c}

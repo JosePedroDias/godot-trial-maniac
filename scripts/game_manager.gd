@@ -20,7 +20,9 @@ var tracks = [
 	"res://scenes/continuos_track_222.tscn",
 	"res://scenes/continuos_track_333.tscn",
 	"res://scenes/continuos_track_444.tscn",
-	"res://scenes/continuos_track_555.tscn"
+	"res://scenes/continuos_track_555.tscn",
+	"res://scenes/usa_miami_track.tscn",
+	"res://scenes/spain_track.tscn"
 ]
 var current_track_index = 0
 var highscores = {} 
