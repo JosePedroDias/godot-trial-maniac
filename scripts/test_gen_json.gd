@@ -3,7 +3,7 @@ extends SceneTree
 func _init():
 	var gen_script = load("res://scripts/track_from_json.gd").new()
 	
-	var tracks = ["usa_miami", "spain"]
+	var tracks = ["usa_miami", "spain", "austria", "belgium", "bahrain"]
 	for track in tracks:
 		var json_path = "res://assets/tracks/%s_processed.json" % track
 		var output = gen_script.generate_from_json(json_path)

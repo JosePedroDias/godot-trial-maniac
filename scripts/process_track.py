@@ -82,7 +82,7 @@ if __name__ == "__main__":
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
         
-    for track in ["usa_miami", "spain"]:
+    for track in ["usa_miami", "spain", "austria", "belgium", "bahrain"]:
         input_file = os.path.join(tracks_dir, f"{track}_points.json")
         output_file = os.path.join(output_dir, f"{track}_processed.json")
         if os.path.exists(input_file):
