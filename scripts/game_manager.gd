@@ -11,23 +11,24 @@ var sfx_enabled = true
 var ghost_enabled = true
 
 var tracks = [
-	"res://scenes/blocky_track_12345.tscn",
-	"res://scenes/blocky_track_54321.tscn",
-	"res://scenes/blocky_track_98765.tscn",
-	"res://scenes/blocky_track_13579.tscn",
-	"res://scenes/blocky_track_24680.tscn",
-	"res://scenes/continuos_track_111.tscn",
-	"res://scenes/continuos_track_222.tscn",
-	"res://scenes/continuos_track_333.tscn",
-	"res://scenes/continuos_track_444.tscn",
-	"res://scenes/continuos_track_555.tscn",
 	"res://scenes/usa_miami_track.tscn",
 	"res://scenes/spain_track.tscn",
 	"res://scenes/austria_track.tscn",
 	"res://scenes/belgium_track.tscn",
-	"res://scenes/bahrain_track.tscn"
+	"res://scenes/bahrain_track.tscn",
+	"res://scenes/blocky_track_12345.tscn",
+	"res://scenes/blocky_track_54321.tscn",
+	#"res://scenes/blocky_track_98765.tscn",
+	#"res://scenes/blocky_track_13579.tscn",
+	#"res://scenes/blocky_track_24680.tscn",
+	"res://scenes/continuos_track_111.tscn",
+	"res://scenes/continuos_track_222.tscn",
+	#"res://scenes/continuos_track_333.tscn",
+	#"res://scenes/continuos_track_444.tscn",
+	#"res://scenes/continuos_track_555.tscn"
 ]
 var current_track_index = 0
+var initial_car_transform: Transform3D
 var highscores = {} 
 var selected_car = "res://scenes/mania_car.tscn"
 const SAVE_PATH = "user://game_data.json"
@@ -130,6 +131,7 @@ func _replace_car_at_runtime():
 	# Check if it's already the right one (optional but good for log)
 	if old_car.scene_file_path == selected_car:
 		print("DEBUG: Car already matches selected_car: ", selected_car)
+		initial_car_transform = old_car.global_transform
 		return
 
 	print("DEBUG: Swapping ", old_car.name, " (", old_car.scene_file_path, ") with ", selected_car)
@@ -139,13 +141,17 @@ func _replace_car_at_runtime():
 		return
 		
 	var new_car = car_scene.instantiate()
-	new_car.name = "Car"
 	
 	var old_transform = old_car.global_transform
 	var parent = old_car.get_parent()
 	
+	# Rename old car FIRST to free up the name "Car"
+	old_car.name = "OldCar_Deleted"
+	
 	parent.add_child(new_car)
+	new_car.name = "Car" # Now it will definitely stay "Car"
 	new_car.global_transform = old_transform
+	initial_car_transform = old_transform
 	
 	var cam = scene.find_child("FollowCamera", true, false)
 	if cam:
@@ -193,15 +199,18 @@ func start_race():
 	var scene_path = get_tree().current_scene.scene_file_path
 	best_time = float(highscores.get(scene_path, 600.0))
 	record_updated.emit(best_time)
-	if current_state != RaceState.RACING:
-		current_state = RaceState.RACING
-		start_time = Time.get_ticks_msec() / 1000.0
-		state_changed.emit(current_state)
+	
+	current_state = RaceState.RACING
+	start_time = Time.get_ticks_msec() / 1000.0
+	state_changed.emit(current_state)
 
-func finish_race():
+func finish_race(is_closed: bool = false):
 	if current_state == RaceState.RACING:
-		current_state = RaceState.FINISHED
-		if _ghost_actor: _ghost_actor.is_playing = false
+		# Add a minimum race time (e.g. 5 seconds) to prevent immediate finish on combined gates
+		var current_time = (Time.get_ticks_msec() / 1000.0) - start_time
+		if current_time < 5.0:
+			return
+			
 		race_time = (Time.get_ticks_msec() / 1000.0) - start_time
 		time_diff = 0.0
 		if race_time < best_time:
@@ -212,10 +221,28 @@ func finish_race():
 			_save_data()
 			_save_ghost(tracks[current_track_index])
 			record_updated.emit(best_time)
-		state_changed.emit(current_state)
-		await get_tree().create_timer(2.0).timeout
-		if current_state == RaceState.FINISHED:
-			next_track()
+		
+		if is_closed:
+			# Next lap immediately
+			start_race()
+		else:
+			current_state = RaceState.FINISHED
+			if _ghost_actor: _ghost_actor.is_playing = false
+			state_changed.emit(current_state)
+			await get_tree().create_timer(2.0).timeout
+			if current_state == RaceState.FINISHED:
+				reset_car_to_start()
+
+func reset_car_to_start():
+	var car = get_tree().current_scene.get_node_or_null("Car")
+	if car:
+		car.global_transform = initial_car_transform
+		if car is RigidBody3D:
+			car.linear_velocity = Vector3.ZERO
+			car.angular_velocity = Vector3.ZERO
+	current_state = RaceState.PRE_START
+	race_time = 0.0
+	state_changed.emit(current_state)
 
 func next_track():
 	current_track_index = (current_track_index + 1) % tracks.size()

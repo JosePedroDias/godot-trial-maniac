@@ -42,7 +42,8 @@ func generate_from_json(json_path: String, car_path: String = "res://scenes/mani
 
 	# Update camera target
 	var camera = track_root.get_node("FollowCamera")
-	camera.target_path = camera.get_path_to(car)
+	if camera:
+		camera.target_path = camera.get_path_to(car)
 
 	# Prepare MeshTurtle
 	var turtle = MeshTurtle.new()
@@ -63,34 +64,32 @@ func generate_from_json(json_path: String, car_path: String = "res://scenes/mani
 	var get_p = func(idx: int): 
 		return points_data[(idx + point_count) % point_count]
 	
+	# Place a single COMBINED Start/Finish Gate at index 0
+	var p0 = points_data[0]
+	var gate_pos = Vector3(p0.x, p0.y, p0.z)
+	var gate_tangent = Vector3(p0.tx, p0.ty, p0.tz)
+	
+	var gate_scene = load("res://scenes/blocks/RoadlessStart.tscn")
+	var gate_block = gate_scene.instantiate()
+	track_root.add_child(gate_block)
+	gate_block.owner = track_root
+	gate_block.transform = Transform3D(Basis.looking_at(-gate_tangent, Vector3.UP), gate_pos)
+	# Set to combined type (13 is START_FINISH in our enum)
+	gate_block.type = 13 
+	
+	# Car Position: ~20m behind gate (Index -4 if 5m spacing)
 	var car_idx = -4
 	var cp = get_p.call(car_idx)
 	var car_pos = Vector3(cp.x, cp.y + 1.0, cp.z)
 	var car_tangent = Vector3(cp.tx, cp.ty, cp.tz)
 	car.transform = Transform3D(Basis.looking_at(-car_tangent, Vector3.UP), car_pos)
-	
-	var finish_idx = -5
-	var fp = get_p.call(finish_idx)
-	var finish_scene = load("res://scenes/blocks/RoadlessFinish.tscn")
-	var finish_block = finish_scene.instantiate()
-	track_root.add_child(finish_block)
-	finish_block.owner = track_root
-	finish_block.transform = Transform3D(Basis.looking_at(-Vector3(fp.tx, fp.ty, fp.tz), Vector3.UP), Vector3(fp.x, fp.y, fp.z))
-	
-	var start_idx = -3
-	var sp = get_p.call(start_idx)
-	var start_scene = load("res://scenes/blocks/RoadlessStart.tscn")
-	var start_block = start_scene.instantiate()
-	track_root.add_child(start_block)
-	start_block.owner = track_root
-	start_block.transform = Transform3D(Basis.looking_at(-Vector3(sp.tx, sp.ty, sp.tz), Vector3.UP), Vector3(sp.x, sp.y, sp.z))
 
-	# 2. Add platform behind start area
-	turtle.transform = finish_block.transform
+	# 2. Add platform behind gate
+	turtle.transform = gate_block.transform
 	update_kerb_color.call(0.0)
 	turtle.push_state()
 	turtle.turn_left(180)
-	turtle.move_and_extrude(15.0)
+	turtle.move_and_extrude(25.0) # Longer platform to ensure car is covered
 	turtle.stop_extrusion()
 	turtle.pop_state()
 	
@@ -158,7 +157,7 @@ func generate_from_json(json_path: String, car_path: String = "res://scenes/mani
 	scene.pack(track_root)
 	var output_path = "res://scenes/%s_track.tscn" % track_name
 	ResourceSaver.save(scene, output_path)
-	print("Track saved: ", output_path)
+	print("Track saved with single Start/Finish: ", output_path)
 	
 	track_root.free()
 	return output_path
