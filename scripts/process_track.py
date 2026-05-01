@@ -81,11 +81,10 @@ if __name__ == "__main__":
     output_dir = "assets/tracks"
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
-        
-    for track in ["usa_miami", "spain", "austria", "belgium", "bahrain"]:
-        input_file = os.path.join(tracks_dir, f"{track}_points.json")
-        output_file = os.path.join(output_dir, f"{track}_processed.json")
-        if os.path.exists(input_file):
-            process_track(input_file, output_file)
-        else:
-            print(f"File not found: {input_file}")
+    
+    import glob
+    files = glob.glob(os.path.join(tracks_dir, "*_points.json"))
+    for input_file in files:
+        track_name = os.path.basename(input_file).replace("_points.json", "")
+        output_file = os.path.join(output_dir, f"{track_name}_processed.json")
+        process_track(input_file, output_file)
