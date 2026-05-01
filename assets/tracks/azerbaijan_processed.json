@@ -1,5 +1,7 @@
 {
   "track_name": "azerbaijan",
+  "reverseDirection": false,
+  "startPositionRatio": 0.52,
   "total_length": 6011.049021724305,
   "points": [
     {

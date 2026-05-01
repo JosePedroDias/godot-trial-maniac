@@ -1,5 +1,7 @@
 {
   "track_name": "great_britain",
+  "reverseDirection": false,
+  "startPositionRatio": 0.65,
   "total_length": 5891.907856235898,
   "points": [
     {

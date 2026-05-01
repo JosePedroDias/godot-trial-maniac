@@ -1,5 +1,7 @@
 {
   "track_name": "japan",
+  "reverseDirection": false,
+  "startPositionRatio": 0.32,
   "total_length": 5814.619734802409,
   "points": [
     {

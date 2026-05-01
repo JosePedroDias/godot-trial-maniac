@@ -1,5 +1,7 @@
 {
   "track_name": "singapore",
+  "reverseDirection": false,
+  "startPositionRatio": 0.07,
   "total_length": 4958.506529104887,
   "points": [
     {

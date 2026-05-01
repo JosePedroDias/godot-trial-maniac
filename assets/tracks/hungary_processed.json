@@ -1,5 +1,7 @@
 {
   "track_name": "hungary",
+  "reverseDirection": false,
+  "startPositionRatio": 0.87,
   "total_length": 4380.019150944249,
   "points": [
     {

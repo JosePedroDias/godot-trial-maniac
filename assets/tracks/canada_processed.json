@@ -1,5 +1,7 @@
 {
   "track_name": "canada",
+  "reverseDirection": false,
+  "startPositionRatio": 0.12,
   "total_length": 4364.15614929782,
   "points": [
     {

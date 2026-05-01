@@ -1,5 +1,7 @@
 {
   "track_name": "saudi_arabia",
+  "reverseDirection": false,
+  "startPositionRatio": 0.05,
   "total_length": 5253.650670697501,
   "points": [
     {

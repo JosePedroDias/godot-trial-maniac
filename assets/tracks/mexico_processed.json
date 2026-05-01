@@ -1,5 +1,7 @@
 {
   "track_name": "mexico",
+  "reverseDirection": false,
+  "startPositionRatio": 0.93,
   "total_length": 4310.175792333426,
   "points": [
     {

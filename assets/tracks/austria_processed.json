@@ -1,7 +1,7 @@
 {
   "track_name": "austria",
-  "reverseDirection": true,
-  "startPositionRatio": 0.93,
+  "reverseDirection": false,
+  "startPositionRatio": 0.94,
   "total_length": 4322.4849823317345,
   "points": [
     {

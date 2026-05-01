@@ -1,5 +1,7 @@
 {
   "track_name": "usa_cota",
+  "reverseDirection": false,
+  "startPositionRatio": 0.75,
   "total_length": 5506.554752980305,
   "points": [
     {

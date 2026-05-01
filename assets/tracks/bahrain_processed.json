@@ -1,7 +1,7 @@
 {
   "track_name": "bahrain",
-  "reverseDirection": true,
-  "startPositionRatio": 0.3,
+  "reverseDirection": false,
+  "startPositionRatio": 0.64,
   "total_length": 5426.512704158487,
   "points": [
     {

@@ -1,5 +1,7 @@
 {
   "track_name": "brazil",
+  "reverseDirection": false,
+  "startPositionRatio": 0.41,
   "total_length": 4310.289570894101,
   "points": [
     {

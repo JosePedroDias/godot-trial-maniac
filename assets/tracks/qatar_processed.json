@@ -1,5 +1,7 @@
 {
   "track_name": "qatar",
+  "reverseDirection": true,
+  "startPositionRatio": 0.88,
   "total_length": 5460.221463473241,
   "points": [
     {

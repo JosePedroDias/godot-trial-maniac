@@ -1,5 +1,7 @@
 {
   "track_name": "italy_emilia",
+  "reverseDirection": false,
+  "startPositionRatio": 0.62,
   "total_length": 4921.362732449674,
   "points": [
     {

@@ -1,5 +1,7 @@
 {
   "track_name": "italy_monza",
+  "reverseDirection": false,
+  "startPositionRatio": 0.1,
   "total_length": 5797.726352564454,
   "points": [
     {

@@ -1,5 +1,7 @@
 {
   "track_name": "australia",
+  "reverseDirection": false,
+  "startPositionRatio": 0.615,
   "total_length": 5308.868709627721,
   "points": [
     {

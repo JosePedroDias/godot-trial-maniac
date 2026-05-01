@@ -1,5 +1,7 @@
 {
   "track_name": "monaco",
+  "reverseDirection": true,
+  "startPositionRatio": 0.62,
   "total_length": 3345.199615624679,
   "points": [
     {

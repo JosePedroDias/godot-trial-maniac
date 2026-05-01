@@ -15,26 +15,27 @@ var ghost_enabled = true
 var tracks = [
 	"res://scenes/australia_track.tscn",
 	"res://scenes/china_track.tscn",
-	"res://scenes/japan_track.tscn",
-	"res://scenes/bahrain_track.tscn",
-	"res://scenes/saudi_arabia_track.tscn",
+	"res://scenes/japan_track.tscn", # 180?
+	##"res://scenes/bahrain_track.tscn", # skipped
+	##"res://scenes/saudi_arabia_track.tscn", # skipped
 	"res://scenes/usa_miami_track.tscn",
 	"res://scenes/italy_emilia_track.tscn",
-	"res://scenes/monaco_track.tscn",
-	"res://scenes/spain_track.tscn",
-	"res://scenes/canada_track.tscn",
-	"res://scenes/austria_track.tscn",
+	##"res://scenes/canada_track.tscn", # TODO needs work
+	##"res://scenes/monaco_track.tscn", # TODO needs work
+	"res://scenes/spain_barcelona_track.tscn",
+	"res://scenes/austria_track.tscn", # 180?
 	"res://scenes/great_britain_track.tscn",
 	"res://scenes/belgium_track.tscn",
 	"res://scenes/hungary_track.tscn",
 	"res://scenes/netherlands_track.tscn",
 	"res://scenes/italy_monza_track.tscn",
-	"res://scenes/azerbaijan_track.tscn",
-	"res://scenes/singapore_track.tscn",
+	##"res://scenes/spain_madrid_track.tscn", # TODO https://www.formula1.com/en/racing/2026/spain
+	#"res://scenes/azerbaijan_track.tscn", # TODO needs work
+	#"res://scenes/singapore_track.tscn", # TODO needs work
 	"res://scenes/usa_cota_track.tscn",
 	"res://scenes/mexico_track.tscn",
 	"res://scenes/brazil_track.tscn",
-	"res://scenes/usa_las_vegas_track.tscn",
+	##"res://scenes/usa_las_vegas_track.tscn", # TODO needs work https://www.formula1.com/en/racing/2026/las-vegas
 	"res://scenes/qatar_track.tscn",
 	"res://scenes/abu_dhabi_track.tscn",
 

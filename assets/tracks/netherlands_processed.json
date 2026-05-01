@@ -1,5 +1,7 @@
 {
   "track_name": "netherlands",
+  "reverseDirection": false,
+  "startPositionRatio": 0.14,
   "total_length": 4264.162584742698,
   "points": [
     {

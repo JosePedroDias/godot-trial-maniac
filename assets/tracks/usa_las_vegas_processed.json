@@ -1,5 +1,7 @@
 {
   "track_name": "usa_las_vegas",
+  "reverseDirection": false,
+  "startPositionRatio": 0.0,
   "total_length": 3221.317634230734,
   "points": [
     {

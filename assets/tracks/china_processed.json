@@ -1,5 +1,7 @@
 {
   "track_name": "china",
+  "reverseDirection": false,
+  "startPositionRatio": 0.99,
   "total_length": 5456.560025322352,
   "points": [
     {

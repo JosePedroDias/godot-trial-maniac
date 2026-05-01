@@ -4,7 +4,7 @@ const MeshTurtle = preload("res://scripts/mesh_turtle.gd")
 
 const ROAD_WIDTH = 16.0
 const KERB_WIDTH = 1.8
-const GRASS_WIDTH = 12.0
+const GRASS_WIDTH = 10.0
 
 func generate_from_json(json_path: String, car_path: String = "res://scenes/mania_car.tscn") -> String:
 	var file = FileAccess.open(json_path, FileAccess.READ)
@@ -20,6 +20,14 @@ func generate_from_json(json_path: String, car_path: String = "res://scenes/mani
 	
 	var track_name = data.get("track_name", "custom_track")
 	var points_data = data.get("points", [])
+
+	# fix coords
+	for p in points_data:
+		p.x = -p.x
+		p.tx = -p.tx
+
+		#p.z = -p.z
+		#p.tz = -p.tz
 	
 	# Handle optional transformations
 	if data.get("reverseDirection", false):
