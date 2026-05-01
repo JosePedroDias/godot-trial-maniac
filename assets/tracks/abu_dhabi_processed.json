@@ -1,5 +1,7 @@
 {
   "track_name": "abu_dhabi",
+  "reverseDirection": false,
+  "startPositionRatio": 0.13,
   "total_length": 5290.603487197744,
   "points": [
     {
