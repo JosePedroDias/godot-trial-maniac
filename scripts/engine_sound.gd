@@ -16,6 +16,10 @@ func _ready():
 	play()
 
 func _process(_delta):
+	if not playing:
+		playback = null
+		return
+		
 	if not playback:
 		playback = get_stream_playback()
 	

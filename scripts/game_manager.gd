@@ -55,6 +55,13 @@ var _bound_is_btn = false
 var _substate_timer = 0.0
 var _key_states = {}
 
+func _exit_tree():
+	_current_run_ghost.clear()
+	_best_ghost_data.clear()
+	if _ghost_actor:
+		_ghost_actor.queue_free()
+		_ghost_actor = null
+
 func _ready():
 	Input.set_mouse_mode(Input.MOUSE_MODE_HIDDEN)
 	_load_data()
