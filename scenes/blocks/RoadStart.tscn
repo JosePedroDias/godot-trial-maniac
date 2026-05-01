@@ -34,38 +34,38 @@ size = Vector3(0.1, 2, 0.1)
 
 [sub_resource type="BoxMesh" id="BoxMesh_afs7a"]
 material = SubResource("StandardMaterial3D_megug")
-size = Vector3(8.3, 0.1, 0.1)
+size = Vector3(16.1, 0.1, 0.1)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_j4rq6"]
-size = Vector3(8, 3, 0.5)
+size = Vector3(16, 3, 0.5)
 
-[node name="RoadStart" type="StaticBody3D" unique_id=1912659264]
+[node name="RoadStart" type="StaticBody3D" unique_id=1054999098]
 script = ExtResource("1_jtr2t")
 type = 1
 
-[node name="@MeshInstance3D@14" type="MeshInstance3D" parent="." unique_id=1431226352]
+[node name="@MeshInstance3D@14" type="MeshInstance3D" parent="." unique_id=2046899626]
 material_override = SubResource("StandardMaterial3D_ij7u6")
 mesh = SubResource("ArrayMesh_dhrhf")
 
-[node name="@CollisionShape3D@15" type="CollisionShape3D" parent="." unique_id=1200877817]
+[node name="@CollisionShape3D@15" type="CollisionShape3D" parent="." unique_id=1431163712]
 shape = SubResource("ConcavePolygonShape3D_q06no")
 
-[node name="Gate" type="Node3D" parent="." unique_id=1195200640]
+[node name="Gate" type="Node3D" parent="." unique_id=62635086]
 
-[node name="@MeshInstance3D@10" type="MeshInstance3D" parent="Gate" unique_id=1689540270]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.15, 1, 0)
+[node name="@MeshInstance3D@10" type="MeshInstance3D" parent="Gate" unique_id=2026550905]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 1, 0)
 mesh = SubResource("BoxMesh_ekaa0")
 
-[node name="@MeshInstance3D@11" type="MeshInstance3D" parent="Gate" unique_id=1511850908]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.15, 1, 0)
+[node name="@MeshInstance3D@11" type="MeshInstance3D" parent="Gate" unique_id=1936751400]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 1, 0)
 mesh = SubResource("BoxMesh_gk5iy")
 
-[node name="@MeshInstance3D@12" type="MeshInstance3D" parent="Gate" unique_id=924530489]
+[node name="@MeshInstance3D@12" type="MeshInstance3D" parent="Gate" unique_id=1391502075]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0)
 mesh = SubResource("BoxMesh_afs7a")
 
-[node name="DetectionArea" type="Area3D" parent="Gate" unique_id=503633443]
+[node name="DetectionArea" type="Area3D" parent="Gate" unique_id=1105305148]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
 
-[node name="@CollisionShape3D@13" type="CollisionShape3D" parent="Gate/DetectionArea" unique_id=1517797103]
+[node name="@CollisionShape3D@13" type="CollisionShape3D" parent="Gate/DetectionArea" unique_id=838642320]
 shape = SubResource("BoxShape3D_j4rq6")

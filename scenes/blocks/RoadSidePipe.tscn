@@ -21,13 +21,13 @@ _surfaces = [{
 [sub_resource type="ConcavePolygonShape3D" id="ConcavePolygonShape3D_agq23"]
 data = PackedVector3Array(4, 4, 0, 2.8284, 6.8283997, 0, 4, 4, -8, 2.8284, 6.8283997, 0, 2.8284, 6.8283997, -8, 4, 4, -8, 2.8284, 6.8283997, 0, 0, 8, 0, 2.8284, 6.8283997, -8, 0, 8, 0, 0, 8, -8, 2.8284, 6.8283997, -8, 0, 8, 0, -2.8284, 6.8283997, 0, 0, 8, -8, -2.8284, 6.8283997, 0, -2.8284, 6.8283997, -8, 0, 8, -8, -2.8284, 6.8283997, 0, -4, 4, 0, -2.8284, 6.8283997, -8, -4, 4, 0, -4, 4, -8, -2.8284, 6.8283997, -8, -4, 4, 0, -2.8284, 1.1716, 0, -4, 4, -8, -2.8284, 1.1716, 0, -2.8284, 1.1716, -8, -4, 4, -8, -2.8284, 1.1716, 0, 0, 0, 0, -2.8284, 1.1716, -8, 0, 0, 0, 0, 0, -8, -2.8284, 1.1716, -8, 0, 0, 0, 2.8284, 1.1716, 0, 0, 0, -8, 2.8284, 1.1716, 0, 2.8284, 1.1716, -8, 0, 0, -8, 2.8284, 1.1716, 0, 4, 4, 0, 2.8284, 1.1716, -8, 4, 4, 0, 4, 4, -8, 2.8284, 1.1716, -8)
 
-[node name="RoadSidePipe" type="StaticBody3D" unique_id=1882503223]
+[node name="RoadSidePipe" type="StaticBody3D" unique_id=1624892643]
 script = ExtResource("1_2vy4u")
 type = 9
 
-[node name="@MeshInstance3D@36" type="MeshInstance3D" parent="." unique_id=799579185]
+[node name="@MeshInstance3D@44" type="MeshInstance3D" parent="." unique_id=1349689616]
 material_override = SubResource("StandardMaterial3D_poo50")
 mesh = SubResource("ArrayMesh_4d11y")
 
-[node name="@CollisionShape3D@37" type="CollisionShape3D" parent="." unique_id=672831911]
+[node name="@CollisionShape3D@45" type="CollisionShape3D" parent="." unique_id=1276767461]
 shape = SubResource("ConcavePolygonShape3D_agq23")

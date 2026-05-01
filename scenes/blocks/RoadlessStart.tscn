@@ -1,42 +1,45 @@
-[gd_scene load_steps=7 format=3]
+[gd_scene format=3]
 
-[ext_resource type="Script" path="res://scripts/track_block.gd" id="1_roadless_start"]
+[ext_resource type="Script" path="res://scripts/track_block.gd" id="1_l1rdm"]
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_start"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_xdw4h"]
 albedo_color = Color(0.1, 0.8, 0.1, 1)
 
-[sub_resource type="BoxMesh" id="BoxMesh_post"]
-material = SubResource("StandardMaterial3D_start")
+[sub_resource type="BoxMesh" id="BoxMesh_0cbjo"]
+material = SubResource("StandardMaterial3D_xdw4h")
 size = Vector3(0.1, 2, 0.1)
 
-[sub_resource type="BoxMesh" id="BoxMesh_top"]
-material = SubResource("StandardMaterial3D_start")
-size = Vector3(8, 0.1, 0.1)
+[sub_resource type="BoxMesh" id="BoxMesh_xi7h2"]
+material = SubResource("StandardMaterial3D_xdw4h")
+size = Vector3(0.1, 2, 0.1)
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_trigger"]
-size = Vector3(8, 2.1, 0.5)
+[sub_resource type="BoxMesh" id="BoxMesh_egya6"]
+material = SubResource("StandardMaterial3D_xdw4h")
+size = Vector3(16.1, 0.1, 0.1)
 
-[node name="RoadlessStart" type="StaticBody3D"]
-script = ExtResource("1_roadless_start")
+[sub_resource type="BoxShape3D" id="BoxShape3D_3embg"]
+size = Vector3(16, 3, 0.5)
+
+[node name="RoadlessStart" type="StaticBody3D" unique_id=22133514]
+script = ExtResource("1_l1rdm")
 type = 1
 
-[node name="Gate" type="Node3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+[node name="Gate" type="Node3D" parent="." unique_id=1528048011]
 
-[node name="PostL" type="MeshInstance3D" parent="Gate"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.95, 1, 0)
-mesh = SubResource("BoxMesh_post")
+[node name="@MeshInstance3D@22" type="MeshInstance3D" parent="Gate" unique_id=1343366773]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 1, 0)
+mesh = SubResource("BoxMesh_0cbjo")
 
-[node name="PostR" type="MeshInstance3D" parent="Gate"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.95, 1, 0)
-mesh = SubResource("BoxMesh_post")
+[node name="@MeshInstance3D@23" type="MeshInstance3D" parent="Gate" unique_id=42028852]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 1, 0)
+mesh = SubResource("BoxMesh_xi7h2")
 
-[node name="TopBar" type="MeshInstance3D" parent="Gate"]
+[node name="@MeshInstance3D@24" type="MeshInstance3D" parent="Gate" unique_id=566364319]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0)
-mesh = SubResource("BoxMesh_top")
+mesh = SubResource("BoxMesh_egya6")
 
-[node name="DetectionArea" type="Area3D" parent="Gate"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.05, 0)
+[node name="DetectionArea" type="Area3D" parent="Gate" unique_id=1370174958]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Gate/DetectionArea"]
-shape = SubResource("BoxShape3D_trigger")
+[node name="@CollisionShape3D@25" type="CollisionShape3D" parent="Gate/DetectionArea" unique_id=980899217]
+shape = SubResource("BoxShape3D_3embg")

@@ -62,18 +62,20 @@ func _create_gate(color: Color) -> Node3D:
 	var mat = StandardMaterial3D.new()
 	mat.albedo_color = color
 	
+	var gate_width = 16.0
+	
 	var left = MeshInstance3D.new()
 	left.mesh = BoxMesh.new(); left.mesh.size = Vector3(0.1, 2, 0.1); left.mesh.material = mat
-	left.position = Vector3(-(ROAD_WIDTH/2.0 + 0.15), 1, 0)
+	left.position = Vector3(-gate_width/2.0, 1, 0)
 	gate.add_child(left)
 	
 	var right = MeshInstance3D.new()
 	right.mesh = BoxMesh.new(); right.mesh.size = Vector3(0.1, 2, 0.1); right.mesh.material = mat
-	right.position = Vector3(ROAD_WIDTH/2.0 + 0.15, 1, 0)
+	right.position = Vector3(gate_width/2.0, 1, 0)
 	gate.add_child(right)
 	
 	var top = MeshInstance3D.new()
-	top.mesh = BoxMesh.new(); top.mesh.size = Vector3(ROAD_WIDTH + 0.3, 0.1, 0.1); top.mesh.material = mat
+	top.mesh = BoxMesh.new(); top.mesh.size = Vector3(gate_width + 0.1, 0.1, 0.1); top.mesh.material = mat
 	top.position = Vector3(0, 2, 0)
 	gate.add_child(top)
 	
@@ -81,7 +83,7 @@ func _create_gate(color: Color) -> Node3D:
 	area.name = "DetectionArea"
 	var col = CollisionShape3D.new()
 	col.shape = BoxShape3D.new()
-	col.shape.size = Vector3(ROAD_WIDTH, 3.0, 0.5)
+	col.shape.size = Vector3(gate_width, 3.0, 0.5)
 	area.add_child(col)
 	# Center at Y=1.5 with height 3.0 means it covers Y=[0, 3]
 	area.position = Vector3(0, 1.5, 0)
@@ -95,13 +97,15 @@ func _save_block(name: String, type_idx: int, mesh_node: MeshInstance3D, extra: 
 	root.set_script(load("res://scripts/track_block.gd"))
 	root.type = type_idx
 	
-	root.add_child(mesh_node)
-	mesh_node.owner = root
-	
-	var col = CollisionShape3D.new()
-	col.shape = mesh_node.mesh.create_trimesh_shape()
-	root.add_child(col)
-	col.owner = root
+	if mesh_node:
+		root.add_child(mesh_node)
+		mesh_node.owner = root
+		
+		if mesh_node.mesh:
+			var col = CollisionShape3D.new()
+			col.shape = mesh_node.mesh.create_trimesh_shape()
+			root.add_child(col)
+			col.owner = root
 	
 	if extra:
 		root.add_child(extra)
@@ -165,6 +169,9 @@ func _init():
 	
 	_save_block("RoadStart", 1, _create_straight(ROAD_LENGTH, road_color), _create_gate(start_color))
 	_save_block("RoadFinish", 2, _create_straight(ROAD_LENGTH, road_color), _create_gate(finish_color))
+	
+	_save_block("RoadlessStart", 1, null, _create_gate(start_color))
+	_save_block("RoadlessFinish", 2, null, _create_gate(finish_color))
 	
 	_save_block("RoadCurveTightRight", 5, _create_curve(2.0, 90, false, road_color))
 	_save_block("RoadCurveTightLeft", 5, _create_curve(2.0, 90, true, road_color))

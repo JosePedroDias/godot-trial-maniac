@@ -1,8 +1,10 @@
 extends Node
 
 enum RaceState { PRE_START, RACING, FINISHED, BINDING }
+enum MapMode { HIDDEN, FULL, ZOOMED }
 
 var current_state = RaceState.PRE_START
+var map_mode = MapMode.HIDDEN
 var start_time = 0.0
 var race_time = 0.0
 var best_time = 0.0
@@ -43,6 +45,7 @@ signal state_changed(new_state)
 signal time_updated(new_time)
 signal speed_updated(new_speed)
 signal record_updated(record_time)
+signal map_mode_changed(new_mode)
 signal sfx_toggled(is_enabled)
 signal ghost_toggled(is_enabled)
 signal binding_step_changed(step_text)
@@ -422,6 +425,7 @@ func _handle_global_input():
 	_key_states[KEY_1] = Input.is_key_pressed(KEY_1)
 	_key_states[KEY_5] = Input.is_key_pressed(KEY_5)
 	_key_states[KEY_6] = Input.is_key_pressed(KEY_6)
+	_key_states[KEY_7] = Input.is_key_pressed(KEY_7)
 	_key_states[KEY_3] = Input.is_key_pressed(KEY_3)
 	_key_states[KEY_4] = Input.is_key_pressed(KEY_4)
 	_key_states[KEY_0] = Input.is_key_pressed(KEY_0)
@@ -438,6 +442,7 @@ func _handle_global_input():
 	if Input.is_key_pressed(KEY_1) and not _get_prev_key_state(KEY_1): toggle_sfx()
 	if Input.is_key_pressed(KEY_5) and not _get_prev_key_state(KEY_5): toggle_car()
 	if Input.is_key_pressed(KEY_6) and not _get_prev_key_state(KEY_6): _toggle_camera()
+	if Input.is_key_pressed(KEY_7) and not _get_prev_key_state(KEY_7): _toggle_map()
 	if Input.is_action_just_pressed("next_track"): next_track()
 	if Input.is_key_pressed(KEY_3) and not _get_prev_key_state(KEY_3): start_binding()
 	if Input.is_key_pressed(KEY_4) and not _get_prev_key_state(KEY_4): toggle_ghost()
@@ -476,6 +481,13 @@ func _process_prev_states():
 
 # Call this at the end of process or use a custom system
 # For simplicity, I'll integrate it into _handle_global_input's end
+
+func _toggle_map():
+	map_mode = (map_mode + 1) % 3 as MapMode
+	map_mode_changed.emit(map_mode)
+	var mode_name = ["HIDDEN", "FULL", "ZOOMED"][map_mode]
+	binding_step_changed.emit("MAP: " + mode_name)
+	get_tree().create_timer(1.0).timeout.connect(func(): binding_step_changed.emit(""))
 
 func toggle_sfx():
 	sfx_enabled = !sfx_enabled

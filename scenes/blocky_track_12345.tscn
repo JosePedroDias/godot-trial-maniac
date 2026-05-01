@@ -1,12 +1,9 @@
-[gd_scene format=3]
+[gd_scene format=3 uid="uid://dh0dv3jno1o3a"]
 
 [ext_resource type="PackedScene" path="res://scenes/mania_car.tscn" id="1_epf5c"]
-[ext_resource type="Script" path="res://scripts/car_controller.gd" id="2_5aq3q"]
-[ext_resource type="Script" path="res://scripts/follow_camera.gd" id="3_ob7iw"]
+[ext_resource type="Script" uid="uid://d3t3fpwfrfixw" path="res://scripts/follow_camera.gd" id="3_ob7iw"]
 [ext_resource type="PackedScene" path="res://scenes/hud.tscn" id="4_x84c8"]
-[ext_resource type="Script" path="res://scripts/hud.gd" id="5_n6hpj"]
 [ext_resource type="PackedScene" path="res://scenes/blocks/RoadStraight.tscn" id="6_gm4u2"]
-[ext_resource type="Script" path="res://scripts/track_block.gd" id="7_146qe"]
 [ext_resource type="PackedScene" path="res://scenes/blocks/RoadStart.tscn" id="8_ti3y1"]
 [ext_resource type="PackedScene" path="res://scenes/blocks/RoadCurveWideLeft.tscn" id="9_4ippr"]
 [ext_resource type="PackedScene" path="res://scenes/blocks/RoadCurveExtraWideRight.tscn" id="10_h7oxe"]
@@ -38,142 +35,90 @@ environment = SubResource("Environment_d3voq")
 transform = Transform3D(0.707107, -0.5, 0.5, 0, 0.707107, 0.707107, -0.707107, -0.5, 0.5, 0, 0, 0)
 shadow_enabled = true
 
-[node name="Car" type="RigidBody3D" parent="." unique_id=1443523597 instance=ExtResource("1_epf5c")]
+[node name="Car" parent="." unique_id=1443523597 instance=ExtResource("1_epf5c")]
 transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 0, 1, 2)
-mass = 1500.0
-center_of_mass_mode = 1
-center_of_mass = Vector3(0, -0.2, 0)
-script = ExtResource("2_5aq3q")
 
 [node name="FollowCamera" type="Camera3D" parent="." unique_id=1188242515]
 script = ExtResource("3_ob7iw")
 target_path = NodePath("../Car")
 
-[node name="HUD" type="CanvasLayer" parent="." unique_id=1272179135 instance=ExtResource("4_x84c8")]
-script = ExtResource("5_n6hpj")
+[node name="HUD" parent="." unique_id=1272179135 instance=ExtResource("4_x84c8")]
 
 [node name="Track" type="Node3D" parent="." unique_id=2070242223]
 
-[node name="RoadStraight" type="StaticBody3D" parent="Track" unique_id=466516385 instance=ExtResource("6_gm4u2")]
+[node name="RoadStraight" parent="Track" unique_id=466516385 instance=ExtResource("6_gm4u2")]
 transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 0, 0, 0)
-script = ExtResource("7_146qe")
 
-[node name="RoadStart" type="StaticBody3D" parent="Track" unique_id=1912659264 instance=ExtResource("8_ti3y1")]
-script = ExtResource("7_146qe")
-type = 1
+[node name="RoadStart" parent="Track" unique_id=1912659264 instance=ExtResource("8_ti3y1")]
 
-[node name="@StaticBody3D@2" type="StaticBody3D" parent="Track" unique_id=1155136527 instance=ExtResource("6_gm4u2")]
+[node name="@StaticBody3D@2" parent="Track" unique_id=1155136527 instance=ExtResource("6_gm4u2")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -4)
-script = ExtResource("7_146qe")
 
-[node name="RoadCurveWideLeft" type="StaticBody3D" parent="Track" unique_id=1462576344 instance=ExtResource("9_4ippr")]
+[node name="RoadCurveWideLeft" parent="Track" unique_id=1462576344 instance=ExtResource("9_4ippr")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -8)
-script = ExtResource("7_146qe")
-type = 6
 
-[node name="RoadCurveExtraWideRight" type="StaticBody3D" parent="Track" unique_id=200701905 instance=ExtResource("10_h7oxe")]
+[node name="RoadCurveExtraWideRight" parent="Track" unique_id=200701905 instance=ExtResource("10_h7oxe")]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -14, 0, -22)
-script = ExtResource("7_146qe")
-type = 8
 
-[node name="@StaticBody3D@3" type="StaticBody3D" parent="Track" unique_id=411267509 instance=ExtResource("9_4ippr")]
+[node name="@StaticBody3D@3" parent="Track" unique_id=411267509 instance=ExtResource("9_4ippr")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -36, 0, -44)
-script = ExtResource("7_146qe")
-type = 6
 
-[node name="@StaticBody3D@4" type="StaticBody3D" parent="Track" unique_id=1212326258 instance=ExtResource("10_h7oxe")]
+[node name="@StaticBody3D@4" parent="Track" unique_id=1212326258 instance=ExtResource("10_h7oxe")]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -50, 0, -58)
-script = ExtResource("7_146qe")
-type = 8
 
-[node name="RoadCurveTightLeft" type="StaticBody3D" parent="Track" unique_id=1154201916 instance=ExtResource("11_inv42")]
+[node name="RoadCurveTightLeft" parent="Track" unique_id=1154201916 instance=ExtResource("11_inv42")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -72, 0, -80)
-script = ExtResource("7_146qe")
-type = 5
 
-[node name="RoadStraightLong" type="StaticBody3D" parent="Track" unique_id=483418329 instance=ExtResource("12_ti6vf")]
+[node name="RoadStraightLong" parent="Track" unique_id=483418329 instance=ExtResource("12_ti6vf")]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -78, 0, -86)
-script = ExtResource("7_146qe")
-type = 7
 
-[node name="@StaticBody3D@5" type="StaticBody3D" parent="Track" unique_id=1875003740 instance=ExtResource("6_gm4u2")]
+[node name="@StaticBody3D@5" parent="Track" unique_id=1875003740 instance=ExtResource("6_gm4u2")]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -94, 0, -86)
-script = ExtResource("7_146qe")
 
-[node name="@StaticBody3D@6" type="StaticBody3D" parent="Track" unique_id=2068657351 instance=ExtResource("10_h7oxe")]
+[node name="@StaticBody3D@6" parent="Track" unique_id=2068657351 instance=ExtResource("10_h7oxe")]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -98, 0, -86)
-script = ExtResource("7_146qe")
-type = 8
 
-[node name="@StaticBody3D@7" type="StaticBody3D" parent="Track" unique_id=207861947 instance=ExtResource("11_inv42")]
+[node name="@StaticBody3D@7" parent="Track" unique_id=207861947 instance=ExtResource("11_inv42")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -120, 0, -108)
-script = ExtResource("7_146qe")
-type = 5
 
-[node name="@StaticBody3D@8" type="StaticBody3D" parent="Track" unique_id=1967918732 instance=ExtResource("6_gm4u2")]
+[node name="@StaticBody3D@8" parent="Track" unique_id=1967918732 instance=ExtResource("6_gm4u2")]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -126, 0, -114)
-script = ExtResource("7_146qe")
 
-[node name="@StaticBody3D@9" type="StaticBody3D" parent="Track" unique_id=1716012354 instance=ExtResource("12_ti6vf")]
+[node name="@StaticBody3D@9" parent="Track" unique_id=1716012354 instance=ExtResource("12_ti6vf")]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -130, 0, -114)
-script = ExtResource("7_146qe")
-type = 7
 
-[node name="@StaticBody3D@10" type="StaticBody3D" parent="Track" unique_id=2000423207 instance=ExtResource("12_ti6vf")]
+[node name="@StaticBody3D@10" parent="Track" unique_id=2000423207 instance=ExtResource("12_ti6vf")]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -146, 0, -114)
-script = ExtResource("7_146qe")
-type = 7
 
-[node name="@StaticBody3D@11" type="StaticBody3D" parent="Track" unique_id=138695096 instance=ExtResource("11_inv42")]
+[node name="@StaticBody3D@11" parent="Track" unique_id=138695096 instance=ExtResource("11_inv42")]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -162, 0, -114)
-script = ExtResource("7_146qe")
-type = 5
 
-[node name="@StaticBody3D@12" type="StaticBody3D" parent="Track" unique_id=460109317 instance=ExtResource("10_h7oxe")]
+[node name="@StaticBody3D@12" parent="Track" unique_id=460109317 instance=ExtResource("10_h7oxe")]
 transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -168, 0, -108)
-script = ExtResource("7_146qe")
-type = 8
 
-[node name="RoadCurveExtraWideLeft" type="StaticBody3D" parent="Track" unique_id=1140911134 instance=ExtResource("13_g8fh7")]
+[node name="RoadCurveExtraWideLeft" parent="Track" unique_id=1140911134 instance=ExtResource("13_g8fh7")]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -190, 0, -86)
-script = ExtResource("7_146qe")
-type = 8
 
-[node name="@StaticBody3D@13" type="StaticBody3D" parent="Track" unique_id=932269649 instance=ExtResource("9_4ippr")]
+[node name="@StaticBody3D@13" parent="Track" unique_id=932269649 instance=ExtResource("9_4ippr")]
 transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -212, 0, -64)
-script = ExtResource("7_146qe")
-type = 6
 
-[node name="@StaticBody3D@15" type="StaticBody3D" parent="Track" unique_id=257200836 instance=ExtResource("12_ti6vf")]
+[node name="@StaticBody3D@15" parent="Track" unique_id=257200836 instance=ExtResource("12_ti6vf")]
 transform = Transform3D(1.3113416e-07, 0, -1, 0, 1, 0, 1, 0, 1.3113416e-07, -198, 0, -50)
-script = ExtResource("7_146qe")
-type = 7
 
-[node name="@StaticBody3D@16" type="StaticBody3D" parent="Track" unique_id=1667647228 instance=ExtResource("6_gm4u2")]
+[node name="@StaticBody3D@16" parent="Track" unique_id=1667647228 instance=ExtResource("6_gm4u2")]
 transform = Transform3D(1.3113416e-07, 0, -1, 0, 1, 0, 1, 0, 1.3113416e-07, -182, 0, -50.000004)
-script = ExtResource("7_146qe")
 
-[node name="@StaticBody3D@17" type="StaticBody3D" parent="Track" unique_id=1280428636 instance=ExtResource("9_4ippr")]
+[node name="@StaticBody3D@17" parent="Track" unique_id=1280428636 instance=ExtResource("9_4ippr")]
 transform = Transform3D(1.3113416e-07, 0, -1, 0, 1, 0, 1, 0, 1.3113416e-07, -178, 0, -50.000004)
-script = ExtResource("7_146qe")
-type = 6
 
-[node name="RoadCurveTightRight" type="StaticBody3D" parent="Track" unique_id=535300540 instance=ExtResource("14_38tho")]
+[node name="RoadCurveTightRight" parent="Track" unique_id=535300540 instance=ExtResource("14_38tho")]
 transform = Transform3D(1, 0, 1.7484555e-07, 0, 1, 0, -1.7484555e-07, 0, 1, -164, 0, -64.00001)
-script = ExtResource("7_146qe")
-type = 5
 
-[node name="@StaticBody3D@18" type="StaticBody3D" parent="Track" unique_id=269712969 instance=ExtResource("12_ti6vf")]
+[node name="@StaticBody3D@18" parent="Track" unique_id=269712969 instance=ExtResource("12_ti6vf")]
 transform = Transform3D(1.3113416e-07, 0, -1, 0, 1, 0, 1, 0, 1.3113416e-07, -158, 0, -70.00001)
-script = ExtResource("7_146qe")
-type = 7
 
-[node name="@StaticBody3D@19" type="StaticBody3D" parent="Track" unique_id=1010541071 instance=ExtResource("10_h7oxe")]
+[node name="@StaticBody3D@19" parent="Track" unique_id=1010541071 instance=ExtResource("10_h7oxe")]
 transform = Transform3D(1.3113416e-07, 0, -1, 0, 1, 0, 1, 0, 1.3113416e-07, -142, 0, -70.00001)
-script = ExtResource("7_146qe")
-type = 8
 
-[node name="RoadFinish" type="StaticBody3D" parent="Track" unique_id=1553438599 instance=ExtResource("15_tsvht")]
+[node name="RoadFinish" parent="Track" unique_id=1553438599 instance=ExtResource("15_tsvht")]
 transform = Transform3D(-1, 0, -8.742277e-08, 0, 1, 0, 8.742277e-08, 0, -1, -120, 0, -48.00001)
-script = ExtResource("7_146qe")
-type = 2
