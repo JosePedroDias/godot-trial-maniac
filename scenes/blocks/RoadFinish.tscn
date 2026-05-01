@@ -1,6 +1,6 @@
-[gd_scene format=4]
+[gd_scene format=4 uid="uid://cvoavosyi8l33"]
 
-[ext_resource type="Script" path="res://scripts/track_block.gd" id="1_ch3mv"]
+[ext_resource type="Script" uid="uid://vr50jkeds18g" path="res://scripts/track_block.gd" id="1_ch3mv"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_gdi5k"]
 vertex_color_use_as_albedo = true
@@ -22,50 +22,51 @@ _surfaces = [{
 data = PackedVector3Array(-4.1, 0.25, 0, -4, 0.25, 0, -4.1, 0.25, -4, -4, 0.25, 0, -4, 0.25, -4, -4.1, 0.25, -4, -4, 0.25, 0, -4, 0, 0, -4, 0.25, -4, -4, 0, 0, -4, 0, -4, -4, 0.25, -4, -4, 0, 0, 4, 0, 0, -4, 0, -4, 4, 0, 0, 4, 0, -4, -4, 0, -4, 4, 0, 0, 4, 0.25, 0, 4, 0, -4, 4, 0.25, 0, 4, 0.25, -4, 4, 0, -4, 4, 0.25, 0, 4.1, 0.25, 0, 4, 0.25, -4, 4.1, 0.25, 0, 4.1, 0.25, -4, 4, 0.25, -4, 4.1, 0.25, 0, 4.1, -0.39999998, 0, 4.1, 0.25, -4, 4.1, -0.39999998, 0, 4.1, -0.39999998, -4, 4.1, 0.25, -4, 4.1, -0.39999998, 0, -4.1, -0.39999998, 0, 4.1, -0.39999998, -4, -4.1, -0.39999998, 0, -4.1, -0.39999998, -4, 4.1, -0.39999998, -4, -4.1, -0.39999998, 0, -4.1, 0.25, 0, -4.1, -0.39999998, -4, -4.1, 0.25, 0, -4.1, 0.25, -4, -4.1, -0.39999998, -4)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_2s25p"]
-albedo_color = Color(0.8, 0.1, 0.1, 1)
+albedo_color = Color(1, 1, 0.6, 1)
 
 [sub_resource type="BoxMesh" id="BoxMesh_lcwd8"]
 material = SubResource("StandardMaterial3D_2s25p")
-size = Vector3(0.1, 2, 0.1)
+size = Vector3(0.2, 5, 0.2)
 
 [sub_resource type="BoxMesh" id="BoxMesh_cwltg"]
 material = SubResource("StandardMaterial3D_2s25p")
-size = Vector3(0.1, 2, 0.1)
+size = Vector3(0.2, 5, 0.2)
 
 [sub_resource type="BoxMesh" id="BoxMesh_o1lx7"]
 material = SubResource("StandardMaterial3D_2s25p")
-size = Vector3(16.1, 0.1, 0.1)
+size = Vector3(16.2, 0.2, 0.2)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_y65is"]
-size = Vector3(16, 3, 0.5)
+size = Vector3(16, 5.055786, 0.5)
 
-[node name="RoadFinish" type="StaticBody3D" unique_id=951351194]
+[node name="RoadFinish" type="StaticBody3D" unique_id=261864385]
 script = ExtResource("1_ch3mv")
 type = 2
 
-[node name="@MeshInstance3D@20" type="MeshInstance3D" parent="." unique_id=633691220]
+[node name="@MeshInstance3D@20" type="MeshInstance3D" parent="." unique_id=887736499]
 material_override = SubResource("StandardMaterial3D_gdi5k")
 mesh = SubResource("ArrayMesh_1jv2j")
 
-[node name="@CollisionShape3D@21" type="CollisionShape3D" parent="." unique_id=1049850342]
+[node name="@CollisionShape3D@21" type="CollisionShape3D" parent="." unique_id=30300303]
 shape = SubResource("ConcavePolygonShape3D_tue10")
 
-[node name="Gate" type="Node3D" parent="." unique_id=1357028577]
+[node name="Gate" type="Node3D" parent="." unique_id=2054362689]
 
-[node name="@MeshInstance3D@16" type="MeshInstance3D" parent="Gate" unique_id=1763213251]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 1, 0)
+[node name="@MeshInstance3D@16" type="MeshInstance3D" parent="Gate" unique_id=689023014]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 2.5, 0)
 mesh = SubResource("BoxMesh_lcwd8")
 
-[node name="@MeshInstance3D@17" type="MeshInstance3D" parent="Gate" unique_id=1699682082]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 1, 0)
+[node name="@MeshInstance3D@17" type="MeshInstance3D" parent="Gate" unique_id=1618046607]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 2.5, 0)
 mesh = SubResource("BoxMesh_cwltg")
 
-[node name="@MeshInstance3D@18" type="MeshInstance3D" parent="Gate" unique_id=881294297]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0)
+[node name="@MeshInstance3D@18" type="MeshInstance3D" parent="Gate" unique_id=749399901]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5, 0)
 mesh = SubResource("BoxMesh_o1lx7")
 
-[node name="DetectionArea" type="Area3D" parent="Gate" unique_id=1043161786]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
+[node name="DetectionArea" type="Area3D" parent="Gate" unique_id=887502574]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, 0)
 
-[node name="@CollisionShape3D@19" type="CollisionShape3D" parent="Gate/DetectionArea" unique_id=1013638524]
+[node name="@CollisionShape3D@19" type="CollisionShape3D" parent="Gate/DetectionArea" unique_id=455084560]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.47210693, 0)
 shape = SubResource("BoxShape3D_y65is")

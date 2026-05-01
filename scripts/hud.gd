@@ -19,7 +19,7 @@ func _ready():
 		gm.record_updated.connect(_on_record_updated)
 		gm.binding_step_changed.connect(_on_binding_step_changed)
 		gm.map_mode_changed.connect(_on_map_mode_changed)
-		map_mode = gm.map_mode
+		_on_map_mode_changed(gm.map_mode)
 	finish_label.hide()
 	binding_label.hide()
 	
@@ -49,7 +49,15 @@ func _on_binding_step_changed(step_text):
 func _on_record_updated(record):
 	var gm = get_node_or_null("/root/GameManager")
 	if gm:
-		record_label.text = "RECORD: " + gm.format_time(record)
+		var track_name = "UNKNOWN"
+		if get_tree().current_scene:
+			var scene_path = get_tree().current_scene.scene_file_path
+			if scene_path != "":
+				track_name = scene_path.get_file().get_basename().replace("_track", "").to_upper().replace("_", " ")
+			else:
+				track_name = get_tree().current_scene.name.to_upper().replace("_", " ")
+		
+		record_label.text = "BEST: " + gm.format_time(record) + "\n" + track_name
 
 func _on_speed_updated(speed):
 	speed_label.text = str(int(speed)) + " KM/H"

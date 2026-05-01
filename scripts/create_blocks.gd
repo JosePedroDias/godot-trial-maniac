@@ -63,30 +63,32 @@ func _create_gate(color: Color) -> Node3D:
 	mat.albedo_color = color
 	
 	var gate_width = 16.0
+	var gate_height = 5.0 # Increased from 2.0 (2.5x)
+	var thickness = 0.2 # Doubled from 0.1
 	
 	var left = MeshInstance3D.new()
-	left.mesh = BoxMesh.new(); left.mesh.size = Vector3(0.1, 2, 0.1); left.mesh.material = mat
-	left.position = Vector3(-gate_width/2.0, 1, 0)
+	left.mesh = BoxMesh.new(); left.mesh.size = Vector3(thickness, gate_height, thickness); left.mesh.material = mat
+	left.position = Vector3(-gate_width/2.0, gate_height/2.0, 0)
 	gate.add_child(left)
 	
 	var right = MeshInstance3D.new()
-	right.mesh = BoxMesh.new(); right.mesh.size = Vector3(0.1, 2, 0.1); right.mesh.material = mat
-	right.position = Vector3(gate_width/2.0, 1, 0)
+	right.mesh = BoxMesh.new(); right.mesh.size = Vector3(thickness, gate_height, thickness); right.mesh.material = mat
+	right.position = Vector3(gate_width/2.0, gate_height/2.0, 0)
 	gate.add_child(right)
 	
 	var top = MeshInstance3D.new()
-	top.mesh = BoxMesh.new(); top.mesh.size = Vector3(gate_width + 0.1, 0.1, 0.1); top.mesh.material = mat
-	top.position = Vector3(0, 2, 0)
+	top.mesh = BoxMesh.new(); top.mesh.size = Vector3(gate_width + thickness, thickness, thickness); top.mesh.material = mat
+	top.position = Vector3(0, gate_height, 0)
 	gate.add_child(top)
 	
 	var area = Area3D.new()
 	area.name = "DetectionArea"
 	var col = CollisionShape3D.new()
 	col.shape = BoxShape3D.new()
-	col.shape.size = Vector3(gate_width, 3.0, 0.5)
+	col.shape.size = Vector3(gate_width, gate_height + 1.0, 0.5)
 	area.add_child(col)
-	# Center at Y=1.5 with height 3.0 means it covers Y=[0, 3]
-	area.position = Vector3(0, 1.5, 0)
+	# Center it to cover from floor to slightly above top bar
+	area.position = Vector3(0, (gate_height + 1.0)/2.0, 0)
 	gate.add_child(area)
 	
 	return gate
@@ -159,19 +161,18 @@ func _create_side_pipe(length: float, color: Color) -> MeshInstance3D:
 func _init():
 	var road_color = Color(0.2, 0.2, 0.2)
 	var booster_color = Color(1.0, 0.7, 0.1)
-	var start_color = Color(0.1, 0.8, 0.1)
-	var finish_color = Color(0.8, 0.1, 0.1)
+	var gate_color = Color(1.0, 1.0, 0.6) # Light Yellow
 	
 	_save_block("RoadStraight", 0, _create_straight(ROAD_LENGTH, road_color))
 	_save_block("RoadStraightLong", 7, _create_straight(ROAD_LENGTH * 4.0, road_color))
 	_save_block("RoadStraightLongNoWalls", 10, _create_straight(ROAD_LENGTH * 4.0, road_color)) # Should technically have no walls, but for now...
 	_save_block("RoadBooster", 3, _create_straight(ROAD_LENGTH, booster_color))
 	
-	_save_block("RoadStart", 1, _create_straight(ROAD_LENGTH, road_color), _create_gate(start_color))
-	_save_block("RoadFinish", 2, _create_straight(ROAD_LENGTH, road_color), _create_gate(finish_color))
+	_save_block("RoadStart", 1, _create_straight(ROAD_LENGTH, road_color), _create_gate(gate_color))
+	_save_block("RoadFinish", 2, _create_straight(ROAD_LENGTH, road_color), _create_gate(gate_color))
 	
-	_save_block("RoadlessStart", 1, null, _create_gate(start_color))
-	_save_block("RoadlessFinish", 2, null, _create_gate(finish_color))
+	_save_block("RoadlessStart", 1, null, _create_gate(gate_color))
+	_save_block("RoadlessFinish", 2, null, _create_gate(gate_color))
 	
 	_save_block("RoadCurveTightRight", 5, _create_curve(2.0, 90, false, road_color))
 	_save_block("RoadCurveTightLeft", 5, _create_curve(2.0, 90, true, road_color))

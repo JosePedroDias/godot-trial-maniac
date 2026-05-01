@@ -4,7 +4,7 @@ enum RaceState { PRE_START, RACING, FINISHED, BINDING }
 enum MapMode { HIDDEN, FULL, ZOOMED }
 
 var current_state = RaceState.PRE_START
-var map_mode = MapMode.HIDDEN
+var map_mode = MapMode.ZOOMED
 var start_time = 0.0
 var race_time = 0.0
 var best_time = 0.0
