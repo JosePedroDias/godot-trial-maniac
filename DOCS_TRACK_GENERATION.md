@@ -14,8 +14,11 @@ This document describes the process of adapting real-world (or OSM-derived) 3D p
     -   The processed points are saved to a new JSON format containing `x, y, z` and `tx, ty, tz` (tangent vector).
     -   A Godot script (`scripts/track_from_json.gd`) reads these points.
     -   It uses a `MeshTurtle` (a custom extrusion tool) to "sweep" a road profile along the interpolated path.
-    -   The `MeshTurtle` is oriented at each step using the tangent vectors, ensuring the road surface correctly follows the track's direction and banking (currently default up-vector).
+    -   The `MeshTurtle` is oriented at each step using the tangent vectors and optional **roll (banking)** data, ensuring the road surface correctly follows the track's direction and banking (e.g., Madrid's 24% turn).
     -   The result is a single continuous mesh with optimized UVs and collision geometry.
+
+## Optional JSON Fields
+-   `roll` (float): Banking angle in radians. Used to tilt the track surface. Supported in both raw points (interpolated via Spline) and processed points.
 
 ## Tools Used
 
@@ -40,4 +43,6 @@ This document describes the process of adapting real-world (or OSM-derived) 3D p
 
 ## Results
 -   **USA Miami**: Resampled from 259 to 1086 points (5.4km).
--   **Spain**: Resampled from 221 to 942 points (4.7km).
+-   **Spain (Barcelona)**: Resampled from 221 to 942 points (4.7km).
+-   **Spain (Madrid)**: 2026 layout with 24% banking on Turn 12.
+-   **Netherlands (Zandvoort)**: Authentic 34% (Turn 3) and 32% (Turn 14) banking.

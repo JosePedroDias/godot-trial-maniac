@@ -20,7 +20,7 @@ var tracks = [
 	##"res://scenes/saudi_arabia_track.tscn", # skipped
 	"res://scenes/usa_miami_track.tscn",
 	"res://scenes/italy_emilia_track.tscn",
-	"res://scenes/canada_track.tscn", # TODO needs work
+	"res://scenes/canada_track.tscn",
 	"res://scenes/monaco_track.tscn", # TODO needs work
 	"res://scenes/spain_barcelona_track.tscn",
 	"res://scenes/austria_track.tscn", # 180?
@@ -29,13 +29,13 @@ var tracks = [
 	"res://scenes/hungary_track.tscn",
 	"res://scenes/netherlands_track.tscn",
 	"res://scenes/italy_monza_track.tscn",
-	##"res://scenes/spain_madrid_track.tscn", # TODO https://www.formula1.com/en/racing/2026/spain
+	"res://scenes/spain_madrid_track.tscn",
 	"res://scenes/azerbaijan_track.tscn", # TODO needs work
 	"res://scenes/singapore_track.tscn", # TODO needs work
 	"res://scenes/usa_cota_track.tscn",
 	"res://scenes/mexico_track.tscn",
 	"res://scenes/brazil_track.tscn",
-	"res://scenes/usa_las_vegas_track.tscn", # TODO needs work https://www.formula1.com/en/racing/2026/las-vegas
+	"res://scenes/usa_las_vegas_track.tscn",
 	"res://scenes/qatar_track.tscn",
 	"res://scenes/abu_dhabi_track.tscn",
 

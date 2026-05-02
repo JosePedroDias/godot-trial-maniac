@@ -8,10 +8,13 @@ def process_track(input_path, output_path, target_spacing=5.0):
         data = json.load(f)
     
     points = np.array([[p['x'], p['y'], p['z']] for p in data['points']])
+    rolls = np.array([p.get('roll', 0.0) for p in data['points']])
     
     # Close the loop if it's not closed
     if not np.allclose(points[0], points[-1]):
         points = np.vstack([points, points[0]])
+        if len(rolls) > 0:
+            rolls = np.append(rolls, rolls[0])
     
     # Smooth elevation (Y) using circular padding for a flawless loop
     if len(points) > 10:
@@ -37,12 +40,14 @@ def process_track(input_path, output_path, target_spacing=5.0):
     # Create Cubic Spline
     # bc_type='periodic' ensures smooth transition at start/end
     cs = CubicSpline(cumulative_dist, points, bc_type='periodic')
+    cs_roll = CubicSpline(cumulative_dist, rolls, bc_type='periodic') if len(rolls) > 0 else None
     
     # Resample
     num_samples = int(total_length / target_spacing)
     # Using endpoint=False for consistent loop spacing
     new_dists = np.linspace(0, total_length, num_samples, endpoint=False)
     new_points = cs(new_dists)
+    new_rolls = cs_roll(new_dists) if cs_roll else np.zeros(len(new_dists))
     
     # Also calculate tangents (for orientation)
     tangents = cs.derivative()(new_dists)
@@ -61,7 +66,8 @@ def process_track(input_path, output_path, target_spacing=5.0):
             "z": float(new_points[i][2]),
             "tx": float(tangents[i][0]),
             "ty": float(tangents[i][1]),
-            "tz": float(tangents[i][2])
+            "tz": float(tangents[i][2]),
+            "roll": float(new_rolls[i])
         })
         
     output_data = {

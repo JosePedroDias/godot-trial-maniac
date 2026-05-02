@@ -140,8 +140,13 @@ static func build_track_mesh(points_data: Array) -> MeshInstance3D:
 		var p_data = points_data[i]
 		var curr_pos = Vector3(p_data.x, p_data.y, p_data.z)
 		var curr_tangent = Vector3(p_data.tx, p_data.ty, p_data.tz)
+		var roll = p_data.get("roll", 0.0)
 		
-		turtle.transform = Transform3D(Basis.looking_at(-curr_tangent, Vector3.UP), curr_pos)
+		var basis = Basis.looking_at(-curr_tangent, Vector3.UP)
+		if roll != 0.0:
+			basis = basis.rotated(curr_tangent.normalized(), roll)
+		
+		turtle.transform = Transform3D(basis, curr_pos)
 		var d = curr_pos.distance_to(prev_pos)
 		total_dist += d
 		turtle._total_dist = total_dist
@@ -152,7 +157,13 @@ static func build_track_mesh(points_data: Array) -> MeshInstance3D:
 
 	# Close the loop
 	var last_p_data = points_data[0]
-	turtle.transform = Transform3D(Basis.looking_at(-Vector3(last_p_data.tx, last_p_data.ty, last_p_data.tz), Vector3.UP), Vector3(last_p_data.x, last_p_data.y, last_p_data.z))
+	var last_tangent = Vector3(last_p_data.tx, last_p_data.ty, last_p_data.tz)
+	var last_roll = last_p_data.get("roll", 0.0)
+	var last_basis = Basis.looking_at(-last_tangent, Vector3.UP)
+	if last_roll != 0.0:
+		last_basis = last_basis.rotated(last_tangent.normalized(), last_roll)
+	
+	turtle.transform = Transform3D(last_basis, Vector3(last_p_data.x, last_p_data.y, last_p_data.z))
 	update_kerb_color.call(total_dist + prev_pos.distance_to(Vector3(last_p_data.x, last_p_data.y, last_p_data.z)))
 	turtle.add_slice()
 

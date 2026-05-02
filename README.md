@@ -103,5 +103,9 @@ These scripts are utility tools used to generate the static assets of the game.
 - **Toggle Fullscreen:** 0
 - **Quit Game:** Escape
 
+## Credits & Acknowledgments
+- **[FastF1](https://github.com/theOehrly/Fast-F1):** Used for retrieving high-precision F1 telemetry data to fix circuit heights and disparities.
+- **[f1-circuits (bacinger)](https://github.com/bacinger/f1-circuits):** Source for the Madrid (Madring) circuit GeoJSON used to map the upcoming 2026 layout.
+
 ## License
 This project is licensed under the **Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)** license. See the [LICENSE](LICENSE) file for details.
