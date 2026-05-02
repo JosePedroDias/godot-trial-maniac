@@ -1,12 +1,12 @@
 extends RigidBody3D
 
 enum Strategy { RAYCAST, SIMPLE }
-@export var physics_strategy: Strategy = Strategy.SIMPLE # RAYCAST, SIMPLE
+@export var physics_strategy: Strategy = Strategy.RAYCAST # RAYCAST, SIMPLE
 
 @export_group("Engine")
 @export var engine_power: float = 150000.0
 @export var brake_force: float = 100000.0
-@export var max_speed: float = 400.0 # km/h
+@export var max_speed: float = 320.0 # km/h
 @export var reverse_force: float = 30000.0
 
 @export_group("Steering")
@@ -61,7 +61,7 @@ func _ready():
 	linear_damp = 0.5
 	angular_damp = 5.0
 	center_of_mass_mode = 1
-	center_of_mass = Vector3(0, -0.5, 0)
+	center_of_mass = Vector3(0, 0.25, 0.2)
 	
 	_init_physics_strategy()
 	_setup_audio()

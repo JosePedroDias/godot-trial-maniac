@@ -19,6 +19,8 @@ func toggle_mode():
 	mode = (mode + 1) % 3 as Mode
 	print("Camera Mode: ", Mode.keys()[mode])
 
+var _smooth_forward: Vector3 = Vector3.FORWARD
+
 func _process(delta):
 	if not is_instance_valid(target):
 		var p = get_parent()
@@ -26,25 +28,43 @@ func _process(delta):
 		if not target: return
 
 	match mode:
+		# _follow_logic(delta, distance, height, pos_smooth, rot_smooth):
 		Mode.FOLLOW:
-			_follow_logic(delta, 5.0, 2.5, 8.0)
+			_follow_logic(delta, 5.0, 4.0, 4.0, 36.0)
 		Mode.FAR:
-			_follow_logic(delta, 12.0, 6.0, 4.0)
+			_follow_logic(delta, 10.0, 9.0, 2.0, 24.0)
 		Mode.TOP_FIXED:
 			_top_fixed_logic(delta)
 
-func _follow_logic(delta, distance, height, smoothness):
+func _follow_logic(delta, distance, height, pos_smooth, rot_smooth):
 	var target_pos = target.global_transform.origin
-	# In this project, +Z is forward for the car
-	var forward = target.global_transform.basis.z
+	var car_fwd = target.global_transform.basis.z
 	
-	var desired_pos = target_pos - forward * distance + Vector3.UP * height
-	global_position = global_position.lerp(desired_pos, smoothness * delta)
+	# Use velocity to help guide the camera direction if moving fast enough
+	# This makes the camera follow the 'path' rather than every tiny steering wiggle
+	var velocity = Vector3.ZERO
+	if target is RigidBody3D:
+		velocity = target.linear_velocity
 	
-	# Look at a point slightly ahead of the car
-	var look_target = target_pos + forward * 4.0
+	var vel_fwd = velocity.normalized()
+	var speed = velocity.length()
+	
+	# Blend car orientation and velocity direction
+	var target_fwd = car_fwd
+	if speed > 5.0:
+		var vel_factor = clamp((speed - 5.0) / 20.0, 0.0, 0.7)
+		target_fwd = car_fwd.lerp(vel_fwd, vel_factor).normalized()
+	
+	# Smoothly update the camera's internal forward vector
+	_smooth_forward = _smooth_forward.lerp(target_fwd, rot_smooth * delta).normalized()
+	
+	var desired_pos = target_pos - _smooth_forward * distance + Vector3.UP * height
+	global_position = global_position.lerp(desired_pos, pos_smooth * delta)
+	
+	# Look at a point slightly ahead of the car using the smooth forward
+	var look_target = target_pos + _smooth_forward * 4.0
 	var new_transform = transform.looking_at(look_target, Vector3.UP)
-	global_basis = global_basis.slerp(new_transform.basis, smoothness * delta)
+	global_basis = global_basis.slerp(new_transform.basis, rot_smooth * delta)
 
 func _top_fixed_logic(delta):
 	if not _calculated_center:
@@ -52,7 +72,7 @@ func _top_fixed_logic(delta):
 	
 	# Stay high up at center, look at car
 	# Adjust height based on track size if possible, or just keep it very high
-	var desired_pos = _fixed_center + Vector3.UP * 250.0 
+	var desired_pos = _fixed_center + Vector3.UP * 60.0 
 	global_position = global_position.lerp(desired_pos, 2.0 * delta)
 	
 	var new_transform = transform.looking_at(target.global_position, Vector3.UP)
