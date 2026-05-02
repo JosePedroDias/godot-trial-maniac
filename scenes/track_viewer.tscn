@@ -1,0 +1,29 @@
+[gd_scene load_steps=3 format=3 uid="uid://c8n8m2v8j5y3d"]
+
+[ext_resource type="Script" path="res://scripts/track_viewer.gd" id="1_v4w2n"]
+[ext_resource type="Script" path="res://scripts/orbit_camera.gd" id="2_u6k2r"]
+
+[node name="TrackViewer" type="Node3D"]
+script = ExtResource("1_v4w2n")
+
+[node name="OrbitCamera" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 100)
+current = true
+script = ExtResource("2_u6k2r")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.866025, -0.433013, 0.25, 0, 0.5, 0.866025, -0.5, -0.75, 0.433013, 0, 0, 0)
+shadow_enabled = true
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="Label" type="Label" parent="CanvasLayer"]
+offset_left = 20.0
+offset_top = 20.0
+offset_right = 400.0
+offset_bottom = 100.0
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 4
+theme_override_font_sizes/font_size = 18
+text = "Track Viewer
+[LMB] Orbit | [RMB] Pan | [Wheel] Zoom"
