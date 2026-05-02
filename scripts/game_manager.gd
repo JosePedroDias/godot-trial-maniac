@@ -1,62 +1,14 @@
 extends Node
 
 enum RaceState { PRE_START, RACING, FINISHED, BINDING }
-enum MapMode { HIDDEN, FULL, ZOOMED }
 
 var current_state = RaceState.PRE_START
-var map_mode = MapMode.ZOOMED
-var start_time = 0.0
-var race_time = 0.0
-var best_time = 0.0
-var time_diff = 0.0
-var sfx_enabled = true
-var ghost_enabled = true
-
-var tracks = [
-	"res://scenes/australia_track.tscn",
-	"res://scenes/china_track.tscn",
-	"res://scenes/japan_track.tscn", # 180?
-	##"res://scenes/bahrain_track.tscn", # skipped
-	##"res://scenes/saudi_arabia_track.tscn", # skipped
-	"res://scenes/usa_miami_track.tscn",
-	"res://scenes/italy_emilia_track.tscn",
-	"res://scenes/canada_track.tscn",
-	"res://scenes/monaco_track.tscn", # TODO needs work
-	"res://scenes/spain_barcelona_track.tscn",
-	"res://scenes/austria_track.tscn", # 180?
-	"res://scenes/great_britain_track.tscn",
-	"res://scenes/belgium_track.tscn",
-	"res://scenes/hungary_track.tscn",
-	"res://scenes/netherlands_track.tscn",
-	"res://scenes/italy_monza_track.tscn",
-	"res://scenes/spain_madrid_track.tscn",
-	"res://scenes/azerbaijan_track.tscn", # TODO needs work
-	"res://scenes/singapore_track.tscn", # TODO needs work
-	"res://scenes/usa_cota_track.tscn",
-	"res://scenes/mexico_track.tscn",
-	"res://scenes/brazil_track.tscn",
-	"res://scenes/usa_las_vegas_track.tscn",
-	"res://scenes/qatar_track.tscn",
-	"res://scenes/abu_dhabi_track.tscn",
-
-	#"res://scenes/blocky_track_12345.tscn",
-	#"res://scenes/blocky_track_54321.tscn",
-	#"res://scenes/blocky_track_98765.tscn",
-	#"res://scenes/blocky_track_13579.tscn",
-	#"res://scenes/blocky_track_24680.tscn",
-	#"res://scenes/continuos_track_111.tscn",
-	#"res://scenes/continuos_track_222.tscn",
-	#"res://scenes/continuos_track_333.tscn",
-	#"res://scenes/continuos_track_444.tscn",
-	#"res://scenes/continuos_track_555.tscn"
-]
+var current_time = 0.0
+var best_time = 600.0
 var current_track_index = 0
-var initial_car_transform: Transform3D
-var highscores = {} 
-var selected_car = "res://scenes/mania_car.tscn"
-const SAVE_PATH = "user://game_data.json"
+var map_mode = 0 # 0: Off, 1: Full, 2: Small
 
-# Input Assignments v3 - Extended for Keyboard
+# Control Config (Defaults)
 var steer_left = {"dev": -1, "axis": 0, "sign": -1, "btn": -1, "is_btn": false, "snap": 0.0, "key": KEY_LEFT, "is_kb": true}
 var steer_right = {"dev": -1, "axis": 0, "sign": 1, "btn": -1, "is_btn": false, "snap": 0.0, "key": KEY_RIGHT, "is_kb": true}
 var throttle = {"dev": -1, "axis": 5, "sign": 1, "btn": -1, "is_btn": false, "snap": 0.0, "key": KEY_UP, "is_kb": true}
@@ -72,245 +24,118 @@ signal sfx_toggled(is_enabled)
 signal ghost_toggled(is_enabled)
 signal binding_step_changed(step_text)
 
-var _current_run_ghost: Array = []
-var _best_ghost_data: Array = []
-var _ghost_actor = null
+var tracks = [
+	"res://scenes/australia_track.tscn",
+	"res://scenes/china_track.tscn",
+	"res://scenes/japan_track.tscn",
+	"res://scenes/italy_emilia_track.tscn",
+	"res://scenes/monaco_track.tscn",
+	"res://scenes/canada_track.tscn",
+	"res://scenes/spain_barcelona_track.tscn",
+	"res://scenes/austria_track.tscn",
+	"res://scenes/great_britain_track.tscn",
+	"res://scenes/belgium_track.tscn",
+	"res://scenes/hungary_track.tscn",
+	"res://scenes/netherlands_track.tscn",
+	"res://scenes/italy_monza_track.tscn",
+	"res://scenes/spain_madrid_track.tscn",
+	"res://scenes/azerbaijan_track.tscn",
+	"res://scenes/singapore_track.tscn",
+	"res://scenes/usa_cota_track.tscn",
+	"res://scenes/mexico_track.tscn",
+	"res://scenes/brazil_track.tscn",
+	"res://scenes/usa_las_vegas_track.tscn",
+	"res://scenes/qatar_track.tscn",
+	"res://scenes/abu_dhabi_track.tscn",
+	"res://scenes/usa_miami_track.tscn"
+]
 
-var _binding_step = -1 # -1: Choice (K/J)
-var _binding_mode = 0 # 0: Keyboard, 1: Joypad
+var highscores = {}
+var sfx_enabled: bool = true
+var ghost_enabled: bool = true
+var telemetry_enabled: bool = false
+var current_telemetry: Array = []
+
+var _current_run_ghost = []
+var _best_ghost_data = []
+var _ghost_actor: Node3D = null
+var _last_initialized_scene_path: String = ""
+
 var _binding_steps = ["STEER LEFT", "STEER RIGHT", "THROTTLE", "BRAKE"]
-var _bind_substate = 0 # 0: Prep/Snapshot, 1: Listen, 2: Release, 3: Delay
+var _bind_substate = 0 
 var _step_snapshots = {} 
-var _bound_device = -1
-var _bound_idx = -1
-var _bound_is_btn = false
 var _substate_timer = 0.0
-var _key_states = {}
+var _binding_wait_for_release = false
 
 func _exit_tree():
 	_current_run_ghost.clear()
 	_best_ghost_data.clear()
 	if _ghost_actor:
 		_ghost_actor.queue_free()
-		_ghost_actor = null
 
 func _ready():
 	Input.set_mouse_mode(Input.MOUSE_MODE_HIDDEN)
 	_load_data()
 	current_state = RaceState.PRE_START
 	
-	# Connect to tree signals to detect when a new scene is loaded
-	get_tree().node_added.connect(_on_node_added)
+	if "--telemetry" in OS.get_cmdline_args():
+		telemetry_enabled = true
+		print("TELEMETRY ENABLED")
 	
-	# Initial setup
+	get_tree().node_added.connect(_on_node_added)
 	_init_scene.call_deferred()
 	
-	# Add Track Editor
 	var editor = Node.new()
 	editor.name = "TrackEditor"
 	editor.set_script(load("res://scripts/track_editor.gd"))
 	add_child(editor)
 
 func _on_node_added(node):
-	# If the node added is the new current scene root
 	if node.get_parent() == get_tree().root and node.name != "GameManager":
 		_init_scene.call_deferred()
 
 func _init_scene():
-	if get_tree().current_scene:
-		print("Initializing scene: ", get_tree().current_scene.name)
-		_replace_car_at_runtime()
-		_setup_ghost_actor()
-		var scene_path = get_tree().current_scene.scene_file_path
-		var idx = tracks.find(scene_path)
-		if idx != -1:
-			current_track_index = idx
-			best_time = float(highscores.get(scene_path, 600.0))
-			_load_ghost(scene_path)
-			get_tree().create_timer(0.1).timeout.connect(_emit_initial_record)
-		_update_window_title()
+	var scene = get_tree().current_scene
+	if not scene: return
+	if _last_initialized_scene_path == scene.scene_file_path and scene.scene_file_path != "":
+		return
+	_last_initialized_scene_path = scene.scene_file_path if scene.scene_file_path else ""
+
+	print("Initializing scene: ", scene.name)
+	_replace_car_at_runtime()
+	_setup_ghost_actor()
+	
+	var scene_path = scene.scene_file_path
+	if not scene_path: return
+	
+	var idx = tracks.find(scene_path)
+	if idx != -1:
+		current_track_index = idx
+		best_time = float(highscores.get(scene_path, 600.0))
+		_load_ghost(scene_path)
+		get_tree().create_timer(0.1).timeout.connect(_emit_initial_record)
+	_update_window_title()
 
 func _update_window_title():
-	var scene_path = tracks[current_track_index]
-	var track_name = scene_path.get_file().get_basename()
+	if current_track_index >= tracks.size(): return
+	var track_name = tracks[current_track_index].get_file().get_basename()
 	DisplayServer.window_set_title("Godot Trial Maniac - " + track_name)
 
-func _toggle_camera():
-	var cam = get_tree().current_scene.find_child("FollowCamera", true, false)
-	if cam and cam.has_method("toggle_mode"):
-		cam.toggle_mode()
-		var mode_name = ["FOLLOW", "FAR", "TRACK VIEW"][cam.mode]
-		binding_step_changed.emit("CAM: " + mode_name)
-		get_tree().create_timer(1.0).timeout.connect(func(): binding_step_changed.emit(""))
-
-func _replace_car_at_runtime():
-	var scene = get_tree().current_scene
-	if not scene:
-		print("DEBUG: No current scene yet.")
-		return
-		
-	# Find Car anywhere in the hierarchy
-	var old_car = scene.find_child("Car", true, false)
-	
-	if not old_car: 
-		print("DEBUG: No 'Car' node found in scene: ", scene.name)
-		# Try looking for anything with "Car" in the name
-		old_car = scene.find_child("*Car*", true, false)
-		if not old_car:
-			return
-	
-	# Check if it's already the right one (optional but good for log)
-	if old_car.scene_file_path == selected_car:
-		print("DEBUG: Car already matches selected_car: ", selected_car)
-		initial_car_transform = old_car.global_transform
-		return
-
-	print("DEBUG: Swapping ", old_car.name, " (", old_car.scene_file_path, ") with ", selected_car)
-	var car_scene = load(selected_car)
-	if not car_scene:
-		print("ERROR: Could not load car scene: ", selected_car)
-		return
-		
-	var new_car = car_scene.instantiate()
-	
-	var old_transform = old_car.global_transform
-	var parent = old_car.get_parent()
-	
-	# Rename old car FIRST to free up the name "Car"
-	old_car.name = "OldCar_Deleted"
-	
-	parent.add_child(new_car)
-	new_car.name = "Car" # Now it will definitely stay "Car"
-	new_car.global_transform = old_transform
-	initial_car_transform = old_transform
-	
-	var cam = scene.find_child("FollowCamera", true, false)
-	if cam:
-		cam.target = new_car
-		cam.target_path = cam.get_path_to(new_car)
-		print("DEBUG: Camera target updated to new Car.")
-	
-	old_car.name = "OldCar_Deleted"
-	old_car.queue_free()
-	print("DEBUG: Swap complete.")
-
-func _setup_ghost_actor():
-	if _ghost_actor: 
-		_ghost_actor.queue_free()
-		_ghost_actor = null
-		
-	var car_scene = load(selected_car).instantiate()
-	_ghost_actor = Node3D.new()
-	_ghost_actor.name = "GhostCar"
-	_ghost_actor.set_script(load("res://scripts/ghost_car.gd"))
-	
-	var wheels_to_copy = ["WheelFL", "WheelFR", "WheelRL", "WheelRR"]
-	var ghost_wheels = []
-	
-	for child in car_scene.get_children():
-		if child is MeshInstance3D or child is Node3D:
-			if not (child is CollisionShape3D or child is RayCast3D):
-				var duplicate = child.duplicate()
-				_ghost_actor.add_child(duplicate)
-				if wheels_to_copy.has(child.name):
-					ghost_wheels.append(duplicate)
-	
-	car_scene.free()
-	get_tree().current_scene.add_child(_ghost_actor)
-	_ghost_actor.visible = false
-	_ghost_actor.set_meta("wheels", ghost_wheels)
-
-func start_race():
-	_current_run_ghost.clear()
-	if not is_instance_valid(_ghost_actor):
-		_setup_ghost_actor()
-		_load_ghost(get_tree().current_scene.scene_file_path)
-	
-	if _ghost_actor:
-		if ghost_enabled and _best_ghost_data.size() > 0:
-			_ghost_actor.start_playback(_best_ghost_data)
-		else:
-			_ghost_actor.stop_playback()
-			
-	var scene_path = get_tree().current_scene.scene_file_path
-	best_time = float(highscores.get(scene_path, 600.0))
-	record_updated.emit(best_time)
-	
-	current_state = RaceState.RACING
-	start_time = Time.get_ticks_msec() / 1000.0
-	state_changed.emit(current_state)
-
-func finish_race(is_closed: bool = false):
-	if current_state == RaceState.RACING:
-		# Add a minimum race time (e.g. 5 seconds) to prevent immediate finish on combined gates
-		var current_time = (Time.get_ticks_msec() / 1000.0) - start_time
-		if current_time < 5.0:
-			return
-			
-		race_time = (Time.get_ticks_msec() / 1000.0) - start_time
-		time_diff = 0.0
-		if race_time < best_time:
-			time_diff = race_time - best_time
-			best_time = race_time
-			highscores[tracks[current_track_index]] = best_time
-			_best_ghost_data = _current_run_ghost.duplicate()
-			_save_data()
-			_save_ghost(tracks[current_track_index])
-			record_updated.emit(best_time)
-		
-		if is_closed:
-			# Next lap immediately
-			start_race()
-		else:
-			current_state = RaceState.FINISHED
-			if _ghost_actor: _ghost_actor.is_playing = false
-			state_changed.emit(current_state)
-			await get_tree().create_timer(2.0).timeout
-			if current_state == RaceState.FINISHED:
-				reset_car_to_start()
-
-func reset_car_to_start():
-	var car = get_tree().current_scene.get_node_or_null("Car")
-	if car:
-		car.global_transform = initial_car_transform
-		if car is RigidBody3D:
-			car.linear_velocity = Vector3.ZERO
-			car.angular_velocity = Vector3.ZERO
-	current_state = RaceState.PRE_START
-	race_time = 0.0
-	state_changed.emit(current_state)
-
-func next_track():
-	current_track_index = (current_track_index + 1) % tracks.size()
-	var next_path = tracks[current_track_index]
-	best_time = float(highscores.get(next_path, 600.0))
-	current_state = RaceState.PRE_START
-	_update_window_title()
-	get_tree().change_scene_to_file(next_path)
-
-func reset_race():
-	current_state = RaceState.PRE_START
-	race_time = 0.0
-	state_changed.emit(current_state)
-	get_tree().reload_current_scene()
-
-func start_binding():
-	current_state = RaceState.BINDING
-	_binding_step = -1 # Start with Choice
-	_bind_substate = 1
-	_substate_timer = 0.0
-	state_changed.emit(current_state)
-	binding_step_changed.emit("PRESS [K] FOR KEYS OR [J] FOR JOYSTICK")
-
-func _process(delta):
-	if current_state == RaceState.RACING:
-		race_time = (Time.get_ticks_msec() / 1000.0) - start_time
-		time_updated.emit(race_time)
-	
-	if current_state == RaceState.BINDING:
-		_process_binding_logic(delta)
-	
-	_handle_global_input()
+func _input(event):
+	if event is InputEventKey and event.pressed and not event.is_echo():
+		match event.keycode:
+			KEY_ESCAPE: get_tree().quit()
+			KEY_R: reset_race()
+			KEY_1: _prev_track()
+			KEY_2: _next_track()
+			KEY_3: _start_binding()
+			KEY_4: _toggle_ghost()
+			KEY_M: _toggle_map()
+			KEY_7: _toggle_map()
+			KEY_S: _toggle_sfx()
+			KEY_C: _toggle_camera()
+			KEY_6: _toggle_camera()
+			KEY_0: _toggle_fullscreen()
 
 func _physics_process(delta):
 	if current_state == RaceState.RACING:
@@ -332,286 +157,236 @@ func _physics_process(delta):
 				]
 			}
 			_current_run_ghost.append(snapshot)
-	
-	_prev_key_states = _key_states.duplicate()
+			
+			if telemetry_enabled:
+				current_telemetry.append({
+					"t": current_time,
+					"s": car.linear_velocity.length() * 3.6,
+					"g": car.current_gear,
+					"p": car.global_position,
+					"og": car.on_ground,
+					"steer": car.steering_input,
+					"throttle": car.throttle_input,
+					"brake": car.brake_input
+				})
 
-func _process_binding_logic(delta):
-	if _binding_step == -1:
-		if Input.is_key_pressed(KEY_K):
-			_binding_mode = 0
-			_binding_step = 0
-			_bind_substate = 1
-			binding_step_changed.emit(_binding_steps[_binding_step])
-		elif Input.is_key_pressed(KEY_J):
-			_binding_mode = 1
-			_binding_step = 0
-			_bind_substate = 0 # Snapshot first for joypad
-			binding_step_changed.emit("RELEASE ALL") # Immediate feedback
-		return
-
-	_substate_timer -= delta
-	match _bind_substate:
-		0: # RELEASE ALL / PREP (Joypad only)
-			if _is_everything_neutral():
-				_take_global_snapshot()
-				_bind_substate = 1
-				binding_step_changed.emit(_binding_steps[_binding_step])
-		1: # LISTEN
-			if _binding_mode == 0: # Keyboard
-				# Scan for any key press
-				for k in range(KEY_A, KEY_YEN): # General range
-					if Input.is_key_pressed(k) and k != KEY_K and k != KEY_J:
-						_apply_kb_step_data(k)
-						_bind_substate = 3
-						_substate_timer = 0.5
-						binding_step_changed.emit("OK!")
-						return
-				# Arrow keys etc
-				for k in [KEY_UP, KEY_DOWN, KEY_LEFT, KEY_RIGHT, KEY_SPACE, KEY_SHIFT, KEY_CTRL, KEY_ALT]:
-					if Input.is_key_pressed(k):
-						_apply_kb_step_data(k)
-						_bind_substate = 3
-						_substate_timer = 0.5
-						binding_step_changed.emit("OK!")
-						return
-			else: # Joypad
-				for d in Input.get_connected_joypads():
-					for a in range(8):
-						var snap = _step_snapshots.get(d, {}).get(a, 0.0)
-						var diff = Input.get_joy_axis(d, a) - snap
-						if abs(diff) > 0.75:
-							_apply_joy_step_data({"dev": d, "axis": a, "sign": 1 if diff > 0 else -1, "btn": -1, "is_btn": false, "snap": snap, "is_kb": false})
-							_start_release_phase(d, a, false)
-							return
-					for b in range(16):
-						if Input.is_joy_button_pressed(d, b):
-							_apply_joy_step_data({"dev": d, "axis": -1, "sign": 1, "btn": b, "is_btn": true, "snap": 0.0, "is_kb": false})
-							_start_release_phase(d, b, true)
-							return
-		2: # RELEASE TARGET (Joypad only)
-			var released = false
-			if _bound_is_btn:
-				if not Input.is_joy_button_pressed(_bound_device, _bound_idx): released = true
-			else:
-				var snap = _step_snapshots.get(_bound_device, {}).get(_bound_idx, 0.0)
-				if abs(Input.get_joy_axis(_bound_device, _bound_idx) - snap) < 0.2: released = true
-			if released:
-				_bind_substate = 3
-				_substate_timer = 0.8
-				binding_step_changed.emit("OK!")
-		3: # DELAY
-			if _substate_timer <= 0:
-				_binding_step += 1
-				if _binding_step < _binding_steps.size():
-					_bind_substate = 0 if _binding_mode == 1 else 1
-					binding_step_changed.emit(_binding_steps[_binding_step])
-				else: _complete_binding()
-
-func _complete_binding():
-	binding_step_changed.emit("SAVED!")
-	current_state = RaceState.PRE_START
-	_save_data()
-	get_tree().create_timer(1.0).timeout.connect(func(): 
-		binding_step_changed.emit("")
-		state_changed.emit(current_state)
-	)
-
-func _take_global_snapshot():
-	_step_snapshots.clear()
-	for d in Input.get_connected_joypads():
-		var axes = {}
-		for a in range(8): axes[a] = Input.get_joy_axis(d, a)
-		_step_snapshots[d] = axes
-
-func _is_everything_neutral() -> bool:
-	for d in Input.get_connected_joypads():
-		for a in range(8):
-			if abs(Input.get_joy_axis(d, a)) > 0.2: return false
-		for b in range(16):
-			if Input.is_joy_button_pressed(d, b): return false
-	return true
-
-func _start_release_phase(dev, idx, is_btn):
-	_bound_device = dev
-	_bound_idx = idx
-	_bound_is_btn = is_btn
-	_bind_substate = 2
-	binding_step_changed.emit("RELEASE...")
-
-func _apply_kb_step_data(keycode):
-	var data = {"dev": -1, "axis": -1, "sign": 0, "btn": -1, "is_btn": false, "snap": 0.0, "key": keycode, "is_kb": true}
-	match _binding_step:
-		0: steer_left = data
-		1: steer_right = data
-		2: throttle = data
-		3: brake = data
-
-func _apply_joy_step_data(data):
-	match _binding_step:
-		0: steer_left = data
-		1: steer_right = data
-		2: throttle = data
-		3: brake = data
-
-func _handle_global_input():
-	# Update key states regardless of BINDING state to prevent stuck keys
-	_key_states[KEY_1] = Input.is_key_pressed(KEY_1)
-	_key_states[KEY_5] = Input.is_key_pressed(KEY_5)
-	_key_states[KEY_6] = Input.is_key_pressed(KEY_6)
-	_key_states[KEY_7] = Input.is_key_pressed(KEY_7)
-	_key_states[KEY_3] = Input.is_key_pressed(KEY_3)
-	_key_states[KEY_4] = Input.is_key_pressed(KEY_4)
-	_key_states[KEY_0] = Input.is_key_pressed(KEY_0)
-
+func _process(delta):
+	if current_state == RaceState.RACING:
+		current_time += delta
+		time_updated.emit(current_time)
 	if current_state == RaceState.BINDING:
-		if Input.is_key_pressed(KEY_ESCAPE):
-			current_state = RaceState.PRE_START
-			binding_step_changed.emit("")
-			state_changed.emit(current_state)
-		return
+		_process_binding_logic(delta)
 
-	if Input.is_action_just_pressed("restart"): reset_race()
+func start_race():
+	current_state = RaceState.RACING
+	current_time = 0.0
+	_current_run_ghost.clear()
+	current_telemetry.clear()
+	state_changed.emit(current_state)
+	if _ghost_actor and _ghost_actor.has_method("start_playback"):
+		_ghost_actor.start_playback(_best_ghost_data)
+
+func finish_race():
+	current_state = RaceState.FINISHED
+	state_changed.emit(current_state)
+	if _ghost_actor: _ghost_actor.stop_playback()
 	
-	if Input.is_key_pressed(KEY_1) and not _get_prev_key_state(KEY_1): toggle_sfx()
-	if Input.is_key_pressed(KEY_5) and not _get_prev_key_state(KEY_5): toggle_car()
-	if Input.is_key_pressed(KEY_6) and not _get_prev_key_state(KEY_6): _toggle_camera()
-	if Input.is_key_pressed(KEY_7) and not _get_prev_key_state(KEY_7): _toggle_map()
-	if Input.is_action_just_pressed("next_track"): next_track()
-	if Input.is_key_pressed(KEY_3) and not _get_prev_key_state(KEY_3): start_binding()
-	if Input.is_key_pressed(KEY_4) and not _get_prev_key_state(KEY_4): toggle_ghost()
-	if Input.is_key_pressed(KEY_0) and not _get_prev_key_state(KEY_0): _toggle_fullscreen()
+	if current_time < best_time:
+		best_time = current_time
+		highscores[get_tree().current_scene.scene_file_path] = best_time
+		_best_ghost_data = _current_run_ghost.duplicate()
+		_save_data()
+		_save_ghost(get_tree().current_scene.scene_file_path)
+		record_updated.emit(best_time)
 	
-	if Input.is_key_pressed(KEY_9) and not _get_prev_key_state(KEY_9): reset_all_data()
-	_key_states[KEY_9] = Input.is_key_pressed(KEY_9)
-	
-	if Input.is_action_just_pressed("ui_cancel"): get_tree().quit()
+	if telemetry_enabled: _save_telemetry()
 
-func reset_all_data():
-	highscores.clear()
-	for track in tracks:
-		highscores[track] = 600.0
-		var path = "user://ghost_" + track.get_file().get_basename() + ".res"
-		if FileAccess.file_exists(path):
-			DirAccess.remove_absolute(path)
-	
-	_best_ghost_data = []
-	best_time = 600.0
-	_save_data()
-	
-	if _ghost_actor:
-		_ghost_actor.stop_playback()
-	
-	record_updated.emit(best_time)
-	print("ALL DATA RESET")
+func reset_race():
+	if telemetry_enabled and current_telemetry.size() > 0:
+		_save_telemetry()
+	_last_initialized_scene_path = ""
+	get_tree().reload_current_scene()
+	current_state = RaceState.PRE_START
+	current_time = 0.0
+	_current_run_ghost.clear()
+	current_telemetry.clear()
 
-# Helper to check previous frame state BEFORE it was updated in this frame
-var _prev_key_states = {}
-func _get_prev_key_state(key) -> bool:
-	return _prev_key_states.get(key, false)
+func _save_telemetry():
+	var f = FileAccess.open("res://gameplay_telemetry.json", FileAccess.WRITE)
+	if f:
+		f.store_string(JSON.stringify(current_telemetry))
+		print("Telemetry saved.")
 
-func _process_prev_states():
-	_prev_key_states = _key_states.duplicate()
+func _next_track():
+	_last_initialized_scene_path = ""
+	current_track_index = (current_track_index + 1) % tracks.size()
+	get_tree().change_scene_to_file(tracks[current_track_index])
 
-# Call this at the end of process or use a custom system
-# For simplicity, I'll integrate it into _handle_global_input's end
-
-func _toggle_map():
-	map_mode = (map_mode + 1) % 3 as MapMode
-	map_mode_changed.emit(map_mode)
-	var mode_name = ["HIDDEN", "FULL", "ZOOMED"][map_mode]
-	binding_step_changed.emit("MAP: " + mode_name)
-	get_tree().create_timer(1.0).timeout.connect(func(): binding_step_changed.emit(""))
-
-func toggle_sfx():
-	sfx_enabled = !sfx_enabled
-	sfx_toggled.emit(sfx_enabled)
-	return sfx_enabled
-
-func toggle_car():
-	if selected_car == "res://scenes/mania_car.tscn":
-		selected_car = "res://scenes/f1_2026_car.tscn"
-	else:
-		selected_car = "res://scenes/mania_car.tscn"
-	_save_data()
-	
-	var car_name = "F1 2026" if "f1" in selected_car else "MANIA"
-	binding_step_changed.emit("CAR: " + car_name)
-	get_tree().create_timer(1.0).timeout.connect(func(): binding_step_changed.emit(""))
-	
-	print("Car changed to: ", selected_car)
-	reset_race()
-
-func toggle_ghost():
-	ghost_enabled = !ghost_enabled
-	if _ghost_actor: _ghost_actor.visible = ghost_enabled and _ghost_actor.is_playing
-	ghost_toggled.emit(ghost_enabled)
-
-func _load_ghost(track_path):
-	var path = "user://ghost_" + track_path.get_file().get_basename() + ".res"
-	if FileAccess.file_exists(path):
-		var res = ResourceLoader.load(path)
-		if res and res.get("data"):
-			_best_ghost_data = res.data
-	else:
-		_best_ghost_data = []
-
-func _save_ghost(track_path):
-	var path = "user://ghost_" + track_path.get_file().get_basename() + ".res"
-	var g = GhostResource.new()
-	g.data = _best_ghost_data
-	ResourceSaver.save(g, path)
-
-func _load_data():
-	if FileAccess.file_exists(SAVE_PATH):
-		var file = FileAccess.open(SAVE_PATH, FileAccess.READ)
-		var json = JSON.new()
-		if json.parse(file.get_as_text()) == OK:
-			var data = json.data
-			if data is Dictionary:
-				if data.has("scores"):
-					var scores = data.scores
-					for k in scores: highscores[k] = float(scores[k])
-				if data.has("selected_car"):
-					selected_car = data.selected_car
-				if data.has("input_v3"):
-					var input = data.input_v3
-					steer_left = input.get("steer_left", steer_left)
-					steer_right = input.get("steer_right", steer_right)
-					throttle = input.get("throttle", throttle)
-					brake = input.get("brake", brake)
-	for track in tracks:
-		if not highscores.has(track): highscores[track] = 600.0
-
-func _save_data():
-	var file = FileAccess.open(SAVE_PATH, FileAccess.WRITE)
-	var data = {
-		"scores": highscores,
-		"selected_car": selected_car,
-		"input_v3": {
-			"steer_left": steer_left,
-			"steer_right": steer_right,
-			"throttle": throttle,
-			"brake": brake
-		}
-	}
-	file.store_string(JSON.stringify(data))
+func _prev_track():
+	_last_initialized_scene_path = ""
+	current_track_index = (current_track_index - 1 + tracks.size()) % tracks.size()
+	get_tree().change_scene_to_file(tracks[current_track_index])
 
 func _toggle_fullscreen():
 	var mode = DisplayServer.window_get_mode()
 	if mode == DisplayServer.WINDOW_MODE_FULLSCREEN or mode == DisplayServer.WINDOW_MODE_EXCLUSIVE_FULLSCREEN:
 		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED)
 	else:
-		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN)
+		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_EXCLUSIVE_FULLSCREEN)
 
-func format_time(time_seconds: float) -> String:
-	var minutes = int(time_seconds / 60)
-	var seconds = int(time_seconds) % 60
-	var msec = int((time_seconds - int(time_seconds)) * 1000)
-	return "%02d:%02d.%03d" % [minutes, seconds, msec]
+func _toggle_map():
+	map_mode = (map_mode + 1) % 3
+	map_mode_changed.emit(map_mode)
 
-func format_diff(diff_seconds: float) -> String:
-	var sign_str = "+" if diff_seconds > 0 else ""
-	return "(" + sign_str + "%.3fs!)" % diff_seconds
+func _toggle_sfx():
+	sfx_enabled = !sfx_enabled
+	sfx_toggled.emit(sfx_enabled)
+	_save_data()
+
+func _toggle_ghost():
+	ghost_enabled = !ghost_enabled
+	ghost_toggled.emit(ghost_enabled)
+	if _ghost_actor: _ghost_actor.visible = ghost_enabled
+	_save_data()
+
+func _toggle_camera():
+	var cam = get_tree().current_scene.find_child("FollowCamera", true, false)
+	if cam and cam.has_method("toggle_mode"):
+		cam.toggle_mode()
+		var mode_name = ["FOLLOW", "FAR", "TRACK VIEW"][cam.mode]
+		binding_step_changed.emit("CAM: " + mode_name)
+		get_tree().create_timer(1.0).timeout.connect(func(): binding_step_changed.emit(""))
+
+func _replace_car_at_runtime():
+	var scene = get_tree().current_scene
+	if not scene: return
+	var car = scene.get_node_or_null("Car")
+	if car:
+		var pos = car.global_position
+		var rot = car.global_rotation
+		car.name = "OldCar"
+		car.queue_free()
+		var f1_car = load("res://scenes/f1_2026_car.tscn").instantiate()
+		f1_car.name = "Car"
+		scene.add_child(f1_car)
+		f1_car.global_position = pos
+		f1_car.global_rotation = rot
+
+func _setup_ghost_actor():
+	if _ghost_actor:
+		_ghost_actor.get_parent().remove_child(_ghost_actor)
+		_ghost_actor.queue_free()
+		_ghost_actor = null
+	if _best_ghost_data.size() == 0: return
+	_ghost_actor = load("res://scenes/f1_2026_car.tscn").instantiate()
+	_ghost_actor.name = "GhostCar"
+	_ghost_actor.set_script(load("res://scripts/ghost_car.gd"))
+	_ghost_actor.visible = ghost_enabled
+	get_tree().current_scene.add_child.call_deferred(_ghost_actor)
+	var wheels = [_ghost_actor.get_node("WheelFL"), _ghost_actor.get_node("WheelFR"), _ghost_actor.get_node("WheelRL"), _ghost_actor.get_node("WheelRR")]
+	_ghost_actor.set_meta("wheels", wheels)
+
+func _start_binding():
+	if current_state == RaceState.BINDING:
+		current_state = RaceState.PRE_START
+		binding_step_changed.emit("")
+	else:
+		current_state = RaceState.BINDING
+		_bind_substate = 0
+		_binding_wait_for_release = true
+		binding_step_changed.emit("RELEASE ALL BUTTONS/KEYS...")
+
+func _process_binding_logic(delta):
+	if _binding_wait_for_release:
+		if _listen_for_input() == null:
+			_binding_wait_for_release = false
+			binding_step_changed.emit("PRESS ANY KEY/BUTTON FOR: " + _binding_steps[0])
+		return
+
+	var step_idx = _bind_substate / 4 
+	if step_idx >= _binding_steps.size():
+		current_state = RaceState.PRE_START
+		binding_step_changed.emit("BINDING COMPLETE")
+		_save_data()
+		get_tree().create_timer(1.5).timeout.connect(func(): if current_state == RaceState.PRE_START: binding_step_changed.emit(""))
+		return
+	var sub = _bind_substate % 4
+	match sub:
+		0: 
+			binding_step_changed.emit("BIND " + _binding_steps[step_idx] + ": PRESS KEY/AXIS")
+			_bind_substate += 1
+		1: 
+			var found = _listen_for_input()
+			if found:
+				_step_snapshots[step_idx] = found
+				binding_step_changed.emit("RELEASE...")
+				_bind_substate += 1
+		2: 
+			if not _is_input_active(_step_snapshots[step_idx]):
+				_bind_substate += 1
+				_substate_timer = 0.5
+		3: 
+			_substate_timer -= delta
+			if _substate_timer <= 0:
+				_apply_bind(step_idx, _step_snapshots[step_idx])
+				_bind_substate += 1
+
+func _listen_for_input():
+	for i in range(512):
+		if Input.is_key_pressed(i): return {"is_kb": true, "key": i}
+	for d in range(8):
+		for b in range(JOY_BUTTON_MAX):
+			if Input.is_joy_button_pressed(d, b): return {"dev": d, "btn": b, "is_btn": true}
+		for a in range(JOY_AXIS_MAX):
+			var v = Input.get_joy_axis(d, a)
+			if abs(v) > 0.8: return {"dev": d, "axis": a, "sign": sign(v), "snap": 0.0, "is_btn": false}
+	return null
+
+func _is_input_active(data):
+	if data.get("is_kb", false): return Input.is_key_pressed(data.key)
+	if data.get("is_btn", false): return Input.is_joy_button_pressed(data.dev, data.btn)
+	return abs(Input.get_joy_axis(data.dev, data.axis)) > 0.3
+
+func _apply_bind(idx, data):
+	match idx:
+		0: steer_left = data
+		1: steer_right = data
+		2: throttle = data
+		3: brake = data
 
 func _emit_initial_record():
 	record_updated.emit(best_time)
+
+func format_time(t):
+	var mins = int(t / 60)
+	var secs = int(t) % 60
+	var msecs = int((t - int(t)) * 1000)
+	return "%02d:%02d.%03d" % [mins, secs, msecs]
+
+func _save_data():
+	var f = FileAccess.open("user://save_data.json", FileAccess.WRITE)
+	var data = {"highscores": highscores, "steer_left": steer_left, "steer_right": steer_right, "throttle": throttle, "brake": brake, "sfx_enabled": sfx_enabled, "ghost_enabled": ghost_enabled}
+	f.store_string(JSON.stringify(data))
+
+func _load_data():
+	if not FileAccess.file_exists("user://save_data.json"): return
+	var f = FileAccess.open("user://save_data.json", FileAccess.READ)
+	var data = JSON.parse_string(f.get_as_text())
+	if data:
+		highscores = data.get("highscores", {})
+		steer_left = data.get("steer_left", steer_left); steer_right = data.get("steer_right", steer_right)
+		throttle = data.get("throttle", throttle); brake = data.get("brake", brake)
+		sfx_enabled = data.get("sfx_enabled", true); ghost_enabled = data.get("ghost_enabled", true)
+
+func _save_ghost(scene_path):
+	var path = "user://" + scene_path.get_file().get_basename() + ".ghost"
+	var f = FileAccess.open(path, FileAccess.WRITE)
+	if f: f.store_var(_best_ghost_data)
+
+func _load_ghost(scene_path):
+	var path = "user://" + scene_path.get_file().get_basename() + ".ghost"
+	if FileAccess.file_exists(path):
+		var f = FileAccess.open(path, FileAccess.READ)
+		_best_ghost_data = f.get_var()
+	else:
+		_best_ghost_data = []

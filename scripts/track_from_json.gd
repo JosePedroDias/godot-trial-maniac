@@ -6,7 +6,7 @@ const ROAD_WIDTH = 16.0
 const KERB_WIDTH = 1.8
 const GRASS_WIDTH = 10.0
 
-func generate_from_json(json_path: String, car_path: String = "res://scenes/mania_car.tscn") -> String:
+func generate_from_json(json_path: String, car_path: String = "res://scenes/f1_2026_car.tscn") -> String:
 	var file = FileAccess.open(json_path, FileAccess.READ)
 	if not file:
 		print("Error opening file: ", json_path)

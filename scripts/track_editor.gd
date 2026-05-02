@@ -4,7 +4,7 @@ const TrackFromJson = preload("res://scripts/track_from_json.gd")
 
 var points_data: Array = []
 var json_path: String = ""
-var track_root: Node3D
+var track_root: Node
 var road_mesh: MeshInstance3D
 var indicators: Node3D
 

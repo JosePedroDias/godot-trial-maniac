@@ -1,24 +1,25 @@
 extends RigidBody3D
 
 @export_group("Suspension")
-@export var suspension_rest_dist: float = 0.4 
-@export var spring_strength: float = 400000.0 
-@export var spring_damping: float = 50000.0
+@export var suspension_rest_dist: float = 0.4
+@export var spring_strength: float = 500000.0
+@export var spring_damping: float = 60000.0
 @export var wheel_radius: float = 0.33
+@export var anti_roll: float = 0.4 # 40% force transfer
 
 @export_group("Engine")
-@export var engine_power: float = 75000.0 
+@export var engine_power: float = 85000.0 
 @export var max_speed: float = 340.0 
-@export var aero_downforce: float = 14.0 # Slightly increased
+@export var aero_downforce: float = 14.0
 
 @export_group("Steering")
-@export var steering_angle: float = 24.0 # Increased for better tight cornering
-@export var steering_speed: float = 4.5
-@export var grip: float = 7.0 # Significantly increased base grip
+@export var steering_angle: float = 32.0 
+@export var steering_speed: float = 6.0
+@export var grip: float = 8.0
 
 # Cosmetic/Sound
 var current_gear: int = 1
-var gear_shift_points = [0, 80, 130, 175, 215, 255, 290, 315, 400]
+var gear_shift_points = [0, 80, 130, 175, 215, 255, 290, 315, 450]
 var current_rpm: float = 3500.0
 
 var steering_input = 0.0
@@ -28,7 +29,7 @@ var engine_input = 0.0
 
 var input_override: bool = false
 var fall_timer: float = 0.0
-var settle_timer: float = 2.0 
+var settle_timer: float = 1.0
 
 var engine_player: AudioStreamPlayer3D
 var skid_player: AudioStreamPlayer3D
@@ -48,10 +49,11 @@ func _ready():
 	max_contacts_reported = 4
 	body_entered.connect(_on_body_entered)
 	
-	linear_damp = 0.0
-	angular_damp = 0.0
+	linear_damp = 0.05
+	angular_damp = 1.0
 	center_of_mass_mode = 1
-	center_of_mass = Vector3(0, -0.5, 0) # Even lower COG for banking stability
+	center_of_mass = Vector3(0, -0.9, 0) # Ultra low COG for anti-tip
+	mass = 1600.0
 
 	_raycasts = [$RayCastFL, $RayCastFR, $RayCastRL, $RayCastRR]
 	_wheels = [$WheelFL, $WheelFR, $WheelRL, $WheelRR]
@@ -62,7 +64,6 @@ func _ready():
 			ray.add_exception(self)
 	
 	_setup_audio()
-	mass = 1500.0
 	
 	var gm = get_node_or_null("/root/GameManager")
 	if gm:
@@ -149,6 +150,13 @@ func _setup_audio():
 	coll_stream.data = c_data
 	collision_player.stream = coll_stream
 	collision_player.unit_size = 20.0
+	
+	for i in range(4):
+		var trail = MeshInstance3D.new()
+		trail.set_script(load("res://scripts/trail_renderer.gd"))
+		if is_inside_tree():
+			get_tree().current_scene.add_child.call_deferred(trail)
+		trails.append(trail)
 
 func _physics_process(delta):
 	if settle_timer > 0:
@@ -160,16 +168,22 @@ func _physics_process(delta):
 	var gm = get_node_or_null("/root/GameManager")
 	var sfx_enabled = gm.sfx_enabled if gm else true
 	
-	# 1. Ground Detection
+	# 1. Ground Detection & Compression Cache
 	var currently_touching = false
-	var total_comp = 0.0
-	for ray in _raycasts:
+	var comps = [0.0, 0.0, 0.0, 0.0]
+	var hit_normals = [Vector3.UP, Vector3.UP, Vector3.UP, Vector3.UP]
+	var ray_hitted = [false, false, false, false]
+	
+	for i in range(_raycasts.size()):
+		var ray = _raycasts[i]
 		if ray and ray.is_colliding():
 			var d = (ray.global_position - ray.get_collision_point()).length()
 			var c = (suspension_rest_dist + wheel_radius) - d
 			if c > 0:
+				ray_hitted[i] = true
+				comps[i] = c
+				hit_normals[i] = ray.get_collision_normal()
 				currently_touching = true
-				total_comp += c
 
 	if currently_touching:
 		on_ground = true
@@ -178,10 +192,9 @@ func _physics_process(delta):
 		ground_timer -= delta
 		on_ground = (ground_timer > 0)
 
-	# 2. Fall Detection
 	if !on_ground or global_position.y < -50.0:
 		fall_timer += delta
-		if fall_timer > 2.0 or global_position.y < -100.0:
+		if fall_timer > 2.5 or global_position.y < -100.0:
 			if gm: gm.reset_race()
 			fall_timer = 0.0
 			return
@@ -193,43 +206,37 @@ func _physics_process(delta):
 	var forward_speed = global_basis.z.dot(linear_velocity)
 	
 	if gm: gm.speed_updated.emit(speed_kmh)
-	
 	if speed_kmh > max_speed:
 		linear_velocity = linear_velocity.normalized() * (max_speed / 3.6)
 		speed_kmh = max_speed
 
-	# 3. Stability & Aerodynamics
-	angular_damp = lerp(3.0, 10.0, clamp(speed_kmh / 300.0, 0.0, 1.0))
+	# High Speed Stability
+	angular_damp = lerp(4.0, 20.0, clamp(speed_kmh / 300.0, 0.0, 1.0))
+	linear_damp = 0.05
+	
 	var drag_coeff = 0.012
-	var drag_force = -linear_velocity * speed_cur * drag_coeff * mass
-	apply_central_force(drag_force)
+	apply_central_force(-linear_velocity * speed_cur * drag_coeff * mass)
 	
-	var down_force_mag = speed_cur * speed_cur * aero_downforce
-	var static_glue = 12000.0 if on_ground else 0.0 # Increased glue for banking
-	apply_central_force(-global_basis.y * (down_force_mag + static_glue))
+	var aero_f = speed_cur * speed_cur * aero_downforce
+	var static_glue = 18000.0 if on_ground else 0.0 # Increased glue
+	apply_central_force(-global_basis.y * (aero_f + static_glue))
 	
-	# Pitch stabilization
+	# Active Leveling / Roll Stability
 	var local_av = global_basis.inverse() * angular_velocity
 	apply_torque(global_basis.x * (-local_av.x * 60000.0))
-	
-	# Yaw rotation helper (Simulates aero/diff helping rotate the car)
-	if on_ground:
-		var yaw_helper = -steering_input * speed_cur * mass * 0.8
-		apply_torque(global_basis.y * yaw_helper)
+	apply_torque(global_basis.z * (-local_av.z * 60000.0)) # Increased roll damping
 
 	if not input_override: _read_input(gm, delta)
 	
-	# State Detection
 	is_braking = false
-	var final_engine_torque = throttle_input
+	var final_throt = throttle_input
 	if brake_input > 0.1:
 		if forward_speed > 1.0:
-			is_braking = true
-			final_engine_torque = 0.0
+			is_braking = true; final_throt = 0.0
+			apply_central_force(-global_basis.z * sign(forward_speed) * 80.0 * brake_input * mass)
 		elif forward_speed < 1.0:
-			final_engine_torque = -brake_input * 0.4
-	
-	engine_input = final_engine_torque 
+			final_throt = -brake_input * 0.4
+	engine_input = final_throt
 
 	is_skidding = false
 	if speed_cur > 5.0:
@@ -245,54 +252,64 @@ func _physics_process(delta):
 		var target_brake_vol = 0 if (is_braking and on_ground) else -80
 		brake_plr.volume_db = lerp(brake_plr.volume_db, float(target_brake_vol), 15.0 * delta)
 
-	if is_braking:
-		var brake_accel = 60.0 * brake_input # ~6g braking
-		apply_central_force(-global_basis.z * sign(forward_speed) * brake_accel * mass)
+	_wheel_rotation += (forward_speed * delta) / wheel_radius
 
-	# 4. Suspension & Traction
-	var suspension_limiter = 1.0
-	if currently_touching and speed_kmh < 50.0:
-		suspension_limiter = lerp(0.3, 1.0, speed_kmh / 50.0)
+	# Anti-Roll Bar calculation (Front then Rear)
+	var roll_diff_f = comps[0] - comps[1] # FL - FR
+	var roll_diff_r = comps[2] - comps[3] # RL - RR
 
 	for i in range(_raycasts.size()):
 		var ray = _raycasts[i]
 		var wheel = _wheels[i] if _wheels.size() > i else null
-		if not ray or not ray.is_colliding():
-			if wheel: wheel.position.y = -suspension_rest_dist
+		if not ray: continue
+			
+		var w_basis = global_basis
+		if i < 2:
+			var s_fac = lerp(1.0, 0.2, clamp(speed_kmh / 340.0, 0.0, 1.0))
+			w_basis = w_basis.rotated(global_basis.y, steering_input * deg_to_rad(steering_angle) * s_fac)
+
+		if not ray_hitted[i]:
+			if wheel:
+				wheel.position.y = -suspension_rest_dist
+				wheel.global_basis = w_basis.rotated(w_basis.z, PI/2.0).rotated(w_basis.x, _wheel_rotation)
 			continue
 			
 		var hit_pt = ray.get_collision_point()
-		var hit_norm = ray.get_collision_normal()
-		var dist = (ray.global_position - hit_pt).length()
-		var comp = (suspension_rest_dist + wheel_radius) - dist
+		var hit_norm = hit_normals[i]
+		var comp = comps[i]
 		
-		if comp > 0:
-			var v_at_w = linear_velocity + angular_velocity.cross(ray.global_position - global_position)
-			var up_v = hit_norm.dot(v_at_w)
-			
-			# Anti-clip
-			var extra_push = 0.0
-			if comp > 0.38: extra_push = (comp - 0.38) * 3000000.0
+		var v_at_w = linear_velocity + angular_velocity.cross(ray.global_position - global_position)
+		var up_v = hit_norm.dot(v_at_w)
+		
+		# Anti-clip
+		var extra_push = (comp - 0.38) * 4000000.0 if comp > 0.38 else 0.0
+		
+		# Suspension + Anti-Roll
+		var ar_force = 0.0
+		if i == 0: ar_force = -roll_diff_f * spring_strength * anti_roll
+		elif i == 1: ar_force = roll_diff_f * spring_strength * anti_roll
+		elif i == 2: ar_force = -roll_diff_r * spring_strength * anti_roll
+		elif i == 3: ar_force = roll_diff_r * spring_strength * anti_roll
 
-			var s_force = comp * spring_strength * suspension_limiter
-			var d_force = up_v * spring_damping
-			apply_force(hit_norm * (s_force - d_force + extra_push), ray.global_position - global_position)
+		var s_force = (comp * spring_strength) + ar_force
+		var d_force = up_v * spring_damping
+		apply_force(hit_norm * (s_force - d_force + extra_push), ray.global_position - global_position)
+		
+		if abs(final_throt) > 0.01:
+			apply_force(w_basis.z * final_throt * (engine_power / 4.0), ray.global_position - global_position)
+		
+		var side_v = w_basis.x.dot(v_at_w)
+		# Understeer biased grip at high speed
+		var rear_fac = 1.1 if i >= 2 else 1.0 # More grip for rear
+		var traction = grip * (1.0 + speed_cur * 0.1) * lerp(1.0, 0.5, clamp(speed_kmh/340.0, 0, 1)) * rear_fac
+		apply_force(-w_basis.x * side_v * mass * traction, ray.global_position - global_position)
+		
+		if (is_skidding or is_braking) and trails.size() > i:
+			trails[i].add_point(hit_pt, hit_norm)
 			
-			var w_basis = ray.global_basis
-			if i < 2:
-				# More steering angle available at speed (lerp from 100% to 35% instead of 15%)
-				var s_fac = lerp(1.0, 0.35, clamp(speed_kmh / 250.0, 0.0, 1.0))
-				w_basis = w_basis.rotated(global_basis.y, steering_input * deg_to_rad(steering_angle) * s_fac)
-			
-			if abs(final_engine_torque) > 0.01:
-				apply_force(w_basis.z * final_engine_torque * engine_power, ray.global_position - global_position)
-			
-			# Traction: High-speed grip scaling
-			var side_v = w_basis.x.dot(v_at_w)
-			var traction_mult = grip * (1.0 + (speed_cur * 0.15))
-			apply_force(-w_basis.x * side_v * mass * traction_mult, ray.global_position - global_position)
-			
-		if wheel: wheel.global_position = hit_pt + hit_norm * wheel_radius
+		if wheel:
+			wheel.global_position = hit_pt + hit_norm * wheel_radius
+			wheel.global_basis = w_basis.rotated(w_basis.z, PI/2.0).rotated(w_basis.x, _wheel_rotation)
 			
 	_update_cosmetic_gears(delta, speed_kmh)
 	if engine_player and sfx_enabled:
@@ -303,15 +320,16 @@ func _read_input(gm, delta):
 	if gm:
 		var get_val = func(slot):
 			if slot.get("is_kb", false): return 1.0 if Input.is_key_pressed(slot.key) else 0.0
-			var val = Input.get_joy_axis(slot.dev, slot.axis)
-			return clamp((val - slot.get("snap", 0.0)) * slot.sign, 0.0, 1.0)
-		steering_input = lerp(steering_input, get_val.call(gm.steer_left) - get_val.call(gm.steer_right), steering_speed * delta)
-		throttle_input = get_val.call(gm.throttle)
-		brake_input = get_val.call(gm.brake)
+			return clamp((Input.get_joy_axis(slot.dev, slot.axis) - slot.get("snap", 0.0)) * slot.sign, 0.0, 1.0)
+		var raw_steer = get_val.call(gm.steer_left) - get_val.call(gm.steer_right)
+		var target_steer = sign(raw_steer) * pow(abs(raw_steer), 1.5)
+		steering_input = lerp(steering_input, target_steer, steering_speed * delta)
+		throttle_input = get_val.call(gm.throttle); brake_input = get_val.call(gm.brake)
 	else:
-		steering_input = lerp(steering_input, Input.get_axis("ui_right", "ui_left"), steering_speed * delta)
-		throttle_input = Input.get_action_strength("ui_up")
-		brake_input = Input.get_action_strength("ui_down")
+		var raw_steer = Input.get_axis("ui_right", "ui_left")
+		var target_steer = sign(raw_steer) * pow(abs(raw_steer), 1.5)
+		steering_input = lerp(steering_input, target_steer, steering_speed * delta)
+		throttle_input = Input.get_action_strength("ui_up"); brake_input = Input.get_action_strength("ui_down")
 
 func _update_cosmetic_gears(delta, speed_kmh):
 	var old_gear = current_gear
