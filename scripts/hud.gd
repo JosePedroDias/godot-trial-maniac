@@ -9,6 +9,8 @@ extends CanvasLayer
 var map_points: Array[Vector2] = []
 var map_mode = 0 # 0: Hidden, 1: Full, 2: Zoomed
 var car_node: Node3D = null
+var current_gear: int = 1
+var current_speed: float = 0.0
 
 func _ready():
 	var gm = get_node_or_null("/root/GameManager")
@@ -16,6 +18,7 @@ func _ready():
 		gm.time_updated.connect(_on_time_updated)
 		gm.state_changed.connect(_on_state_changed)
 		gm.speed_updated.connect(_on_speed_updated)
+		gm.gear_updated.connect(_on_gear_updated)
 		gm.record_updated.connect(_on_record_updated)
 		gm.binding_step_changed.connect(_on_binding_step_changed)
 		gm.map_mode_changed.connect(_on_map_mode_changed)
@@ -59,8 +62,16 @@ func _on_record_updated(record):
 		
 		record_label.text = "BEST: " + gm.format_time(record) + "\n" + track_name
 
+func _on_gear_updated(gear):
+	current_gear = gear
+	_update_speed_label()
+
 func _on_speed_updated(speed):
-	speed_label.text = str(int(speed)) + " KM/H"
+	current_speed = speed
+	_update_speed_label()
+
+func _update_speed_label():
+	speed_label.text = str(int(current_speed)) + " KM/H\nGEAR " + str(current_gear)
 
 func _on_time_updated(time):
 	var gm = get_node_or_null("/root/GameManager")
@@ -84,7 +95,9 @@ func _on_state_changed(state):
 
 func _extract_track_points():
 	map_points.clear()
-	var track_node = get_tree().current_scene.get_node_or_null("Track")
+	var scene = get_tree().current_scene
+	if not scene: return
+	var track_node = scene.get_node_or_null("Track")
 	if not track_node: return
 	
 	for child in track_node.get_children():

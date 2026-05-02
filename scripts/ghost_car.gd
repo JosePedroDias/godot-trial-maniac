@@ -139,9 +139,9 @@ func _physics_process(delta):
 			if snapshot.has("a") and snapshot.a.size() == 4:
 				var a = snapshot.a
 				if engine_player:
-					engine_player.rpm = a[0]
+					engine_player.rpm_raw = a[0]
 					engine_player.throttle = a[1]
-					engine_player.volume_db = -15 + clamp(a[0] * 20.0, 0, 10)
+					engine_player.volume_db = -10 + clamp(a[1] * 5.0, 0, 5)
 				
 				if skid_player:
 					var target_skid_vol = 5 if a[2] else -80
@@ -172,6 +172,6 @@ func _update_audio_fallback(delta):
 		var speed_cur = velocity.length()
 		var speed_kmh = speed_cur * 3.6
 		
-		var target_rpm = clamp(speed_kmh / 200.0, 0.0, 1.0)
-		engine_player.rpm = lerp(engine_player.rpm, target_rpm, 10.0 * delta)
-		engine_player.volume_db = -15 + clamp(speed_kmh / 20.0, 0, 10)
+		var target_rpm = lerp(3500.0, 12500.0, clamp(speed_kmh / 300.0, 0.0, 1.0))
+		engine_player.rpm_raw = lerp(engine_player.rpm_raw, target_rpm, 10.0 * delta)
+		engine_player.volume_db = -10

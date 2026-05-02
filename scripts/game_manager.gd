@@ -64,7 +64,8 @@ var brake = {"dev": -1, "axis": 4, "sign": 1, "btn": -1, "is_btn": false, "snap"
 
 signal state_changed(new_state)
 signal time_updated(new_time)
-signal speed_updated(new_speed)
+signal speed_updated(speed)
+signal gear_updated(gear)
 signal record_updated(record_time)
 signal map_mode_changed(new_mode)
 signal sfx_toggled(is_enabled)
@@ -324,7 +325,7 @@ func _physics_process(delta):
 					car.get_node("WheelRR").transform
 				],
 				"a": [
-					car.engine_rpm,
+					car.current_rpm,
 					abs(car.engine_input),
 					car.is_skidding and car.on_ground,
 					car.is_braking and car.on_ground
