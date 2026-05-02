@@ -1,3 +1,5 @@
 # Godot 4+ specific ignores
 .godot/
 /android/
+scripts/__pycache__
+assets/fastf1_cache

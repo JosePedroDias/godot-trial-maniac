@@ -52,7 +52,33 @@ A runtime tool to refine track elevations directly in-game.
 - **Smooth Adjust (Brush):** `Shift` + `PageUp` / `PageDown` (Averages neighboring points for smooth slopes)
 - **Save to JSON:** `Ctrl + S` (Overwrites the source `.json` file and flattens transformation flags for perfect offline persistence)
 
-### 4. Build Tools
+### 4. Track Audit & Repair Pipeline
+A suite of tools to ensure tracks match real-world Formula 1 circuits.
+
+#### A. Visual Audit (`scripts/compare_elevation.py`)
+Generates a side-by-side comparison of the game's track vs. official F1 telemetry.
+```bash
+python3 scripts/compare_elevation.py <track_id>
+```
+Outputs an image (`elevation_comparison_<id>.png`) showing track alignment and elevation profiles.
+
+#### B. Automated Repair (`scripts/inject_f1_elevation.py`)
+Injects high-precision F1 telemetry data directly into the game's JSON files, fixing spikes and inaccuracies.
+```bash
+python3 scripts/inject_f1_elevation.py <track_id>
+```
+*Note: Run `godot -s scripts/test_gen_json.gd --force` after injecting to update the game scenes.*
+
+#### C. 3D Inspection (`scenes/track_viewer.tscn`)
+A dedicated orbit-camera viewer to inspect track geometry and elevation in 3D.
+```bash
+godot scenes/track_viewer.tscn -- <track_id>
+```
+- **LMB (Drag):** Orbit
+- **RMB (Drag):** Pan
+- **Wheel:** Zoom
+
+### 5. Build Tools
 These scripts are utility tools used to generate the static assets of the game.
 
 - **Block Regeneration (`scripts/create_blocks.gd`):** 
