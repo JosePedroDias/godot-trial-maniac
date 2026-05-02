@@ -1,69 +1,51 @@
-extends AudioStreamPlayer3D
+extends Node3D
 
-var playback: AudioStreamGeneratorPlayback
-var sample_rate: float
-var phase: float = 0.0
+enum Strategy { SYNTH, SAMPLE }
+@export var strategy: Strategy = Strategy.SYNTH
 
-var rpm_raw: float = 0.0 # Real RPM value (e.g. 3000 to 12000)
-var throttle: float = 0.0
+var rpm_raw: float = 0.0:
+	set(val):
+		rpm_raw = val
+		if _active_engine: _active_engine.set("rpm_raw", val)
+var throttle: float = 0.0:
+	set(val):
+		throttle = val
+		if _active_engine: _active_engine.set("throttle", val)
+var gear: int = 1:
+	set(val):
+		gear = val
+		if _active_engine: _active_engine.set("gear", val)
 
-var _phases = [0.0, 0.0, 0.0]
+var _active_engine: Node = null
+var _enabled: bool = true
 
 func _ready():
-	var generator = AudioStreamGenerator.new()
-	generator.mix_rate = 44100
-	generator.buffer_length = 0.1
-	stream = generator
-	sample_rate = generator.mix_rate
-	play()
+	_init_strategy()
 
-func _process(_delta):
-	if not playing:
-		playback = null
-		return
-		
-	if not playback:
-		playback = get_stream_playback()
+func _init_strategy():
+	if _active_engine:
+		_active_engine.queue_free()
 	
-	if playback:
-		_fill_buffer()
+	match strategy:
+		Strategy.SYNTH:
+			_active_engine = AudioStreamPlayer3D.new()
+			_active_engine.set_script(load("res://scripts/engine_sound_synth.gd"))
+		Strategy.SAMPLE:
+			_active_engine = Node3D.new()
+			_active_engine.set_script(load("res://scripts/engine_sound_sample.gd"))
+	
+	add_child(_active_engine)
+	_active_engine.set("rpm_raw", rpm_raw)
+	_active_engine.set("throttle", throttle)
+	_active_engine.set("gear", gear)
+	if _active_engine.has_method("set_enabled"):
+		_active_engine.set_enabled(_enabled)
 
-func _fill_buffer():
-	var frames_available = playback.get_frames_available()
-	if frames_available == 0:
-		return
-		
-	# F1 V6 usually revs 4000 to 12000 in our sim range
-	# We map rpm_raw to a fundamental frequency
-	var fundamental = rpm_raw / 60.0 # Hz
-	
-	for i in range(frames_available):
-		var samples = 0.0
-		
-		# Oscillator 1: Fundamental (Low weight, sub)
-		_phases[0] = fmod(_phases[0] + fundamental / sample_rate, 1.0)
-		samples += 0.4 * sin(_phases[0] * TAU)
-		
-		# Oscillator 2: 3rd Harmonic (V6 characteristic)
-		_phases[1] = fmod(_phases[1] + (fundamental * 3.0) / sample_rate, 1.0)
-		var saw = 2.0 * (_phases[1] - floor(0.5 + _phases[1]))
-		samples += 0.6 * saw
-		
-		# Oscillator 3: 1.5th Harmonic (Roughness/Frequency modulation)
-		_phases[2] = fmod(_phases[2] + (fundamental * 1.5) / sample_rate, 1.0)
-		samples += 0.3 * (2.0 * (_phases[2] - floor(0.5 + _phases[2])))
-		
-		# Throttle-based distortion and growl
-		var drive = 1.0 + throttle * 2.5
-		samples *= drive
-		
-		# Soft clipping / Saturation
-		samples = tanh(samples)
-		
-		# High-frequency "whine" (Turbo/Hybrid)
-		var whine_freq = 2000.0 + fundamental * 2.0
-		var whine = sin(float(i + phase) * whine_freq * TAU / sample_rate) * 0.05 * throttle
-		samples += whine
-		
-		var sample = Vector2(samples, samples) * 0.5
-		playback.push_frame(sample)
+func set_enabled(enabled: bool):
+	_enabled = enabled
+	if _active_engine and _active_engine.has_method("set_enabled"):
+		_active_engine.set_enabled(enabled)
+
+func switch_strategy(new_strategy: Strategy):
+	strategy = new_strategy
+	_init_strategy()

@@ -104,6 +104,7 @@ These scripts are utility tools used to generate the static assets of the game.
 - **Quit Game:** Escape
 
 ## Credits & Acknowledgments
+- **Engine Sound Loops:** by [domasx2](https://opengameart.org/users/domasx2) (CC0) from [OpenGameArt](https://opengameart.org/content/racing-car-engine-sound-loops).
 - **[FastF1](https://github.com/theOehrly/Fast-F1):** Used for retrieving high-precision F1 telemetry data to fix circuit heights and disparities.
 - **[f1-circuits (bacinger)](https://github.com/bacinger/f1-circuits):** Source for the Madrid (Madring) circuit GeoJSON used to map the upcoming 2026 layout.
 

@@ -12,7 +12,8 @@ var _calculated_center: bool = false
 
 func _ready():
 	if not target:
-		target = get_parent().get_node_or_null("Car")
+		var p = get_parent()
+		if p: target = p.get_node_or_null("Car")
 
 func toggle_mode():
 	mode = (mode + 1) % 3 as Mode
@@ -20,7 +21,8 @@ func toggle_mode():
 
 func _process(delta):
 	if not is_instance_valid(target):
-		target = get_parent().get_node_or_null("Car")
+		var p = get_parent()
+		if p: target = p.get_node_or_null("Car")
 		if not target: return
 
 	match mode:

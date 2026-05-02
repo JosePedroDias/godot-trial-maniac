@@ -4,7 +4,7 @@ var ghost_data = [] # Array of snapshots { "b": body_transform, "w": [wheel_tran
 var current_index = 0
 var is_playing = false
 
-var engine_player: AudioStreamPlayer3D
+var engine_player: Node3D
 var skid_player: AudioStreamPlayer3D
 var brake_player: AudioStreamPlayer3D
 
@@ -19,7 +19,9 @@ func _ready():
 		gm.sfx_toggled.connect(_on_sfx_toggled)
 
 func _on_sfx_toggled(enabled):
-	var players = [engine_player, skid_player, brake_player]
+	if engine_player and engine_player.has_method("set_enabled"):
+		engine_player.set_enabled(enabled)
+	var players = [skid_player, brake_player]
 	for p in players:
 		if p:
 			if enabled:
@@ -28,11 +30,9 @@ func _on_sfx_toggled(enabled):
 				p.stop()
 
 func _setup_audio():
-	engine_player = AudioStreamPlayer3D.new()
+	engine_player = Node3D.new()
 	engine_player.set_script(load("res://scripts/engine_sound.gd"))
 	add_child(engine_player)
-	engine_player.unit_size = 20.0
-	engine_player.max_db = -5.0 # Slightly quieter than the player
 	
 	skid_player = AudioStreamPlayer3D.new()
 	add_child(skid_player)
@@ -46,7 +46,8 @@ func _setup_audio():
 	
 	var gm = get_node_or_null("/root/GameManager")
 	if gm and gm.sfx_enabled:
-		engine_player.play()
+		if engine_player and engine_player.has_method("set_enabled"):
+			engine_player.set_enabled(true)
 		skid_player.play()
 		brake_player.play()
 
@@ -103,7 +104,8 @@ func start_playback(data):
 	
 	var gm = get_node_or_null("/root/GameManager")
 	if gm and gm.sfx_enabled:
-		if engine_player: engine_player.play()
+		if engine_player and engine_player.has_method("set_enabled"):
+			engine_player.set_enabled(true)
 		if skid_player: skid_player.play()
 		if brake_player: brake_player.play()
 		
@@ -119,7 +121,8 @@ func start_playback(data):
 func stop_playback():
 	is_playing = false
 	visible = false
-	if engine_player: engine_player.stop()
+	if engine_player and engine_player.has_method("set_enabled"):
+		engine_player.set_enabled(false)
 	if skid_player: skid_player.stop()
 	if brake_player: brake_player.stop()
 
@@ -141,7 +144,6 @@ func _physics_process(delta):
 				if engine_player:
 					engine_player.rpm_raw = a[0]
 					engine_player.throttle = a[1]
-					engine_player.volume_db = -10 + clamp(a[1] * 5.0, 0, 5)
 				
 				if skid_player:
 					var target_skid_vol = 5 if a[2] else -80
@@ -162,12 +164,13 @@ func _physics_process(delta):
 		current_index += 1
 	elif current_index >= ghost_data.size():
 		is_playing = false
-		if engine_player: engine_player.stop()
+		if engine_player and engine_player.has_method("set_enabled"):
+			engine_player.set_enabled(false)
 		if skid_player: skid_player.stop()
 		if brake_player: brake_player.stop()
 
 func _update_audio_fallback(delta):
-	if engine_player and engine_player.playing:
+	if engine_player:
 		var velocity = (global_transform.origin - _prev_pos) / delta
 		var speed_cur = velocity.length()
 		var speed_kmh = speed_cur * 3.6

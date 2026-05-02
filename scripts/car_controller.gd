@@ -38,7 +38,7 @@ var _wheel_rot: float = 0.0
 var fall_timer: float = 0.0
 
 # Audio & Visuals
-var engine_player: AudioStreamPlayer3D
+var engine_player: Node3D
 var skid_player: AudioStreamPlayer3D
 var collision_player: AudioStreamPlayer3D
 var current_gear: int = 1
@@ -68,16 +68,17 @@ func _ready():
 	var gm = get_node_or_null("/root/GameManager")
 	if gm:
 		gm.sfx_toggled.connect(_on_sfx_toggled)
+		_on_sfx_toggled(gm.sfx_enabled)
 
 func _on_sfx_toggled(enabled):
-	if engine_player: engine_player.stream_paused = !enabled
+	if engine_player and engine_player.has_method("set_enabled"):
+		engine_player.set_enabled(enabled)
 	if skid_player: skid_player.stream_paused = !enabled
 
 func _setup_audio():
-	engine_player = AudioStreamPlayer3D.new()
+	engine_player = Node3D.new()
 	engine_player.set_script(load("res://scripts/engine_sound.gd"))
 	add_child(engine_player)
-	engine_player.play()
 	
 	skid_player = AudioStreamPlayer3D.new()
 	add_child(skid_player)
@@ -268,6 +269,7 @@ func _update_audio(delta, speed_kmh):
 		var rpm_pct = clamp((speed_kmh - gear_min) / max(1.0, gear_max - gear_min), 0.0, 1.0)
 		engine_player.rpm_raw = lerp(3000.0, 12000.0, rpm_pct)
 		engine_player.throttle = throttle_input
+		engine_player.gear = current_gear
 	
 	if skid_player:
 		var lat_v = abs(global_basis.x.dot(linear_velocity))

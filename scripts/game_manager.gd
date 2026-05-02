@@ -139,7 +139,9 @@ func _input(event):
 
 func _physics_process(delta):
 	if current_state == RaceState.RACING:
-		var car = get_tree().current_scene.get_node_or_null("Car")
+		var scene = get_tree().current_scene
+		if not scene: return
+		var car = scene.get_node_or_null("Car")
 		if car:
 			var snapshot = {
 				"b": car.global_transform,
