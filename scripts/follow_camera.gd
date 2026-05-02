@@ -18,7 +18,7 @@ func toggle_mode():
 	mode = (mode + 1) % 3 as Mode
 	print("Camera Mode: ", Mode.keys()[mode])
 
-func _physics_process(delta):
+func _process(delta):
 	if not is_instance_valid(target):
 		target = get_parent().get_node_or_null("Car")
 		if not target: return

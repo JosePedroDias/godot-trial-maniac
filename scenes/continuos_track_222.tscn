@@ -1,6 +1,6 @@
 [gd_scene format=4]
 
-[ext_resource type="PackedScene" path="res://scenes/mania_car.tscn" id="1_bc52f"]
+[ext_resource type="PackedScene" path="res://scenes/f1_2026_car.tscn" id="1_bc52f"]
 [ext_resource type="Script" path="res://scripts/car_controller.gd" id="2_flrd6"]
 [ext_resource type="Script" path="res://scripts/follow_camera.gd" id="3_j2jot"]
 [ext_resource type="PackedScene" path="res://scenes/hud.tscn" id="4_bgage"]
