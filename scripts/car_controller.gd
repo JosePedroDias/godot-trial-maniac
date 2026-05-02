@@ -280,7 +280,7 @@ func _physics_process(delta):
 		if ray.is_colliding():
 			on_ground = true
 			var collider = ray.get_collider()
-			if collider.has_method("get_script") and collider.get_script() and collider.get_script().get_path() == "res://scripts/track_block.gd":
+			if collider and collider.has_method("get_script") and collider.get_script() and collider.get_script().get_path() == "res://scripts/track_block.gd":
 				_check_track_block(collider)
 				if collider.is_sticky(): is_on_sticky = true
 			

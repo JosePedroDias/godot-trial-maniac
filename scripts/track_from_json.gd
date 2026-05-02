@@ -25,14 +25,10 @@ func generate_from_json(json_path: String, car_path: String = "res://scenes/mani
 	for p in points_data:
 		p.x = -p.x
 		p.tx = -p.tx
-
-		#p.z = -p.z
-		#p.tz = -p.tz
 	
 	# Handle optional transformations
 	if data.get("reverseDirection", false):
 		points_data.reverse()
-		# Flip tangents because direction is reversed
 		for p in points_data:
 			p.tx = -p.tx
 			p.ty = -p.ty
@@ -53,6 +49,8 @@ func generate_from_json(json_path: String, car_path: String = "res://scenes/mani
 	var base_scene = load("res://scenes/base_track.tscn")
 	var track_root = base_scene.instantiate()
 	track_root.name = track_name
+	track_root.set_meta("json_path", json_path)
+	track_root.set_meta("points_data", points_data)
 
 	# Replace the car instance with the selected car
 	var old_car = track_root.get_node("Car")
@@ -66,12 +64,62 @@ func generate_from_json(json_path: String, car_path: String = "res://scenes/mani
 	car_parent.add_child(car)
 	car.owner = track_root
 
+	# Setup Starting Area & Car
+	var point_count = points_data.size()
+	var get_p = func(idx: int): 
+		return points_data[(idx + point_count) % point_count]
+	
+	var p0 = points_data[0]
+	var gate_pos = Vector3(p0.x, p0.y, p0.z)
+	var gate_tangent = Vector3(p0.tx, p0.ty, p0.tz)
+	
+	var gate_scene = load("res://scenes/blocks/RoadlessStart.tscn")
+	var gate_block = gate_scene.instantiate()
+	track_root.add_child(gate_block)
+	gate_block.owner = track_root
+	gate_block.transform = Transform3D(Basis.looking_at(-gate_tangent, Vector3.UP), gate_pos)
+	gate_block.type = 13 
+	
+	var car_idx = -4
+	var cp = get_p.call(car_idx)
+	var car_pos = Vector3(cp.x, cp.y + 1.0, cp.z)
+	var car_tangent = Vector3(cp.tx, cp.ty, cp.tz)
+	car.transform = Transform3D(Basis.looking_at(-car_tangent, Vector3.UP), car_pos)
+
 	# Update camera target
 	var camera = track_root.get_node("FollowCamera")
 	if camera:
 		camera.target_path = camera.get_path_to(car)
 
-	# Prepare MeshTurtle
+	var mesh_instance = build_track_mesh(points_data)
+	mesh_instance.name = "RoadMesh"
+	
+	var track_node = track_root.get_node_or_null("Track")
+	if not track_node:
+		track_node = Node3D.new()
+		track_node.name = "Track"
+		track_root.add_child(track_node)
+		track_node.owner = track_root
+	
+	track_node.add_child(mesh_instance)
+	mesh_instance.owner = track_root
+	# Ensure nested nodes also have owner set for packing
+	for child in mesh_instance.get_children():
+		child.owner = track_root
+		for gchild in child.get_children():
+			gchild.owner = track_root
+
+	# Save Scene
+	var scene = PackedScene.new()
+	scene.pack(track_root)
+	var output_path = "res://scenes/%s_track.tscn" % track_name
+	ResourceSaver.save(scene, output_path)
+	print("Track saved: ", output_path)
+	
+	track_root.free()
+	return output_path
+
+static func build_track_mesh(points_data: Array) -> MeshInstance3D:
 	var turtle = MeshTurtle.new()
 	var profile_res = MeshTurtle.create_f1_profile(ROAD_WIDTH, KERB_WIDTH, GRASS_WIDTH)
 	
@@ -85,41 +133,6 @@ func generate_from_json(json_path: String, car_path: String = "res://scenes/mani
 		colors[7] = kerb_col
 		turtle.set_profile(profile_res.points, colors)
 
-	# 1. Setup Starting Area & Car
-	var point_count = points_data.size()
-	var get_p = func(idx: int): 
-		return points_data[(idx + point_count) % point_count]
-	
-	# Place a single COMBINED Start/Finish Gate at index 0
-	var p0 = points_data[0]
-	var gate_pos = Vector3(p0.x, p0.y, p0.z)
-	var gate_tangent = Vector3(p0.tx, p0.ty, p0.tz)
-	
-	var gate_scene = load("res://scenes/blocks/RoadlessStart.tscn")
-	var gate_block = gate_scene.instantiate()
-	track_root.add_child(gate_block)
-	gate_block.owner = track_root
-	gate_block.transform = Transform3D(Basis.looking_at(-gate_tangent, Vector3.UP), gate_pos)
-	# Set to combined type (13 is START_FINISH in our enum)
-	gate_block.type = 13 
-	
-	# Car Position: ~20m behind gate (Index -4 if 5m spacing)
-	var car_idx = -4
-	var cp = get_p.call(car_idx)
-	var car_pos = Vector3(cp.x, cp.y + 1.0, cp.z)
-	var car_tangent = Vector3(cp.tx, cp.ty, cp.tz)
-	car.transform = Transform3D(Basis.looking_at(-car_tangent, Vector3.UP), car_pos)
-
-	# 2. Add platform behind gate
-	turtle.transform = gate_block.transform
-	update_kerb_color.call(0.0)
-	turtle.push_state()
-	turtle.turn_left(180)
-	turtle.move_and_extrude(25.0) # Longer platform to ensure car is covered
-	turtle.stop_extrusion()
-	turtle.pop_state()
-	
-	# 3. Main extrusion loop
 	var prev_pos = Vector3(points_data[0].x, points_data[0].y, points_data[0].z)
 	var total_dist = 0.0
 	
@@ -137,20 +150,17 @@ func generate_from_json(json_path: String, car_path: String = "res://scenes/mani
 		turtle.add_slice()
 		prev_pos = curr_pos
 
-	# 4. Close the loop
+	# Close the loop
 	var last_p_data = points_data[0]
 	turtle.transform = Transform3D(Basis.looking_at(-Vector3(last_p_data.tx, last_p_data.ty, last_p_data.tz), Vector3.UP), Vector3(last_p_data.x, last_p_data.y, last_p_data.z))
 	update_kerb_color.call(total_dist + prev_pos.distance_to(Vector3(last_p_data.x, last_p_data.y, last_p_data.z)))
 	turtle.add_slice()
 
-	# NEW: Smoothing pass to fix intersections/folds
 	turtle.smooth_mesh(3)
 
-	# 5. Commit Mesh and Add to Scene
 	var mesh = turtle.commit_mesh()
 	var mesh_instance = MeshInstance3D.new()
 	mesh_instance.mesh = mesh
-	mesh_instance.name = "RoadMesh"
 	
 	var static_body = StaticBody3D.new()
 	static_body.name = "StaticBody"
@@ -159,6 +169,7 @@ func generate_from_json(json_path: String, car_path: String = "res://scenes/mani
 	mesh_instance.add_child(static_body)
 	
 	var collision_shape = CollisionShape3D.new()
+	collision_shape.name = "CollisionShape3D"
 	collision_shape.shape = mesh.create_trimesh_shape()
 	static_body.add_child(collision_shape)
 	
@@ -166,24 +177,4 @@ func generate_from_json(json_path: String, car_path: String = "res://scenes/mani
 	mat.vertex_color_use_as_albedo = true
 	mesh_instance.material_override = mat
 	
-	var track_node = track_root.get_node_or_null("Track")
-	if not track_node:
-		track_node = Node3D.new()
-		track_node.name = "Track"
-		track_root.add_child(track_node)
-		track_node.owner = track_root
-	
-	track_node.add_child(mesh_instance)
-	mesh_instance.owner = track_root
-	static_body.owner = track_root
-	collision_shape.owner = track_root
-
-	# Save Scene
-	var scene = PackedScene.new()
-	scene.pack(track_root)
-	var output_path = "res://scenes/%s_track.tscn" % track_name
-	ResourceSaver.save(scene, output_path)
-	print("Track saved with single Start/Finish: ", output_path)
-	
-	track_root.free()
-	return output_path
+	return mesh_instance

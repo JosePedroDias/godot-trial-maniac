@@ -16,11 +16,11 @@ var tracks = [
 	"res://scenes/australia_track.tscn",
 	"res://scenes/china_track.tscn",
 	"res://scenes/japan_track.tscn", # 180?
-	##"res://scenes/bahrain_track.tscn", # skipped
-	##"res://scenes/saudi_arabia_track.tscn", # skipped
+	"res://scenes/bahrain_track.tscn", # skipped
+	"res://scenes/saudi_arabia_track.tscn", # skipped
 	"res://scenes/usa_miami_track.tscn",
 	"res://scenes/italy_emilia_track.tscn",
-	##"res://scenes/canada_track.tscn", # TODO needs work
+	"res://scenes/canada_track.tscn", # TODO needs work
 	##"res://scenes/monaco_track.tscn", # TODO needs work
 	"res://scenes/spain_barcelona_track.tscn",
 	"res://scenes/austria_track.tscn", # 180?
@@ -30,8 +30,8 @@ var tracks = [
 	"res://scenes/netherlands_track.tscn",
 	"res://scenes/italy_monza_track.tscn",
 	##"res://scenes/spain_madrid_track.tscn", # TODO https://www.formula1.com/en/racing/2026/spain
-	#"res://scenes/azerbaijan_track.tscn", # TODO needs work
-	#"res://scenes/singapore_track.tscn", # TODO needs work
+	"res://scenes/azerbaijan_track.tscn", # TODO needs work
+	"res://scenes/singapore_track.tscn", # TODO needs work
 	"res://scenes/usa_cota_track.tscn",
 	"res://scenes/mexico_track.tscn",
 	"res://scenes/brazil_track.tscn",
@@ -103,6 +103,12 @@ func _ready():
 	
 	# Initial setup
 	_init_scene.call_deferred()
+	
+	# Add Track Editor
+	var editor = Node.new()
+	editor.name = "TrackEditor"
+	editor.set_script(load("res://scripts/track_editor.gd"))
+	add_child(editor)
 
 func _on_node_added(node):
 	# If the node added is the new current scene root

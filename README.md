@@ -45,6 +45,13 @@ Generates tracks from external point data (e.g., F1 circuit data).
   - `startPositionRatio` (float, 0.0 to 1.0): Rotates the starting point of the track loop by the given ratio. Useful for aligning the start/finish gate.
 - **Regenerate Tracks:** `godot --headless -s scripts/test_gen_json.gd`
 
+#### D. Track Height Editor (`scripts/track_editor.gd`)
+A runtime tool to refine track elevations directly in-game.
+- **Toggle Edit Mode:** `Ctrl + E`
+- **Adjust Height:** `PageUp` / `PageDown` (Nearest point)
+- **Smooth Adjust (Brush):** `Shift` + `PageUp` / `PageDown` (Averages neighboring points for smooth slopes)
+- **Save to JSON:** `Ctrl + S` (Overwrites the source `.json` file and flattens transformation flags for perfect offline persistence)
+
 ### 4. Build Tools
 These scripts are utility tools used to generate the static assets of the game.
 
