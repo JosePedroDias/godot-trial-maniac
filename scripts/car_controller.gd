@@ -1,15 +1,18 @@
 extends RigidBody3D
 
+enum Strategy { RAYCAST, SIMPLE }
+@export var physics_strategy: Strategy = Strategy.SIMPLE # RAYCAST, SIMPLE
+
 @export_group("Engine")
-@export var engine_power: float = 150000.0 # Doubled power
+@export var engine_power: float = 150000.0
 @export var brake_force: float = 100000.0
-@export var max_speed: float = 400.0 # Increased cap
+@export var max_speed: float = 400.0 # km/h
 @export var reverse_force: float = 30000.0
 
 @export_group("Steering")
 @export var steering_speed: float = 8.0
-@export var steering_angle: float = 15.0 # was 30.0
-@export var grip: float = 9.0 # was 12.0
+@export var steering_angle: float = 15.0
+@export var grip: float = 9.0
 
 @export_group("Suspension")
 @export var suspension_rest_dist: float = 0.4
@@ -18,24 +21,25 @@ extends RigidBody3D
 @export var wheel_radius: float = 0.33
 @export var aero_downforce: float = 5.0
 
-# Internal State
+# Input & State (Shared with physics strategies)
 var steering_input: float = 0.0
 var throttle_input: float = 0.0
 var brake_input: float = 0.0
 var is_on_ground: bool = false
 var on_ground: bool = false # Alias for ghost system
 var ground_normal: Vector3 = Vector3.UP
+var is_skidding: bool = false
+var is_braking: bool = false
 
 # Ghost System / Compatibility
 var current_rpm: float = 0.0
 var engine_input: float = 0.0
-var is_skidding: bool = false
-var is_braking: bool = false
 
 var _raycasts = []
 var _wheels = []
 var _wheel_rot: float = 0.0
 var fall_timer: float = 0.0
+var _physics_logic: Node = null
 
 # Audio & Visuals
 var engine_player: Node3D
@@ -59,6 +63,7 @@ func _ready():
 	center_of_mass_mode = 1
 	center_of_mass = Vector3(0, -0.5, 0)
 	
+	_init_physics_strategy()
 	_setup_audio()
 	
 	contact_monitor = true
@@ -69,6 +74,36 @@ func _ready():
 	if gm:
 		gm.sfx_toggled.connect(_on_sfx_toggled)
 		_on_sfx_toggled(gm.sfx_enabled)
+
+func _init_physics_strategy():
+	if _physics_logic:
+		_physics_logic.queue_free()
+	
+	match physics_strategy:
+		Strategy.RAYCAST:
+			_physics_logic = Node.new()
+			_physics_logic.set_script(load("res://scripts/car_physics_raycast.gd"))
+		Strategy.SIMPLE:
+			_physics_logic = Node.new()
+			_physics_logic.set_script(load("res://scripts/car_physics_simple.gd"))
+			
+	add_child(_physics_logic)
+	_physics_logic.setup(self)
+	_sync_physics_params()
+
+func _sync_physics_params():
+	if not _physics_logic: return
+	_physics_logic.engine_power = engine_power
+	_physics_logic.brake_force = brake_force
+	_physics_logic.max_speed = max_speed
+	_physics_logic.reverse_force = reverse_force
+	_physics_logic.steering_angle = steering_angle
+	_physics_logic.grip = grip
+	_physics_logic.suspension_rest_dist = suspension_rest_dist
+	_physics_logic.spring_strength = spring_strength
+	_physics_logic.spring_damping = spring_damping
+	_physics_logic.wheel_radius = wheel_radius
+	_physics_logic.aero_downforce = aero_downforce
 
 func _on_sfx_toggled(enabled):
 	if engine_player and engine_player.has_method("set_enabled"):
@@ -82,7 +117,6 @@ func _setup_audio():
 	
 	skid_player = AudioStreamPlayer3D.new()
 	add_child(skid_player)
-	# Create noise for skid
 	var skid_stream = AudioStreamWAV.new()
 	skid_stream.format = AudioStreamWAV.FORMAT_16_BITS
 	skid_stream.loop_mode = AudioStreamWAV.LOOP_FORWARD
@@ -116,19 +150,12 @@ func _on_body_entered(_body):
 func _physics_process(delta):
 	_read_input(delta)
 	
-	# Ground Detection
-	var ray_hits = 0
-	var avg_normal = Vector3.ZERO
-	var avg_dist = 0.0
+	is_skidding = false
+	is_braking = false
+	engine_input = throttle_input - brake_input
 	
-	for ray in _raycasts:
-		if ray.is_colliding():
-			ray_hits += 1
-			avg_normal += ray.get_collision_normal()
-			avg_dist += (ray.global_position - ray.get_collision_point()).length()
-	
-	is_on_ground = ray_hits > 0
-	on_ground = is_on_ground
+	if _physics_logic:
+		_physics_logic.apply_physics(delta)
 	
 	# Fall Detection
 	var gm = get_node_or_null("/root/GameManager")
@@ -141,76 +168,16 @@ func _physics_process(delta):
 	else:
 		fall_timer = 0.0
 
-	# Reset skidding/braking
-	is_skidding = false
-	is_braking = false
-	engine_input = throttle_input - brake_input
-
-	if is_on_ground:
-		ground_normal = (avg_normal / ray_hits).normalized()
-		var target_dist = avg_dist / ray_hits
-		
-		var speed_cur = linear_velocity.length()
-		var speed_kmh = speed_cur * 3.6
-		var forward_v = global_basis.z.dot(linear_velocity)
-		
-		if brake_input > 0.1 and forward_v > 1.0:
-			is_braking = true
-		
-		# 1. Suspension (Keep car afloat)
-		var error = suspension_rest_dist - target_dist
-		var spring_f = error * spring_strength
-		var upward_v = linear_velocity.dot(global_basis.y)
-		var damping_f = upward_v * spring_damping
-		apply_central_force(global_basis.y * (spring_f - damping_f) * mass)
-		
-		# 2. Aero Downforce (Keeps car glued at high speed)
-		apply_central_force(-global_basis.y * speed_cur * speed_cur * aero_downforce)
-		
-		# 3. Alignment (Keep car upright relative to track)
-		var curr_up = global_basis.y
-		var tilt_axis = curr_up.cross(ground_normal)
-		var tilt_angle = curr_up.angle_to(ground_normal)
-		if tilt_angle > 0.01:
-			apply_torque(tilt_axis * tilt_angle * 1000.0)
-		
-		# 4. Acceleration / Braking
-		if throttle_input > 0 and speed_kmh < max_speed:
-			apply_central_force(global_basis.z * throttle_input * engine_power)
-		
-		if brake_input > 0:
-			if forward_v > 1.0:
-				apply_central_force(-global_basis.z * brake_input * brake_force)
-			else:
-				apply_central_force(-global_basis.z * brake_input * reverse_force)
-		
-		# 5. Steering & Grip (Per-wheel for realistic turning)
-		var steer_rad = deg_to_rad(steering_angle) * steering_input
-		
-		for i in range(4):
-			var ray = _raycasts[i]
-			if not ray.is_colliding(): continue
-			
-			var w_basis = global_basis
-			if i < 2: # Front wheels
-				w_basis = w_basis.rotated(global_basis.y, steer_rad)
-			
-			var wheel_pos = ray.global_position - global_position
-			var v_at_w = linear_velocity + angular_velocity.cross(wheel_pos)
-			
-			# Lateral force (Grip)
-			var lat_v = w_basis.x.dot(v_at_w)
-			apply_force(-w_basis.x * lat_v * mass * grip * 0.25, wheel_pos)
-			
-			if i < 2 and abs(lat_v) > 5.0:
-				is_skidding = true
-
-		# Update HUD
-		if gm: gm.speed_updated.emit(speed_kmh)
-		_update_audio(delta, speed_kmh)
-		current_rpm = engine_player.rpm_raw if engine_player else 0.0
+	# HUD & Audio Update
+	var speed_kmh = linear_velocity.length() * 3.6
+	if gm: gm.speed_updated.emit(speed_kmh)
+	_update_audio(delta, speed_kmh)
+	current_rpm = engine_player.rpm_raw if engine_player else 0.0
 	
-	_update_wheels(delta)
+	# Visual Wheel Update
+	_wheel_rot += (global_basis.z.dot(linear_velocity) * delta * 5.0)
+	if _physics_logic:
+		_physics_logic.update_wheels(delta, steering_input, _wheel_rot)
 
 func _read_input(delta):
 	var gm = get_node_or_null("/root/GameManager")
@@ -229,37 +196,12 @@ func _read_input(delta):
 		throttle_input = Input.get_action_strength("ui_up")
 		brake_input = Input.get_action_strength("ui_down")
 
-func _update_wheels(delta):
-	var forward_v = global_basis.z.dot(linear_velocity)
-	_wheel_rot += forward_v * delta * 5.0
-	
-	for i in range(_wheels.size()):
-		var wheel = _wheels[i]
-		var ray = _raycasts[i]
-		
-		# Visual Steering for front wheels
-		if i < 2:
-			wheel.rotation.y = steering_input * deg_to_rad(steering_angle)
-		
-		if ray.is_colliding():
-			var hit_pt = ray.get_collision_point()
-			wheel.global_position = hit_pt + ground_normal * wheel_radius
-		else:
-			wheel.position.y = lerp(wheel.position.y, -suspension_rest_dist, delta * 5.0)
-		
-		# Rolling
-		var mesh = wheel.get_child(0) if wheel.get_child_count() > 0 else null
-		if mesh:
-			mesh.rotation.x = _wheel_rot
-
 func _update_audio(delta, speed_kmh):
 	if engine_player:
-		# Simple gear logic
 		var old_gear = current_gear
 		for g in range(1, 9):
 			if speed_kmh < gear_shift_points[g]:
 				current_gear = g; break
-		
 		if current_gear != old_gear:
 			var gm = get_node_or_null("/root/GameManager")
 			if gm: gm.gear_updated.emit(current_gear)
@@ -272,8 +214,5 @@ func _update_audio(delta, speed_kmh):
 		engine_player.gear = current_gear
 	
 	if skid_player:
-		var lat_v = abs(global_basis.x.dot(linear_velocity))
-		var target_vol = -80
-		if is_on_ground and lat_v > 5.0:
-			target_vol = -10 + clamp(lat_v, 0, 10)
+		var target_vol = 5 if (is_skidding and is_on_ground) else -80
 		skid_player.volume_db = lerp(skid_player.volume_db, float(target_vol), delta * 10.0)
