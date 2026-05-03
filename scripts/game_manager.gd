@@ -303,7 +303,7 @@ func _toggle_camera():
 	var cam = get_tree().current_scene.find_child("FollowCamera", true, false)
 	if cam and cam.has_method("toggle_mode"):
 		cam.toggle_mode()
-		var mode_name = ["FOLLOW", "FAR", "TRACK VIEW"][cam.mode]
+		var mode_name = ["NEAR", "MEDIUM", "FAR", "TRACK VIEW"][cam.mode]
 		binding_step_changed.emit("CAM: " + mode_name)
 		get_tree().create_timer(1.0).timeout.connect(func(): binding_step_changed.emit(""))
 

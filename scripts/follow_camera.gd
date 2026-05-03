@@ -1,7 +1,7 @@
 extends Camera3D
 
-enum Mode { FOLLOW, FAR, TOP_FIXED }
-@export var mode: Mode = Mode.FOLLOW
+enum Mode { FOLLOW_NEAR, FOLLOW_MEDIUM, FOLLOW_FAR, FIXED_TOP }
+@export var mode: Mode = Mode.FOLLOW_MEDIUM
 @export var target_path: NodePath
 @onready var target = get_node_or_null(target_path)
 
@@ -16,7 +16,7 @@ func _ready():
 		if p: target = p.get_node_or_null("Car")
 
 func toggle_mode():
-	mode = (mode + 1) % 3 as Mode
+	mode = (mode + 1) % len(Mode) as Mode
 	print("Camera Mode: ", Mode.keys()[mode])
 
 var _smooth_forward: Vector3 = Vector3.FORWARD
@@ -28,13 +28,15 @@ func _process(delta):
 		if not target: return
 
 	match mode:
-		# _follow_logic(delta, distance, height, pos_smooth, rot_smooth):
-		Mode.FOLLOW:
+		# (delta, distance, height, pos_smooth, rot_smooth):
+		Mode.FOLLOW_NEAR:
 			_follow_logic(delta, 5.0, 4.0, 4.0, 36.0)
-		Mode.FAR:
+		Mode.FOLLOW_MEDIUM:
 			_follow_logic(delta, 10.0, 9.0, 2.0, 24.0)
-		Mode.TOP_FIXED:
-			_top_fixed_logic(delta)
+		Mode.FOLLOW_FAR:
+			_follow_logic(delta, 25.0, 20.0, 1.0, 12.0)
+		Mode.FIXED_TOP:
+			_fixed_logic(delta)
 
 func _follow_logic(delta, distance, height, pos_smooth, rot_smooth):
 	var target_pos = target.global_transform.origin
@@ -66,7 +68,7 @@ func _follow_logic(delta, distance, height, pos_smooth, rot_smooth):
 	var new_transform = transform.looking_at(look_target, Vector3.UP)
 	global_basis = global_basis.slerp(new_transform.basis, rot_smooth * delta)
 
-func _top_fixed_logic(delta):
+func _fixed_logic(delta):
 	if not _calculated_center:
 		_calculate_track_center()
 	
