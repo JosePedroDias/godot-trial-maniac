@@ -5,12 +5,11 @@ func _ready():
 	
 	if "--generate" in args:
 		_run_generation(args)
-		return
 
 	# Wait one frame to ensure GameManager is fully initialized
 	await get_tree().process_frame
-	if not (GameManager and GameManager.tracks.size() > 0):
-		print("Error: GameManager or tracks not found")
+	if GameManager.tracks.size() == 0:
+		print("Error: tracks not found")
 		return
 
 	var target_track = GameManager.tracks[0]

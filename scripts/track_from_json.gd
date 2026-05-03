@@ -175,7 +175,7 @@ static func build_track_mesh(points_data: Array) -> MeshInstance3D:
 	
 	var static_body = StaticBody3D.new()
 	static_body.name = "StaticBody"
-	static_body.set_script(load("res://scripts/track_block.gd"))
+	static_body.set_script(load("res://scripts/track_logic.gd"))
 	static_body.type = 0 # STRAIGHT
 	mesh_instance.add_child(static_body)
 	

@@ -6,7 +6,7 @@
 [ext_resource type="PackedScene" path="res://scenes/f1_2026_car.tscn" id="4_8hnwr"]
 [ext_resource type="Script" path="res://scripts/car_controller.gd" id="5_mbl2y"]
 [ext_resource type="PackedScene" path="res://scenes/blocks/RoadlessStart.tscn" id="6_rtuft"]
-[ext_resource type="Script" path="res://scripts/track_block.gd" id="7_lh8ce"]
+[ext_resource type="Script" path="res://scripts/track_logic.gd" id="7_lh8ce"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_kd68p"]
 
