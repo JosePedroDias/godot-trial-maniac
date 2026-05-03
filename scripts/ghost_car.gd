@@ -14,11 +14,11 @@ func _ready():
 	_set_transparent(self)
 	_setup_audio()
 	
-	var gm = get_node_or_null("/root/GameManager")
-	if gm:
-		gm.sfx_toggled.connect(_on_sfx_toggled)
+	if GameManager:
+		GameManager.sfx_toggled.connect(_on_sfx_toggled)
 
 func _on_sfx_toggled(enabled):
+	if not is_inside_tree(): return
 	if engine_player and engine_player.has_method("set_enabled"):
 		engine_player.set_enabled(enabled)
 	var players = [skid_player, brake_player]
@@ -44,8 +44,7 @@ func _setup_audio():
 	
 	_init_skid_and_brake_streams()
 	
-	var gm = get_node_or_null("/root/GameManager")
-	if gm and gm.sfx_enabled:
+	if GameManager and GameManager.sfx_enabled:
 		if engine_player and engine_player.has_method("set_enabled"):
 			engine_player.set_enabled(true)
 		skid_player.play()
@@ -97,13 +96,17 @@ func _set_transparent(node):
 		_set_transparent(child)
 
 func start_playback(data):
+	if data == null or data.size() == 0:
+		is_playing = false
+		visible = false
+		return
+		
 	ghost_data = data
 	current_index = 0
 	is_playing = true
-	visible = true
+	visible = GameManager.ghost_enabled if GameManager else true
 	
-	var gm = get_node_or_null("/root/GameManager")
-	if gm and gm.sfx_enabled:
+	if GameManager and GameManager.sfx_enabled:
 		if engine_player and engine_player.has_method("set_enabled"):
 			engine_player.set_enabled(true)
 		if skid_player: skid_player.play()

@@ -4,9 +4,11 @@ enum RaceState { PRE_START, RACING, FINISHED, BINDING }
 
 var current_state = RaceState.PRE_START
 var current_time = 0.0
+var race_time = 0.0
+var time_diff = 0.0
 var best_time = 600.0
 var current_track_index = 0
-var map_mode = 0 # 0: Off, 1: Full, 2: Small
+var map_mode = 2 # 0: Off, 1: Full, 2: Small
 
 # Control Config (Defaults)
 var steer_left = {"dev": -1, "axis": 0, "sign": -1, "btn": -1, "is_btn": false, "snap": 0.0, "key": KEY_LEFT, "is_kb": true}
@@ -28,9 +30,9 @@ var tracks = [
 	"res://scenes/australia_track.tscn",
 	"res://scenes/china_track.tscn",
 	"res://scenes/japan_track.tscn",
-	"res://scenes/italy_emilia_track.tscn",
-	"res://scenes/monaco_track.tscn",
+	"res://scenes/usa_miami_track.tscn",
 	"res://scenes/canada_track.tscn",
+	"res://scenes/monaco_track.tscn",
 	"res://scenes/spain_barcelona_track.tscn",
 	"res://scenes/austria_track.tscn",
 	"res://scenes/great_britain_track.tscn",
@@ -47,7 +49,6 @@ var tracks = [
 	"res://scenes/usa_las_vegas_track.tscn",
 	"res://scenes/qatar_track.tscn",
 	"res://scenes/abu_dhabi_track.tscn",
-	"res://scenes/usa_miami_track.tscn"
 ]
 
 var highscores = {}
@@ -101,19 +102,20 @@ func _init_scene():
 		return
 	_last_initialized_scene_path = scene.scene_file_path if scene.scene_file_path else ""
 
-	print("Initializing scene: ", scene.name)
-	_replace_car_at_runtime()
-	_setup_ghost_actor()
-	
 	var scene_path = scene.scene_file_path
 	if not scene_path: return
+
+	print("Initializing scene: ", scene.name)
+	_replace_car_at_runtime()
 	
 	var idx = tracks.find(scene_path)
 	if idx != -1:
 		current_track_index = idx
 		best_time = float(highscores.get(scene_path, 600.0))
 		_load_ghost(scene_path)
+		_setup_ghost_actor()
 		get_tree().create_timer(0.1).timeout.connect(_emit_initial_record)
+	
 	_update_window_title()
 
 func _update_window_title():
@@ -136,6 +138,27 @@ func _input(event):
 			KEY_C: _toggle_camera()
 			KEY_6: _toggle_camera()
 			KEY_0: _toggle_fullscreen()
+			KEY_X: _clear_current_record()
+
+func _clear_current_record():
+	var scene = get_tree().current_scene
+	if not scene: return
+	var scene_path = scene.scene_file_path
+	if not scene_path: return
+	
+	best_time = 600.0
+	_best_ghost_data = []
+	highscores[scene_path] = best_time
+	
+	# Delete ghost file
+	var path = "user://" + scene_path.get_file().get_basename() + ".ghost"
+	if FileAccess.file_exists(path):
+		DirAccess.remove_absolute(path)
+	
+	_save_data()
+	record_updated.emit(best_time)
+	_setup_ghost_actor()
+	print("Cleared record and ghost for: ", scene_path)
 
 func _physics_process(delta):
 	if current_state == RaceState.RACING:
@@ -188,20 +211,45 @@ func start_race():
 	if _ghost_actor and _ghost_actor.has_method("start_playback"):
 		_ghost_actor.start_playback(_best_ghost_data)
 
-func finish_race():
-	current_state = RaceState.FINISHED
-	state_changed.emit(current_state)
-	if _ghost_actor: _ghost_actor.stop_playback()
+func finish_race(is_lap = false):
+	race_time = current_time
+	time_diff = race_time - best_time
 	
-	if current_time < best_time:
-		best_time = current_time
+	if race_time < best_time:
+		best_time = race_time
 		highscores[get_tree().current_scene.scene_file_path] = best_time
 		_best_ghost_data = _current_run_ghost.duplicate()
 		_save_data()
 		_save_ghost(get_tree().current_scene.scene_file_path)
 		record_updated.emit(best_time)
 	
+	if is_lap:
+		# Restart immediately for next lap
+		current_time = 0.0
+		_current_run_ghost.clear()
+		
+		# If we just got our first record, we need to create the ghost actor
+		if not _ghost_actor and _best_ghost_data.size() > 0:
+			_setup_ghost_actor()
+			
+		if _ghost_actor and _ghost_actor.has_method("start_playback"):
+			_ghost_actor.start_playback(_best_ghost_data)
+	else:
+		current_state = RaceState.FINISHED
+		state_changed.emit(current_state)
+		if _ghost_actor: _ghost_actor.stop_playback()
+	
 	if telemetry_enabled: _save_telemetry()
+
+func format_diff(d):
+	var sign_str = "+" if d > 0 else "-"
+	var abs_d = abs(d)
+	var mins = int(abs_d / 60)
+	var secs = int(abs_d) % 60
+	var msecs = int((abs_d - int(abs_d)) * 1000)
+	if mins > 0:
+		return "%s%d:%02d.%03d" % [sign_str, mins, secs, msecs]
+	return "%s%d.%03d" % [sign_str, secs, msecs]
 
 func reset_race():
 	if telemetry_enabled and current_telemetry.size() > 0:
@@ -276,16 +324,26 @@ func _replace_car_at_runtime():
 
 func _setup_ghost_actor():
 	if _ghost_actor:
-		_ghost_actor.get_parent().remove_child(_ghost_actor)
+		if _ghost_actor.get_parent():
+			_ghost_actor.get_parent().remove_child(_ghost_actor)
 		_ghost_actor.queue_free()
 		_ghost_actor = null
+	
 	if _best_ghost_data.size() == 0: return
+	
 	_ghost_actor = load("res://scenes/f1_2026_car.tscn").instantiate()
 	_ghost_actor.name = "GhostCar"
 	_ghost_actor.set_script(load("res://scripts/ghost_car.gd"))
 	_ghost_actor.visible = ghost_enabled
-	get_tree().current_scene.add_child.call_deferred(_ghost_actor)
-	var wheels = [_ghost_actor.get_node("WheelFL"), _ghost_actor.get_node("WheelFR"), _ghost_actor.get_node("WheelRL"), _ghost_actor.get_node("WheelRR")]
+	
+	var scene = get_tree().current_scene
+	scene.add_child(_ghost_actor)
+	
+	# Metadata for ghost playback (wheels)
+	var wheels = []
+	for name in ["WheelFL", "WheelFR", "WheelRL", "WheelRR"]:
+		var w = _ghost_actor.get_node_or_null(name)
+		if w: wheels.append(w)
 	_ghost_actor.set_meta("wheels", wheels)
 
 func _start_binding():
@@ -367,7 +425,15 @@ func format_time(t):
 
 func _save_data():
 	var f = FileAccess.open("user://save_data.json", FileAccess.WRITE)
-	var data = {"highscores": highscores, "steer_left": steer_left, "steer_right": steer_right, "throttle": throttle, "brake": brake, "sfx_enabled": sfx_enabled, "ghost_enabled": ghost_enabled}
+	var data = {
+		"steer_left": steer_left,
+		"steer_right": steer_right,
+		"throttle": throttle,
+		"brake": brake,
+		"highscores": highscores,
+		"sfx_enabled": sfx_enabled,
+		"ghost_enabled": ghost_enabled
+	}
 	f.store_string(JSON.stringify(data))
 
 func _load_data():
@@ -375,10 +441,13 @@ func _load_data():
 	var f = FileAccess.open("user://save_data.json", FileAccess.READ)
 	var data = JSON.parse_string(f.get_as_text())
 	if data:
+		steer_left = data.get("steer_left", steer_left);
+		steer_right = data.get("steer_right", steer_right)
+		throttle = data.get("throttle", throttle);
+		brake = data.get("brake", brake)
 		highscores = data.get("highscores", {})
-		steer_left = data.get("steer_left", steer_left); steer_right = data.get("steer_right", steer_right)
-		throttle = data.get("throttle", throttle); brake = data.get("brake", brake)
-		sfx_enabled = data.get("sfx_enabled", true); ghost_enabled = data.get("ghost_enabled", true)
+		sfx_enabled = data.get("sfx_enabled", true);
+		ghost_enabled = data.get("ghost_enabled", true)
 
 func _save_ghost(scene_path):
 	var path = "user://" + scene_path.get_file().get_basename() + ".ghost"

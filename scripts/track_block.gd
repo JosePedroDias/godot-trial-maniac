@@ -12,17 +12,16 @@ func _ready():
 
 func _on_gate_body_entered(body):
 	if body.name == "Car":
-		var gm = get_node_or_null("/root/GameManager")
-		if gm:
+		if GameManager:
 			if type == BlockType.START:
-				gm.start_race()
+				GameManager.start_race()
 			elif type == BlockType.FINISH:
-				gm.finish_race(false)
+				GameManager.finish_race(false)
 			elif type == BlockType.START_FINISH:
-				if gm.current_state == gm.RaceState.PRE_START:
-					gm.start_race()
-				elif gm.current_state == gm.RaceState.RACING:
-					gm.finish_race(true)
+				if GameManager.current_state == GameManager.RaceState.PRE_START:
+					GameManager.start_race()
+				elif GameManager.current_state == GameManager.RaceState.RACING:
+					GameManager.finish_race(true)
 
 func is_sticky() -> bool:
 	return type == BlockType.SIDE_PIPE or \

@@ -13,16 +13,15 @@ var current_gear: int = 1
 var current_speed: float = 0.0
 
 func _ready():
-	var gm = get_node_or_null("/root/GameManager")
-	if gm:
-		gm.time_updated.connect(_on_time_updated)
-		gm.state_changed.connect(_on_state_changed)
-		gm.speed_updated.connect(_on_speed_updated)
-		gm.gear_updated.connect(_on_gear_updated)
-		gm.record_updated.connect(_on_record_updated)
-		gm.binding_step_changed.connect(_on_binding_step_changed)
-		gm.map_mode_changed.connect(_on_map_mode_changed)
-		_on_map_mode_changed(gm.map_mode)
+	if GameManager:
+		GameManager.time_updated.connect(_on_time_updated)
+		GameManager.state_changed.connect(_on_state_changed)
+		GameManager.speed_updated.connect(_on_speed_updated)
+		GameManager.gear_updated.connect(_on_gear_updated)
+		GameManager.record_updated.connect(_on_record_updated)
+		GameManager.binding_step_changed.connect(_on_binding_step_changed)
+		GameManager.map_mode_changed.connect(_on_map_mode_changed)
+		_on_map_mode_changed(GameManager.map_mode)
 	finish_label.hide()
 	binding_label.hide()
 	
@@ -50,8 +49,8 @@ func _on_binding_step_changed(step_text):
 		binding_label.show()
 
 func _on_record_updated(record):
-	var gm = get_node_or_null("/root/GameManager")
-	if gm:
+	if not is_inside_tree(): return
+	if GameManager:
 		var track_name = "UNKNOWN"
 		if get_tree().current_scene:
 			var scene_path = get_tree().current_scene.scene_file_path
@@ -60,7 +59,7 @@ func _on_record_updated(record):
 			else:
 				track_name = get_tree().current_scene.name.to_upper().replace("_", " ")
 		
-		record_label.text = "BEST: " + gm.format_time(record) + "\n" + track_name
+		record_label.text = "BEST: " + GameManager.format_time(record) + "\n" + track_name
 
 func _on_gear_updated(gear):
 	current_gear = gear
@@ -74,22 +73,22 @@ func _update_speed_label():
 	speed_label.text = str(int(current_speed)) + " KM/H\nGEAR " + str(current_gear)
 
 func _on_time_updated(time):
-	var gm = get_node_or_null("/root/GameManager")
-	if gm:
-		timer_label.text = gm.format_time(time)
+	if not is_inside_tree(): return
+	if GameManager:
+		timer_label.text = GameManager.format_time(time)
 
 func _on_state_changed(state):
-	var gm = get_node_or_null("/root/GameManager")
-	if gm:
-		if state == gm.RaceState.FINISHED:
-			var is_new_record = gm.time_diff < 0
+	if not is_inside_tree(): return
+	if GameManager:
+		if state == GameManager.RaceState.FINISHED:
+			var is_new_record = GameManager.time_diff < 0
 			var record_text = "Finished!"
 			if is_new_record:
-				record_text = "NEW RECORD! " + gm.format_diff(gm.time_diff)
+				record_text = "NEW RECORD! " + GameManager.format_diff(GameManager.time_diff)
 			
-			finish_label.text = record_text + "\nTime: " + gm.format_time(gm.race_time) + "\nBest: " + gm.format_time(gm.best_time)
+			finish_label.text = record_text + "\nTime: " + GameManager.format_time(GameManager.race_time) + "\nBest: " + GameManager.format_time(GameManager.best_time)
 			finish_label.show()
-		elif state == gm.RaceState.PRE_START:
+		elif state == GameManager.RaceState.PRE_START:
 			finish_label.hide()
 			timer_label.text = "00:00.000"
 
@@ -199,5 +198,7 @@ func _draw_car_triangle(c: Control, pos: Vector2, angle: float, col: Color):
 
 func _process(_delta):
 	if map_mode != 0:
+		if map_points.is_empty():
+			_extract_track_points()
 		var map_ctrl = $Control.get_node_or_null("MapControl")
 		if map_ctrl: map_ctrl.queue_redraw()

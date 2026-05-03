@@ -70,10 +70,9 @@ func _ready():
 	max_contacts_reported = 1
 	body_entered.connect(_on_body_entered)
 	
-	var gm = get_node_or_null("/root/GameManager")
-	if gm:
-		gm.sfx_toggled.connect(_on_sfx_toggled)
-		_on_sfx_toggled(gm.sfx_enabled)
+	if GameManager:
+		GameManager.sfx_toggled.connect(_on_sfx_toggled)
+		_on_sfx_toggled(GameManager.sfx_enabled)
 
 func _init_physics_strategy():
 	if _physics_logic:
@@ -106,6 +105,7 @@ func _sync_physics_params():
 	_physics_logic.aero_downforce = aero_downforce
 
 func _on_sfx_toggled(enabled):
+	if not is_inside_tree(): return
 	if engine_player and engine_player.has_method("set_enabled"):
 		engine_player.set_enabled(enabled)
 	if skid_player: skid_player.stream_paused = !enabled
@@ -158,11 +158,10 @@ func _physics_process(delta):
 		_physics_logic.apply_physics(delta)
 	
 	# Fall Detection
-	var gm = get_node_or_null("/root/GameManager")
 	if !is_on_ground or global_position.y < -50.0:
 		fall_timer += delta
 		if fall_timer > 2.5 or global_position.y < -100.0:
-			if gm: gm.reset_race()
+			if GameManager: GameManager.reset_race()
 			fall_timer = 0.0
 			return
 	else:
@@ -170,7 +169,7 @@ func _physics_process(delta):
 
 	# HUD & Audio Update
 	var speed_kmh = linear_velocity.length() * 3.6
-	if gm: gm.speed_updated.emit(speed_kmh)
+	if GameManager: GameManager.speed_updated.emit(speed_kmh)
 	_update_audio(delta, speed_kmh)
 	current_rpm = engine_player.rpm_raw if engine_player else 0.0
 	
@@ -180,16 +179,15 @@ func _physics_process(delta):
 		_physics_logic.update_wheels(delta, steering_input, _wheel_rot)
 
 func _read_input(delta):
-	var gm = get_node_or_null("/root/GameManager")
-	if gm:
+	if GameManager:
 		var get_val = func(slot):
 			if slot.get("is_kb", false): return 1.0 if Input.is_key_pressed(slot.key) else 0.0
 			return clamp((Input.get_joy_axis(slot.dev, slot.axis) - slot.get("snap", 0.0)) * slot.sign, 0.0, 1.0)
 		
-		var target_steer = get_val.call(gm.steer_left) - get_val.call(gm.steer_right)
+		var target_steer = get_val.call(GameManager.steer_left) - get_val.call(GameManager.steer_right)
 		steering_input = lerp(steering_input, target_steer, steering_speed * delta)
-		throttle_input = get_val.call(gm.throttle)
-		brake_input = get_val.call(gm.brake)
+		throttle_input = get_val.call(GameManager.throttle)
+		brake_input = get_val.call(GameManager.brake)
 	else:
 		var target_steer = Input.get_axis("ui_right", "ui_left")
 		steering_input = lerp(steering_input, target_steer, steering_speed * delta)
@@ -203,8 +201,7 @@ func _update_audio(delta, speed_kmh):
 			if speed_kmh < gear_shift_points[g]:
 				current_gear = g; break
 		if current_gear != old_gear:
-			var gm = get_node_or_null("/root/GameManager")
-			if gm: gm.gear_updated.emit(current_gear)
+			if GameManager: GameManager.gear_updated.emit(current_gear)
 		
 		var gear_min = gear_shift_points[current_gear-1]
 		var gear_max = gear_shift_points[current_gear]
