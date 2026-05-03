@@ -9,6 +9,7 @@ var road_mesh: MeshInstance3D
 var indicators: Node3D
 
 var selected_index: int = -1
+var influence_range: int = 4
 var edit_mode: bool = false
 var _cooldown: float = 0.0
 
@@ -90,11 +91,11 @@ func _setup_indicators():
 	
 	# Create a shared mesh for efficiency
 	var sphere = SphereMesh.new()
-	sphere.radius = 0.8
-	sphere.height = 1.6
+	sphere.radius = 0.4
+	sphere.height = 0.8
 	
-	# Only show every 5th point to keep it clean
-	for i in range(0, points_data.size(), 5):
+	# Show ALL points for maximum precision
+	for i in range(0, points_data.size()):
 		var p = points_data[i]
 		var mi = MeshInstance3D.new()
 		mi.mesh = sphere
@@ -158,10 +159,18 @@ func _update_selection():
 		_highlight_indicators(selected_index)
 
 func _highlight_indicators(idx: int):
+	if idx < 0: return
+	var total = points_data.size()
 	for child in indicators.get_children():
 		var child_idx = child.get_meta("index", -1)
+		
+		# Circular distance
+		var dist = abs(child_idx - idx)
+		if dist > total / 2:
+			dist = total - dist
+			
 		var mat = child.material_override as StandardMaterial3D
-		if abs(child_idx - idx) < 10:
+		if dist <= influence_range:
 			mat.albedo_color = Color.RED
 			child.scale = Vector3.ONE * 2.5
 		else:
@@ -169,6 +178,23 @@ func _highlight_indicators(idx: int):
 			child.scale = Vector3.ONE
 
 func _handle_input(delta):
+	# Adjust influence range
+	if Input.is_key_pressed(KEY_BRACKETLEFT) and _cooldown <= 0:
+		influence_range = max(1, influence_range - 1)
+		_cooldown = 0.1
+		_highlight_indicators(selected_index)
+		print("Editor: Influence Range = ", influence_range)
+	if Input.is_key_pressed(KEY_BRACKETRIGHT) and _cooldown <= 0:
+		influence_range = min(200, influence_range + 1)
+		_cooldown = 0.1
+		_highlight_indicators(selected_index)
+		print("Editor: Influence Range = ", influence_range)
+
+	# Average out height
+	if Input.is_key_pressed(KEY_V) and _cooldown <= 0:
+		_average_out_height(selected_index, influence_range)
+		_cooldown = 0.3
+
 	var change = 0.0
 	var speed = 5.0 # meters per second
 	if Input.is_key_pressed(KEY_PAGEUP): change = speed * delta
@@ -185,12 +211,32 @@ func _handle_input(delta):
 		_save_to_json()
 		_cooldown = 1.0
 
+func _average_out_height(idx: int, radius: int):
+	if idx < 0: return
+	var sum_y = 0.0
+	var count = 0
+	var affected_indices = []
+	
+	# We use a loop that handles wrapping around the track
+	for i in range(-radius, radius + 1):
+		var target_idx = (idx + i + points_data.size()) % points_data.size()
+		sum_y += points_data[target_idx].y
+		count += 1
+		affected_indices.append(target_idx)
+	
+	var avg_y = sum_y / count
+	for i in affected_indices:
+		points_data[i].y = avg_y
+	
+	_refresh_track()
+	print("Editor: Averaged out %d points to height %.2f" % [count, avg_y])
+
 func _apply_height_change(idx: int, amount: float):
 	if idx >= 0 and idx < points_data.size():
 		points_data[idx].y += amount
 
 func _apply_height_change_smooth(idx: int, amount: float):
-	var radius = 30 # Number of points to affect
+	var radius = influence_range
 	for i in range(-radius, radius + 1):
 		var target_idx = (idx + i + points_data.size()) % points_data.size()
 		var falloff = 1.0 - (abs(i) / float(radius))
