@@ -36,10 +36,31 @@ Tools to ensure parity between in-game tracks and real-world data.
 ## Controls
 - **Accelerate/Brake/Steer:** - programmable keys/joystick (press 3 to rebind)
 - **Restart Race:** T / Joypad Button 3 (Y/Triangle)
+- **Previous Track:** 1
 - **Next Track:** 2
+- **Rebind controls:** 3
 - **Toggle Ghost:** 4
+- **Toggle Sound:** 5
+- **Toggle Camera:** 6/C
+- **Toggle Map:**: 7/M
 - **Toggle Fullscreen:** 0
+- **Reset record:** X
 - **Quit Game:** Escape
+
+## command line args
+
+```
+--track <trackname>
+--generate [--force]
+```
+
+## circuit tweaks
+
+- **Toggle Edit Mode:** ctrl+E 
+- **lerp/normalize heights:** V
+- **Less points:** [
+- **More points:** ]
+- **Save:** ctrl+S
 
 ## Credits & Acknowledgments
 - **Engine Sound Loops:** by [domasx2](https://opengameart.org/users/domasx2) (CC0) from [OpenGameArt](https://opengameart.org/content/racing-car-engine-sound-loops).

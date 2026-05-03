@@ -1,4 +1,4 @@
-extends Node3D
+extends RigidBody3D
 
 var ghost_data = [] # Array of snapshots { "b": body_transform, "w": [wheel_transforms] }
 var current_index = 0
@@ -13,9 +13,23 @@ var _prev_pos: Vector3 = Vector3.ZERO
 func _ready():
 	_set_transparent(self)
 	_setup_audio()
+	_disable_collision()
 	
 	if GameManager:
 		GameManager.sfx_toggled.connect(_on_sfx_toggled)
+
+func _disable_collision():
+	# Now that we extend RigidBody3D, we can access these properties directly
+	self.collision_layer = 0
+	self.collision_mask = 0
+	self.freeze = true
+	
+	for child in get_children():
+		if child is CollisionShape3D:
+			child.disabled = true
+		elif child is CollisionObject3D:
+			child.collision_layer = 0
+			child.collision_mask = 0
 
 func _on_sfx_toggled(enabled):
 	if not is_inside_tree(): return

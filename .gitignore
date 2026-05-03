@@ -3,3 +3,4 @@
 /android/
 scripts/__pycache__
 assets/fastf1_cache
+assets/.DS_Store

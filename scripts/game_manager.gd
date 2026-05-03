@@ -109,6 +109,11 @@ func _init_scene():
 	print("Initializing scene: ", scene.name)
 	_replace_car_at_runtime()
 	
+	current_state = RaceState.PRE_START
+	current_time = 0.0
+	state_changed.emit(current_state)
+	time_updated.emit(0.0)
+	
 	var idx = tracks.find(scene_path)
 	if idx != -1:
 		current_track_index = idx
@@ -128,16 +133,16 @@ func _input(event):
 	if event is InputEventKey and event.pressed and not event.is_echo():
 		match event.keycode:
 			KEY_ESCAPE: get_tree().quit()
-			KEY_R: reset_race()
+			KEY_R: reset_race() # TODO not working?
 			KEY_1: _prev_track()
 			KEY_2: _next_track()
 			KEY_3: _start_binding()
 			KEY_4: _toggle_ghost()
-			KEY_M: _toggle_map()
-			KEY_7: _toggle_map()
-			KEY_S: _toggle_sfx()
+			KEY_5: _toggle_sfx()
 			KEY_C: _toggle_camera()
 			KEY_6: _toggle_camera()
+			KEY_M: _toggle_map()
+			KEY_7: _toggle_map()
 			KEY_0: _toggle_fullscreen()
 			KEY_X: _clear_current_record()
 
@@ -365,6 +370,8 @@ func _setup_ghost_actor():
 	_ghost_actor.name = "GhostCar"
 	_ghost_actor.set_script(load("res://scripts/ghost_car.gd"))
 	_ghost_actor.visible = ghost_enabled
+	if _ghost_actor is RigidBody3D:
+		_ghost_actor.freeze = true
 	
 	var scene = get_tree().current_scene
 	scene.add_child(_ghost_actor)
