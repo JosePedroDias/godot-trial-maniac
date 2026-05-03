@@ -221,7 +221,8 @@ func _rewind_car(seconds: float):
 	var car = track_root.get_node_or_null("Car")
 	if car and car.has_method("reset_to_start"):
 		car.reset_to_start(target_tr)
-		print("Editor: Rewound car by %.1f seconds" % seconds)
+		GameManager.pop_rewind_frames(seconds)
+		print("Editor: Rewound car by %.1f seconds and truncated history" % seconds)
 
 func _average_out_height(idx: int, radius: int):
 	if idx < 0: return

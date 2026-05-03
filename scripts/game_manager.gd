@@ -210,6 +210,13 @@ func get_rewind_transform(seconds_back: float) -> Transform3D:
 	var idx = max(0, _current_run_ghost.size() - 1 - frames_back)
 	return _current_run_ghost[idx]["b"]
 
+func pop_rewind_frames(seconds: float):
+	var frames_to_remove = int(seconds * 120)
+	if _current_run_ghost.size() <= frames_to_remove:
+		_current_run_ghost.clear()
+	else:
+		_current_run_ghost.resize(_current_run_ghost.size() - frames_to_remove)
+
 func _process(delta):
 	if current_state == RaceState.RACING:
 		current_time += delta
