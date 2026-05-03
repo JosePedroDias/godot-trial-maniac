@@ -91,8 +91,8 @@ func _setup_indicators():
 	
 	# Create a shared mesh for efficiency
 	var sphere = SphereMesh.new()
-	sphere.radius = 0.4
-	sphere.height = 0.8
+	sphere.radius = 0.3
+	sphere.height = 0.6
 	
 	# Show ALL points for maximum precision
 	for i in range(0, points_data.size()):
@@ -172,7 +172,7 @@ func _highlight_indicators(idx: int):
 		var mat = child.material_override as StandardMaterial3D
 		if dist <= influence_range:
 			mat.albedo_color = Color.RED
-			child.scale = Vector3.ONE * 2.5
+			child.scale = Vector3.ONE * 1.5
 		else:
 			mat.albedo_color = Color.GREEN
 			child.scale = Vector3.ONE
