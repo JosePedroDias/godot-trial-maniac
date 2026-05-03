@@ -210,26 +210,43 @@ func _handle_input(delta):
 	if Input.is_key_pressed(KEY_S) and Input.is_key_pressed(KEY_CTRL) and _cooldown <= 0:
 		_save_to_json()
 		_cooldown = 1.0
+	
+	if Input.is_key_pressed(KEY_Q) and _cooldown <= 0:
+		_rewind_car(2.0)
+		_cooldown = 0.5
+
+func _rewind_car(seconds: float):
+	if not GameManager: return
+	var target_tr = GameManager.get_rewind_transform(seconds)
+	var car = track_root.get_node_or_null("Car")
+	if car and car.has_method("reset_to_start"):
+		car.reset_to_start(target_tr)
+		print("Editor: Rewound car by %.1f seconds" % seconds)
 
 func _average_out_height(idx: int, radius: int):
 	if idx < 0: return
-	var sum_y = 0.0
-	var count = 0
-	var affected_indices = []
+	var n = points_data.size()
 	
-	# We use a loop that handles wrapping around the track
-	for i in range(-radius, radius + 1):
-		var target_idx = (idx + i + points_data.size()) % points_data.size()
-		sum_y += points_data[target_idx].y
-		count += 1
-		affected_indices.append(target_idx)
+	var start_idx = (idx - radius + n) % n
+	var end_idx = (idx + radius + n) % n
 	
-	var avg_y = sum_y / count
-	for i in affected_indices:
-		points_data[i].y = avg_y
+	var start_y = points_data[start_idx].y
+	var end_y = points_data[end_idx].y
+	
+	var total_steps = radius * 2
+	for i in range(total_steps + 1):
+		var target_idx = (start_idx + i) % n
+		var t = float(i) / float(total_steps)
+		points_data[target_idx].y = lerp(start_y, end_y, t)
 	
 	_refresh_track()
-	print("Editor: Averaged out %d points to height %.2f" % [count, avg_y])
+	
+	# Bump car up to avoid clipping
+	var car = track_root.get_node_or_null("Car")
+	if car:
+		car.global_position.y += 1.0
+		
+	print("Editor: Smoothed %d points via LERP from %.2f to %.2f" % [total_steps + 1, start_y, end_y])
 
 func _apply_height_change(idx: int, amount: float):
 	if idx >= 0 and idx < points_data.size():
@@ -244,7 +261,25 @@ func _apply_height_change_smooth(idx: int, amount: float):
 		falloff = (cos(PI * (1.0 - falloff)) + 1.0) / 2.0
 		points_data[target_idx].y += amount * falloff
 
+func _recalculate_tangents():
+	var n = points_data.size()
+	if n < 2: return
+	
+	for i in range(n):
+		var p_prev = points_data[(i - 1 + n) % n]
+		var p_next = points_data[(i + 1) % n]
+		
+		var v_prev = Vector3(p_prev.x, p_prev.y, p_prev.z)
+		var v_next = Vector3(p_next.x, p_next.y, p_next.z)
+		
+		var tangent = (v_next - v_prev).normalized()
+		
+		points_data[i].tx = tangent.x
+		points_data[i].ty = tangent.y
+		points_data[i].tz = tangent.z
+
 func _refresh_track():
+	_recalculate_tangents()
 	if not road_mesh: 
 		road_mesh = track_root.find_child("RoadMesh", true, false)
 		if not road_mesh: return
@@ -301,5 +336,14 @@ func _save_to_json():
 		save_file.store_string(JSON.stringify(data, "  "))
 		save_file.close()
 		print("Editor: SUCCESSFULLY SAVED to ", json_path)
+		
+		# Generate the .tscn file from the new JSON
+		var gen = TrackFromJson.new()
+		var output = gen.generate_from_json(json_path)
+		if output:
+			print("Editor: SUCCESSFULLY REGENERATED track scene: ", output)
+		else:
+			print("Editor: FAILED TO REGENERATE track scene.")
+		gen.queue_free()
 	else:
 		print("Editor: FAILED TO SAVE to ", json_path)

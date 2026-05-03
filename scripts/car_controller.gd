@@ -213,3 +213,19 @@ func _update_audio(delta, speed_kmh):
 	if skid_player:
 		var target_vol = 5 if (is_skidding and is_on_ground) else -80
 		skid_player.volume_db = lerp(skid_player.volume_db, float(target_vol), delta * 10.0)
+
+func reset_to_start(tr: Transform3D):
+	global_transform = tr
+	linear_velocity = Vector3.ZERO
+	angular_velocity = Vector3.ZERO
+	steering_input = 0.0
+	throttle_input = 0.0
+	brake_input = 0.0
+	current_gear = 1
+	fall_timer = 0.0
+	_wheel_rot = 0.0
+	if engine_player:
+		engine_player.rpm_raw = 3000.0
+	if GameManager:
+		GameManager.speed_updated.emit(0.0)
+		GameManager.gear_updated.emit(1)

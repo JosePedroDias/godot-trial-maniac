@@ -61,6 +61,7 @@ var _current_run_ghost = []
 var _best_ghost_data = []
 var _ghost_actor: Node3D = null
 var _last_initialized_scene_path: String = ""
+var _initial_car_transform: Transform3D = Transform3D()
 
 var _binding_steps = ["STEER LEFT", "STEER RIGHT", "THROTTLE", "BRAKE"]
 var _bind_substate = 0 
@@ -161,39 +162,53 @@ func _clear_current_record():
 	print("Cleared record and ghost for: ", scene_path)
 
 func _physics_process(delta):
-	if current_state == RaceState.RACING:
-		var scene = get_tree().current_scene
-		if not scene: return
-		var car = scene.get_node_or_null("Car")
-		if car:
-			var snapshot = {
-				"b": car.global_transform,
-				"w": [
-					car.get_node("WheelFL").transform,
-					car.get_node("WheelFR").transform,
-					car.get_node("WheelRL").transform,
-					car.get_node("WheelRR").transform
-				],
-				"a": [
-					car.current_rpm,
-					abs(car.engine_input),
-					car.is_skidding and car.on_ground,
-					car.is_braking and car.on_ground
-				]
-			}
-			_current_run_ghost.append(snapshot)
-			
-			if telemetry_enabled:
-				current_telemetry.append({
-					"t": current_time,
-					"s": car.linear_velocity.length() * 3.6,
-					"g": car.current_gear,
-					"p": car.global_position,
-					"og": car.on_ground,
-					"steer": car.steering_input,
-					"throttle": car.throttle_input,
-					"brake": car.brake_input
-				})
+	var scene = get_tree().current_scene
+	if not scene: return
+	var car = scene.get_node_or_null("Car")
+	if car and (current_state == RaceState.RACING or _is_editor_active()):
+		var snapshot = {
+			"b": car.global_transform,
+			"w": [
+				car.get_node("WheelFL").transform,
+				car.get_node("WheelFR").transform,
+				car.get_node("WheelRL").transform,
+				car.get_node("WheelRR").transform
+			],
+			"a": [
+				car.current_rpm,
+				abs(car.engine_input),
+				car.is_skidding and car.on_ground,
+				car.is_braking and car.on_ground
+			]
+		}
+		_current_run_ghost.append(snapshot)
+		
+		# Keep buffer manageable during long edit sessions (e.g., 30 seconds at 120fps)
+		if _is_editor_active() and _current_run_ghost.size() > 3600:
+			_current_run_ghost.remove_at(0)
+
+		if current_state == RaceState.RACING and telemetry_enabled:
+			current_telemetry.append({
+				"t": current_time,
+				"s": car.linear_velocity.length() * 3.6,
+				"g": car.current_gear,
+				"p": car.global_position,
+				"og": car.on_ground,
+				"steer": car.steering_input,
+				"throttle": car.throttle_input,
+				"brake": car.brake_input
+			})
+
+func _is_editor_active() -> bool:
+	var editor = get_node_or_null("TrackEditor")
+	return editor and editor.get("edit_mode")
+
+func get_rewind_transform(seconds_back: float) -> Transform3D:
+	if _current_run_ghost.is_empty(): return Transform3D()
+	# physics_ticks_per_second is 120
+	var frames_back = int(seconds_back * 120)
+	var idx = max(0, _current_run_ghost.size() - 1 - frames_back)
+	return _current_run_ghost[idx]["b"]
 
 func _process(delta):
 	if current_state == RaceState.RACING:
@@ -254,12 +269,22 @@ func format_diff(d):
 func reset_race():
 	if telemetry_enabled and current_telemetry.size() > 0:
 		_save_telemetry()
-	_last_initialized_scene_path = ""
-	get_tree().reload_current_scene()
+	
+	var scene = get_tree().current_scene
+	if scene:
+		var car = scene.get_node_or_null("Car")
+		if car and car.has_method("reset_to_start"):
+			car.reset_to_start(_initial_car_transform)
+		
+		if _ghost_actor:
+			_ghost_actor.stop_playback()
+	
 	current_state = RaceState.PRE_START
 	current_time = 0.0
 	_current_run_ghost.clear()
 	current_telemetry.clear()
+	state_changed.emit(current_state)
+	time_updated.emit(0.0)
 
 func _save_telemetry():
 	var f = FileAccess.open("res://gameplay_telemetry.json", FileAccess.WRITE)
@@ -312,15 +337,13 @@ func _replace_car_at_runtime():
 	if not scene: return
 	var car = scene.get_node_or_null("Car")
 	if car:
-		var pos = car.global_position
-		var rot = car.global_rotation
+		_initial_car_transform = car.global_transform
 		car.name = "OldCar"
 		car.queue_free()
 		var f1_car = load("res://scenes/f1_2026_car.tscn").instantiate()
 		f1_car.name = "Car"
 		scene.add_child(f1_car)
-		f1_car.global_position = pos
-		f1_car.global_rotation = rot
+		f1_car.global_transform = _initial_car_transform
 
 func _setup_ghost_actor():
 	if _ghost_actor:
